@@ -15,4 +15,3 @@ def export(self):
     data = mt.export(self, paths).read()
     response.setHeader('content-length', len(data))
     return response.write(data)
-

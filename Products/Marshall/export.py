@@ -24,23 +24,36 @@ import tempfile
 import zipfile
 import shutil
 from cStringIO import StringIO
+from Globals import InitializeClass
 from ExtensionClass import Base
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base
 from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.CMFCorePermissions import ManagePortal
+from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
 class Export(Base):
 
+    security = ClassSecurityInfo()
+
+    security.declareProtected(ManagePortal, 'atxml_template')
+    atxml_template = PageTemplateFile(
+        'www/atxml', globals(),
+        __name__ = 'atxml_template')
+
+    security.declareProtected(ManagePortal, 'marshall_data')
     def marshall_data(self, obj):
         from Products.Marshall.registry import getComponent
         marshaller = getComponent('primary_field')
         return self.marshall(obj, marshaller)
 
+    security.declareProtected(ManagePortal, 'marshall_metadata')
     def marshall_metadata(self, obj):
         from Products.Marshall.registry import getComponent
         marshaller = getComponent('atxml')
         return self.marshall(obj, marshaller)
 
+    security.declareProtected(ManagePortal, 'marshall')
     def marshall(self, obj, marshaller):
         REQUEST = obj.REQUEST
         RESPONSE = REQUEST.RESPONSE
@@ -61,6 +74,7 @@ class Export(Base):
         s.seek(0)
         return s
 
+    security.declareProtected(ManagePortal, 'export')
     def export(self, context, paths):
         data = StringIO()
         out = zipfile.ZipFile(data, 'w')
@@ -83,3 +97,34 @@ class Export(Base):
         out.close()
         data.seek(0)
         return data
+
+    security.declareProtected(ManagePortal, 'export_info')
+    def export_info(self, context, info):
+        data = StringIO()
+        out = zipfile.ZipFile(data, 'w')
+
+        for d in info:
+            path = d.get('path', d.get('id'))
+            filename = os.path.basename(path)
+            dir_path = os.path.dirname(path)
+
+            # Write data
+            _d = d.get('data', '')
+            fpath = os.path.join(dir_path, filename)
+            out.writestr(fpath, _d)
+
+            metadata = d.copy()
+            for name in ('data', 'path'):
+                if metadata.has_key(name):
+                    del metadata[name]
+            # Write metadata
+            metadata_path = os.path.join(dir_path, '.metadata')
+            fpath = os.path.join(metadata_path, filename)
+            _d = str(self.atxml_template(info=metadata))
+            out.writestr(fpath, _d)
+
+        out.close()
+        data.seek(0)
+        return data
+
+InitializeClass(Export)

@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: _xml.py,v 1.2 2004/07/27 22:24:30 dreamcatcher Exp $
+$Id: _xml.py,v 1.3 2004/08/05 22:01:19 dreamcatcher Exp $
 """
 
 import libxml2
@@ -331,7 +331,7 @@ class ATXMLMarshaller(Marshaller):
             else:
                 field_values[c.fname] = c.value
 
-        __traceback_info__ = (data, stack)
+        __traceback_info__ = (data, stack, c.__dict__.items())
 
         if ret != 0:
             raise MarshallingException, ("There was an error parsing the "

@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: marshaller.py,v 1.2 2004/07/27 22:24:30 dreamcatcher Exp $
+$Id: marshaller.py,v 1.3 2004/08/05 22:01:18 dreamcatcher Exp $
 """
 
 from Products.CMFCore.utils import getToolByName
@@ -41,6 +41,7 @@ def getContext(obj, REQUEST=None):
 class ControlledMarshaller(Marshaller):
 
     def delegate(self, method, obj, data=None, **kw):
+        __traceback_info__ = (method, obj, kw)
         context = getContext(obj, kw.get('REQUEST'))
         if context is not obj:
             # If the object is being created by means of a PUT
@@ -65,6 +66,7 @@ class ControlledMarshaller(Marshaller):
             raise MarshallingException, ("Couldn't get a marshaller for"
                                          "%r, %r" % (obj, kw))
         marshaller = getComponent(components[0])
+        __traceback_info__ = (marshaller, method, obj, kw)
         args = (obj,)
         if method == 'demarshall':
             args += (data,)

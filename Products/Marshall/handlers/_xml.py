@@ -526,6 +526,9 @@ class ATXMLMarshaller(Marshaller):
             values = filter(non_empty, values)
             if not values:
                 continue
+            if is_ref and values in ([None],):
+                # Don't export null refs
+                continue
             elns = AT_NS
             elname = 'field'
             elinfo = self.field_map.get(fname)

@@ -30,13 +30,7 @@ def getContext(obj, REQUEST=None):
     context = getattr(obj, 'aq_parent', None)
     if context is not None or REQUEST is None:
         return obj
-    # Nasty hack:
-    # Try to find context through REQUEST.SESSION
-    # which has a pointer back to the app root.
-    root = REQUEST.SESSION.aq_chain[-2]
-    path = REQUEST.PATH_INFO
-    path = '/'.join(path.split('/')[:-1])
-    return root.restrictedTraverse(path)
+    return REQUEST['PARENTS'][0]
 
 class ControlledMarshaller(Marshaller):
 

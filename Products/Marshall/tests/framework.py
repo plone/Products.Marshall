@@ -73,6 +73,26 @@ if not sys.modules.has_key('Testing'):
 import Testing, unittest
 execfile(os.path.join(os.path.dirname(Testing.__file__), 'common.py'))
 
+# Try to find the test.py testrunner from Zope 2.7
+# and if found, use it's ImmediateTestRunner
+__ZOPE_HOME = os.path.join(__SOFTWARE_HOME, '..', '..')
+__TESTRUNNER = os.path.join(__ZOPE_HOME, 'test.py')
+if os.path.isfile(__TESTRUNNER):
+    global TestRunner
+    GLB = {'__name__':None}
+    execfile(__TESTRUNNER, GLB)
+    def ImmediateTestRunner(*args):
+        stream = sys.stdout
+        descriptions = 0
+        verbosity = 1
+        if len(args) == 3:
+            stream, descriptions, verbosity = args
+        return GLB['ImmediateTestRunner'](stream=stream,
+                                          descriptions=descriptions,
+                                          verbosity=verbosity,
+                                          progress=1)
+    TestRunner = ImmediateTestRunner
+
 # Include ZopeTestCase support
 #
 if 1:   # Create a new scope

@@ -13,7 +13,6 @@ if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 
 import unittest
-TestRunner = unittest.TextTestRunner
 suite = unittest.TestSuite()
 
 tests = os.listdir(os.curdir)

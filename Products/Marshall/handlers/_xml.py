@@ -413,10 +413,13 @@ class ATXMLMarshaller(Marshaller):
             existing = getattr(instance, UUID_ATTR, _marker)
             if existing is _marker or existing != at_uid:
                 ref = reference(uid=at_uid)
-                if ref.resolve(instance) is not None:
+                target = ref.resolve(instance)
+                if target is not None:
                     raise MarshallingException, (
-                        "Conflicting uid trying to set object uid "
-                        "to an already existing uid.")
+                        "Trying to set uid of "
+                        "%s to an already existing uid "
+                        "clashed with %s" % (
+                        instance.absolute_url(), target.absolute_url()))
                 instance._setUID(at_uid)
 
         for fname, value in field_values.items():

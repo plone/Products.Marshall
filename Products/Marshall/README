@@ -52,3 +52,5 @@ Requirements
 - Plone 2.0.4 or greater
 
 - Archetypes 1.3b3+
+
+- libxml2 2.6.6+ (previous versions seem to have a bug validating RelaxNG)

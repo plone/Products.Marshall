@@ -18,7 +18,7 @@
 """
 Interfaces for Predicate
 
-$Id: predicate.py,v 1.2 2004/07/27 22:24:31 dreamcatcher Exp $
+$Id$
 """
 
 from Interface import Interface

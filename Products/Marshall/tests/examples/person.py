@@ -16,7 +16,10 @@ class Person(BaseContent):
         ReferenceField('mother',
                        relationship='my_mother',
                        multiValued=False,
-                       required=False)
+                       required=False),
+        LinesField('food_preference',
+                   accessor='getFoodPrefs',
+                   mutator='setFoodPrefs'),
         ))
 
 registerType(Person, 'tests.Marshall')

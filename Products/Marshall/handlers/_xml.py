@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: _xml.py,v 1.5 2004/08/19 13:41:01 dreamcatcher Exp $
+$Id$
 """
 
 import os
@@ -245,9 +245,14 @@ class ATXMLMarshaller(Marshaller):
         p = instance.getPrimaryField()
         pname = p and p.getName() or None
         # Filter out primary field. We just deal with metadata.
+        schema_fields = instance.Schema().fields()
         fields = [(f.getName(), f.getMutator(instance))
-                  for f in instance.Schema().fields()
+                  for f in schema_fields
                   if f.getName() != pname]
+        # Collect LinesFields which may not present on our namespace definition
+        defer_fields = dict([(f.getName(), True)
+                             for f in schema_fields
+                             if getattr(f, 'type', None) == 'lines'])
         # Filter out non-existing mutators (probably meaning read-only fields)
         mutators = dict(filter(lambda x: x[1] is not None, fields))
         c = ctx()
@@ -318,6 +323,10 @@ class ATXMLMarshaller(Marshaller):
                                 # a field named 'uid' as that's a reserved
                                 # word for us.
                                 c.name = c.fname = reader.Value()
+                                # Currently, only LinesFields will
+                                # fall into this category
+                                if defer_fields.get(c.fname):
+                                    c.defer = True
             elif reader.NodeType() == XMLREADER_TEXT_ELEMENT_NODE_TYPE:
                 # The value to be set on the field should always be
                 # in a #text element inside the field element.

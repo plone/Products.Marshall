@@ -19,7 +19,7 @@
 Persistent TALES Expression. Highly inspired (read copied)
 from CMFCore's Expression.
 
-$Id: expression.py,v 1.2 2004/07/27 22:24:30 dreamcatcher Exp $
+$Id$
 """
 
 from Globals import Persistent, InitializeClass

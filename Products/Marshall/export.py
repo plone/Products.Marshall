@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: export.py,v 1.2 2004/07/27 22:24:30 dreamcatcher Exp $
+$Id$
 """
 
 import os

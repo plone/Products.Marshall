@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: test_marshall.py,v 1.4 2004/08/05 00:32:44 dreamcatcher Exp $
+$Id$
 """
 
 import os, sys
@@ -392,6 +392,42 @@ class ATXMLReferenceMarshallTest(ArchetypesTestCase.ArcheSiteTestCase):
         # Test multiple metadata references
         self.assertEquals(sidnei['parents'], [paulo.UID(), paulo_s.UID()])
 
+    def test_linesfield(self):
+        sidnei = self.createPerson(
+            self.portal,
+            'sidnei',
+            title='Sidnei da Silva',
+            description='Familia Silva',
+            food_preference='BBQ\nPizza\nShrimp')
+
+        self.assertEquals(sidnei.getFoodPrefs(),
+                          ('BBQ', 'Pizza', 'Shrimp'))
+
+        lines_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/"
+                  xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <field id="food_preference">
+        BBQ
+        </field>
+        <field id="food_preference">
+        Camaron Diablo
+        </field>
+        </metadata>
+        """
+        self.marshaller.demarshall(sidnei, lines_xml)
+        self.assertEquals(sidnei.getFoodPrefs(),
+                          ('BBQ', 'Camaron Diablo'))
+        ctype, length, got = self.marshaller.marshall(sidnei)
+        expected = [s.strip() for s in """\
+        <field id="food_preference">
+        BBQ
+        </field>
+        <field id="food_preference">
+        Camaron Diablo
+        </field>""".splitlines()]
+        got = [s.strip() for s in got.splitlines()]
+        comp = [s for s in expected if s in got]
+        self.assertEquals(comp, expected)
 
 def test_suite():
     import unittest

@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: marshaller.py,v 1.3 2004/08/05 22:01:18 dreamcatcher Exp $
+$Id$
 """
 
 from Products.CMFCore.utils import getToolByName

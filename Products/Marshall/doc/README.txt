@@ -7,7 +7,7 @@ A framework for pluggable marshalling policies
 
 :Author: Sidnei da Silva
 :Contact: sidnei@awkly.org
-:Date: $Date: 2004/07/23 16:16:26 $
+:Date: $Date$
 :Version: $Revision: 1.1 $
 
 People coming to Plone from other CMS or from no CMS at all often want

@@ -16,6 +16,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: __init__.py,v 1.2 2004/07/27 22:24:31 dreamcatcher Exp $
+$Id$
 """
 from Products.Marshall.interfaces.predicate import IPredicate

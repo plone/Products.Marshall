@@ -131,3 +131,64 @@ Registry to decide what Marshaller to use at runtime.
     >>> article.getBody()
     ''
 
+Upload a very simple ATXML file and make sure it used the ATXML
+Marshaller by checking that the Title got changed and the body is
+still empty.
+
+  >>> xml_input = """
+  ... <?xml version="1.0" ?>
+  ... <metadata xmlns="http://plone.org/ns/archetypes/"
+  ...           xmlns:dc="http://purl.org/dc/elements/1.1/">
+  ...   <dc:title>
+  ...     Some Title
+  ...   </dc:title>
+  ... </metadata>
+  ... """
+
+  >>> print http(r"""
+  ... PUT /portal/article HTTP/1.1
+  ... Content-Type: text/xml
+  ... Authorization: Basic portal_owner:
+  ... %s""" % xml_input, handle_errors=False)
+  HTTP/1.1 204 No Content...
+
+  >>> article.Title()
+  'Some Title'
+
+  >>> article.getBody()
+  ''
+
+Upload a text file (in this case, 'text/x-rst') and make sure the body
+field was updated with the uploaded file contents.
+
+  >>> rst_input = """
+  ... Title
+  ... =====
+  ...
+  ... Some Text
+  ... """
+
+  >>> print http(r"""
+  ... PUT /portal/article HTTP/1.1
+  ... Content-Type: text/x-rst
+  ... Authorization: Basic portal_owner:
+  ... %s""" % rst_input, handle_errors=False)
+  HTTP/1.1 204 No Content...
+
+  >>> article.Title()
+  'Some Title'
+
+Get the ``raw`` body value. Using getBody() would return the rendered HTML.
+
+  >>> print article.getField('body').getRaw(article)
+  Title
+  =====
+  <BLANKLINE>
+  Some Text
+  <BLANKLINE>
+
+Now, just restore the previous marshaller, as to leave everything in
+the same state it was found:
+
+    >>> Article.schema.registerLayer('marshall',
+    ...                              old_marshall)

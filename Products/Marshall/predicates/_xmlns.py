@@ -102,6 +102,7 @@ class XMLNS(Predicate):
         elm = get_elm(*elm_args)
         if not elm:
             return ()
+        match = True
         elm = elm[0]
         attr_args = filter(None, (self.getAttributeNS(), self.getAttributeName()))
         if not attr_args:
@@ -109,9 +110,10 @@ class XMLNS(Predicate):
         else:
             get_attr = (len(attr_args) == 2 and elm.getAttributeNS or
                         elm.getAttribute)
-        got = get_attr(*attr_args)
         expected = self.getValue()
-        match = got == expected or (expected is None and got)
+        if expected is not None:
+            got = get_attr(*attr_args)
+            match = got == expected
         return match and retval or ()
 
 InitializeClass(XMLNS)

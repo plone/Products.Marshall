@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: _xml.py,v 1.4 2004/08/05 22:52:42 dreamcatcher Exp $
+$Id: _xml.py,v 1.5 2004/08/19 13:41:01 dreamcatcher Exp $
 """
 
 import os
@@ -26,6 +26,7 @@ from xml.dom import minidom
 from cStringIO import StringIO
 from DateTime import DateTime
 from Products.CMFCore.utils import getToolByName
+from Products.Archetypes.BaseObject import BaseObject
 from Products.Archetypes.Marshall import Marshaller
 from Products.Archetypes.Field import ReferenceField
 from Products.Archetypes.config import REFERENCE_CATALOG, UUID_ATTR
@@ -484,7 +485,11 @@ class ATXMLMarshaller(Marshaller):
         for f in fields:
             fname = f.getName()
             is_ref = isinstance(f, ReferenceField)
-            value = instance[fname]
+            __traceback_info__ = (instance, fname)
+            # Use BaseObject.__getitem__ directly, as
+            # Folder-based stuff overrides __getitem__
+            # XXX Can go away when fixed in Archetypes.
+            value = BaseObject.__getitem__(instance, fname)
             if isinstance(value, DateTime):
                 value = value.HTML4()
             values = [value]

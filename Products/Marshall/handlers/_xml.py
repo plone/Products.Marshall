@@ -133,6 +133,20 @@ class reference(dict):
         res = ct(**kw)
         if not res:
             return None
+
+        # First step: Try to filter by brain metadata
+        # *Usually* a metadata item will exist with the same name
+        # as the index.
+        verify = lambda obj: filter(None, [obj[k] == v for k, v in kw.items()])
+        for r in res:
+            # Shortest path: If a match is found, return immediately
+            # instead of checking all of the results.
+            if verify(r):
+                return r.getObject()
+
+        # Second step: Try to get the real objects and look
+        # into them. Should be *very* slow, so use with care.
+        # We use __getitem__ to access the field raw data.
         verify = lambda obj: filter(None, [obj[k] == v for k, v in params])
         valid = filter(verify, [r.getObject() for r in res])
         if not valid:

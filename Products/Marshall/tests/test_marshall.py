@@ -1,0 +1,402 @@
+"""
+$Id: test_marshall.py,v 1.1 2004/07/23 16:16:27 dreamcatcher Exp $
+"""
+
+import os, sys
+import difflib
+import glob
+import re
+
+if __name__ == '__main__':
+    execfile(os.path.join(sys.path[0], 'framework.py'))
+
+# Load fixture
+from Testing import ZopeTestCase
+from Products.Archetypes.tests import ArchetypesTestCase
+
+# Install our product
+ZopeTestCase.installProduct('Marshall')
+ZopeTestCase.installProduct('Archetypes')
+ZopeTestCase.installProduct('ATContentTypes')
+
+from Products.CMFCore.utils import getToolByName
+from Products.Marshall.registry import Registry, getRegisteredComponents
+from Products.Marshall.registry import getComponent
+from Products.Marshall.exceptions import MarshallingException
+from Products.Marshall.tests import PACKAGE_HOME
+from Products.Marshall.tests.examples import person
+tool_id = Registry.id
+
+def normalize_xml(s):
+    s = re.sub(r"[ \t]+", " ", s)
+    return s
+
+class MarshallerTest(ArchetypesTestCase.ArcheSiteTestCase):
+
+    def afterSetUp(self):
+        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        self.loginPortalOwner()
+        self.qi = self.portal.portal_quickinstaller
+        self.qi.installProduct('Marshall')
+        self.qi.installProduct('ATContentTypes')
+        # Needed so the one below works.
+        get_transaction().commit(1)
+        self.portal.switchCMF2ATCT()
+        self.tool = getToolByName(self.portal, tool_id)
+        self.infile = open(self.input, 'rb+')
+        self.portal.invokeFactory(self.type_name, self.type_name.lower())
+        self.obj = self.portal._getOb(self.type_name.lower())
+
+    def beforeTearDown(self):
+        super(ArchetypesTestCase.ArcheSiteTestCase, self).beforeTearDown()
+        self.infile.close()
+
+    def compare(self, one, two):
+        diff = difflib.ndiff(one.splitlines(), two.splitlines())
+        diff = '\n'.join(list(diff))
+        return diff
+
+    def test_marshall_roundtrip(self):
+        marshaller = getComponent(self.prefix)
+        content = self.infile.read()
+        marshaller.demarshall(self.obj, content)
+        ctype, length, got = marshaller.marshall(self.obj, filename=self.input)
+        if self.input.endswith('xml'):
+            content, got = normalize_xml(content), normalize_xml(got)
+        diff = self.compare(content, got)
+        self.failUnless(got.splitlines() == content.splitlines(), diff)
+
+
+class ATXMLReferenceMarshallTest(ArchetypesTestCase.ArcheSiteTestCase):
+
+    def afterSetUp(self):
+        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        self.loginPortalOwner()
+        self.qi = self.portal.portal_quickinstaller
+        self.qi.installProduct('Marshall')
+        self.tool = getToolByName(self.portal, tool_id)
+        self.marshaller = getComponent('atxml')
+
+    def createPerson(self, ctx, id, **kw):
+        person.addPerson(ctx, id, **kw)
+        return ctx._getOb(id)
+
+    def test_uid_references(self):
+        paulo = self.createPerson(
+            self.portal,
+            'paulo',
+            title='Paulo da Silva')
+        eligia = self.createPerson(
+            self.portal,
+            'eligia',
+            title='Eligia M. da Silva')
+        sidnei = self.createPerson(
+            self.portal,
+            'sidnei',
+            title='Sidnei da Silva')
+
+        self.assertEquals(sidnei.getParents(), [])
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/">
+        <field id="parents">
+        <reference>
+        <uid>
+        %(uid)s
+        </uid>
+        </reference>
+        </field>
+        </metadata>
+        """ % {'uid':paulo.UID()}
+        self.marshaller.demarshall(sidnei, ref_xml)
+        # Test a simple UID reference
+        self.assertEquals(sidnei['parents'], [paulo.UID()])
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/">
+        <field id="parents">
+        <reference>
+        <uid>
+        XXX%(uid)sXXX
+        </uid>
+        </reference>
+        </field>
+        </metadata>
+        """ % {'uid':paulo.UID()}
+        # Test that invalid UID reference raises an exception
+        self.assertRaises(MarshallingException, self.marshaller.demarshall,
+                          sidnei, ref_xml)
+
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/">
+        <field id="parents">
+        <reference>
+        <uid>
+        %(uid1)s
+        </uid>
+        </reference>
+        </field>
+        <field id="parents">
+        <reference>
+        <uid>
+        %(uid2)s
+        </uid>
+        </reference>
+        </field>
+        </metadata>
+        """ % {'uid1':paulo.UID(), 'uid2':eligia.UID()}
+        self.marshaller.demarshall(sidnei, ref_xml)
+        # Test that multiple UID references work.
+        self.assertEquals(sidnei['parents'], [paulo.UID(), eligia.UID()])
+
+        # *WARNING* the tests below are dependent on the one above.
+        new_uid = '9x9x9x9x9x9x9x9x9x9x9x9x9x9x9x9x9x9x9'
+        old_uid = paulo.UID()
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/">
+        <uid>
+        %(uid)s
+        </uid>
+        </metadata>
+        """ % {'uid':new_uid}
+        self.marshaller.demarshall(paulo, ref_xml)
+        # Test modifying a uid by marshalling
+        self.assertEquals(paulo.UID(), new_uid)
+        # Test that the references still apply
+        self.assertEquals(sidnei['parents'], [paulo.UID(), eligia.UID()])
+        # Test that trying to set a different object to the same UID
+        # will raise an exception.
+        self.assertRaises(MarshallingException, self.marshaller.demarshall,
+                          sidnei, ref_xml)
+
+    def test_path_references(self):
+        paulo = self.createPerson(
+            self.portal,
+            'paulo',
+            title='Paulo da Silva')
+        eligia = self.createPerson(
+            self.portal,
+            'eligia',
+            title='Eligia M. da Silva')
+        sidnei = self.createPerson(
+            self.portal,
+            'sidnei',
+            title='Sidnei da Silva')
+
+        self.assertEquals(sidnei.getParents(), [])
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/">
+        <field id="parents">
+        <reference>
+        <path>
+        %(path)s
+        </path>
+        </reference>
+        </field>
+        </metadata>
+        """ % {'path':'paulo'}
+        self.marshaller.demarshall(sidnei, ref_xml)
+        # Test a simple path reference
+        self.assertEquals(sidnei['parents'], [paulo.UID()])
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/">
+        <field id="parents">
+        <reference>
+        <path>
+        XXX%(path)sXXX
+        </path>
+        </reference>
+        </field>
+        </metadata>
+        """ % {'path':'paulo'}
+        # Test that an invalid path reference raises an exception
+        self.assertRaises(MarshallingException, self.marshaller.demarshall,
+                          sidnei, ref_xml)
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/">
+        <field id="parents">
+        <reference>
+        <path>
+        %(path1)s
+        </path>
+        </reference>
+        </field>
+        <field id="parents">
+        <reference>
+        <path>
+        %(path2)s
+        </path>
+        </reference>
+        </field>
+        </metadata>
+        """ % {'path1':'paulo', 'path2':'eligia'}
+        self.marshaller.demarshall(sidnei, ref_xml)
+        # Test multiple path references
+        self.assertEquals(sidnei['parents'], [paulo.UID(), eligia.UID()])
+
+
+    def test_metadata_references(self):
+        paulo = self.createPerson(
+            self.portal,
+            'paulo',
+            title='Paulo da Silva',
+            description='Familia Silva')
+        paulo_s = self.createPerson(
+            self.portal,
+            'paulo_s',
+            title='Paulo Schuh',
+            description='Familia Schuh')
+        sidnei = self.createPerson(
+            self.portal,
+            'sidnei',
+            title='Sidnei da Silva',
+            description='Familia Silva')
+
+        self.assertEquals(sidnei.getParents(), [])
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/"
+                  xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <field id="parents">
+        <reference>
+        <metadata>
+        <dc:title>
+        Paulo Schuh
+        </dc:title>
+        <dc:description>
+        Familia Schuh
+        </dc:description>
+        </metadata>
+        </reference>
+        </field>
+        </metadata>
+        """
+        self.marshaller.demarshall(sidnei, ref_xml)
+        # Test a simple metadata reference
+        self.assertEquals(sidnei['parents'], [paulo_s.UID()])
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/"
+                  xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <field id="parents">
+        <reference>
+        <metadata>
+        <dc:title>
+        Silva
+        </dc:title>
+        </metadata>
+        </reference>
+        </field>
+        </metadata>
+        """
+
+        # Test that a metadata reference that doesn't uniquely
+        # identifies a target raises an exception
+        self.assertRaises(MarshallingException, self.marshaller.demarshall,
+                          sidnei, ref_xml)
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/"
+                  xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <field id="parents">
+        <reference>
+        <metadata>
+        <dc:title>
+        Souza
+        </dc:title>
+        </metadata>
+        </reference>
+        </field>
+        </metadata>
+        """
+        # Test that a metadata reference that doesn't uniquely
+        # find at least one object raises an exception
+        self.assertRaises(MarshallingException, self.marshaller.demarshall,
+                          sidnei, ref_xml)
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/"
+                  xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <field id="parents">
+        <reference>
+        <metadata>
+        <dc:title>
+        Paulo da Silva
+        </dc:title>
+        <dc:description>
+        Familia Silva
+        </dc:description>
+        </metadata>
+        </reference>
+        </field>
+        </metadata>
+        """
+        self.marshaller.demarshall(sidnei, ref_xml)
+        # Test simple metadata reference
+        self.assertEquals(sidnei['parents'], [paulo.UID()])
+
+        ref_xml = """<?xml version="1.0" ?>
+        <metadata xmlns="http://plone.org/ns/archetypes/"
+                  xmlns:dc="http://purl.org/dc/elements/1.1/">
+        <field id="parents">
+        <reference>
+        <metadata>
+        <dc:title>
+        Paulo da Silva
+        </dc:title>
+        <dc:description>
+        Familia Silva
+        </dc:description>
+        </metadata>
+        </reference>
+        </field>
+        <field id="parents">
+        <reference>
+        <metadata>
+        <dc:title>
+        Paulo Schuh
+        </dc:title>
+        <dc:description>
+        Familia Schuh
+        </dc:description>
+        </metadata>
+        </reference>
+        </field>
+        </metadata>
+        """
+        self.marshaller.demarshall(sidnei, ref_xml)
+        # Test multiple metadata references
+        self.assertEquals(sidnei['parents'], [paulo.UID(), paulo_s.UID()])
+
+
+def test_suite():
+    import unittest
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(ATXMLReferenceMarshallTest))
+    dirs = glob.glob(os.path.join(PACKAGE_HOME, 'input', '*'))
+    comps = [i['name'] for i in getRegisteredComponents()]
+    for d in dirs:
+        prefix = os.path.basename(d)
+        if prefix not in comps:
+            continue
+        files = glob.glob(os.path.join(d, '*'))
+        for f in files:
+            if os.path.isdir(f):
+                continue
+            f_name = os.path.basename(f)
+            type_name = os.path.splitext(f_name)[0]
+            k_dict = {'prefix':prefix,
+                      'type_name':type_name,
+                      'input':f}
+            klass = type('%s%sTest' % (prefix, type_name),
+                         (MarshallerTest,),
+                         k_dict)
+            suite.addTest(unittest.makeSuite(klass))
+    return suite
+
+if __name__ == '__main__':
+    framework(descriptions=1, verbosity=1)

@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: test_marshall.py,v 1.3 2004/08/05 00:22:43 dreamcatcher Exp $
+$Id: test_marshall.py,v 1.4 2004/08/05 00:32:44 dreamcatcher Exp $
 """
 
 import os, sys
@@ -407,7 +407,6 @@ def test_suite():
         for f in files:
             if os.path.isdir(f):
                 continue
-            print f
             f_name = os.path.basename(f)
             type_name = os.path.splitext(f_name)[0]
             k_dict = {'prefix':prefix,

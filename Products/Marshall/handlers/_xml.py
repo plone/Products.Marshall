@@ -16,13 +16,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: _xml.py,v 1.3 2004/08/05 22:01:19 dreamcatcher Exp $
+$Id: _xml.py,v 1.4 2004/08/05 22:52:42 dreamcatcher Exp $
 """
 
-import libxml2
-libxml2.initParser()
-
 import os
+import thread
 from types import ListType, TupleType
 from xml.dom import minidom
 from cStringIO import StringIO
@@ -31,6 +29,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.Archetypes.Marshall import Marshaller
 from Products.Archetypes.Field import ReferenceField
 from Products.Archetypes.config import REFERENCE_CATALOG, UUID_ATTR
+from Products.Archetypes.debug import log
 from Products.Marshall.config import AT_NS, CMF_NS, ATXML_SCHEMA
 from Products.Marshall.exceptions import MarshallingException
 
@@ -164,6 +163,36 @@ XMLREADER_TEXT_ELEMENT_NODE_TYPE = 3
 # Initialize ATXML RNG Schema
 ATXML_RNG = open(os.path.join(ATXML_SCHEMA, 'atxml.rng'), 'rb+').read()
 
+# libxml2 initialization. Register a per-thread global error callback.
+import libxml2
+libxml2.initParser()
+
+class ErrorCallback:
+
+    def __init__(self):
+        self.msgs = {}
+
+    def __call__(self, ctx, msg):
+        self.append(msg)
+
+    def append(self, msg):
+        tid = thread.get_ident()
+        msgs = self.msgs.setdefault(tid, [])
+        msgs.append(msg)
+
+    def get(self, clear=False):
+        tid = thread.get_ident()
+        msgs = self.msgs.setdefault(tid, [])
+        if clear: self.clear()
+        return ''.join(msgs)
+
+    def clear(self):
+        tid = thread.get_ident()
+        msgs = self.msgs[tid] = []
+
+error_callback = ErrorCallback()
+libxml2.registerErrorHandler(error_callback, "")
+
 class ATXMLMarshaller(Marshaller):
 
     # Just a plain list of ns objects.
@@ -193,15 +222,17 @@ class ATXMLMarshaller(Marshaller):
     field_map = dict([(a.field, (n.prefix, a.name)) for n, a in flat_ns])
 
     def demarshall(self, instance, data, **kwargs):
+        error_callback.clear()
+        # libxml2.debugMemory(1)
+        libxml2.lineNumbersDefault(1)
         input = StringIO(data)
         input_source = libxml2.inputBuffer(input)
-        reader = input_source.newTextReader("urn:bogus")
+        reader = input_source.newTextReader("urn:%s" % instance.absolute_url())
 
         # Initialize RNG schema validation.
         rngp = libxml2.relaxNGNewMemParserCtxt(ATXML_RNG, len(ATXML_RNG))
         rngs = rngp.relaxNGParse()
         reader.RelaxNGSetSchema(rngs)
-        del rngp
 
         # Some elements may occur more than once, so we defer
         # calling the mutator until we collected all the values.
@@ -331,15 +362,41 @@ class ATXMLMarshaller(Marshaller):
             else:
                 field_values[c.fname] = c.value
 
+
+        is_input_valid = reader.IsValid()
+        # libxml2 cleanups. Don't keep references around
+        # for longer than we need.
+        del rngp
+        del rngs
+        del reader
+        del input_source
+        del input
+        libxml2.relaxNGCleanupTypes()
+        # Memory debug specific
+        libxml2.cleanupParser()
+        # Useful for debugging memory errors
+        # if libxml2.debugMemory(1) == 0:
+        #    print "OK"
+        # else:
+        #    print "Memory leak %d bytes" % (libxml2.debugMemory(1))
+        # libxml2.dumpMemory()
+
         __traceback_info__ = (data, stack, c.__dict__.items())
 
         if ret != 0:
+            errors = error_callback.get(clear=True)
+            log(errors)
             raise MarshallingException, ("There was an error parsing the "
                                          "input. Please make sure that it "
-                                         "is well formed and try again. ")
-        if reader.IsValid() != 1:
+                                         "is well formed and try again.\n"
+                                         "%s" % errors)
+        if is_input_valid != 1:
+            errors = error_callback.get(clear=True)
+            log(errors)
             raise MarshallingException, ("Input failed to validate against "
-                                         "the ATXML RelaxNG schema.")
+                                         "the ATXML RelaxNG schema.\n"
+                                         "%s" % errors)
+        error_callback.clear()
 
         # First thing to do: Try to set the UID if there's one.
         if at_uid is not _marker:

@@ -34,6 +34,7 @@ from Products.Archetypes.tests import ArchetypesTestCase
 # Install our product
 ZopeTestCase.installProduct('Marshall')
 ZopeTestCase.installProduct('Archetypes')
+ZopeTestCase.installProduct('ArchExample')
 ZopeTestCase.installProduct('ATContentTypes')
 
 from Products.CMFCore.utils import getToolByName
@@ -428,10 +429,25 @@ class ATXMLReferenceMarshallTest(ArchetypesTestCase.ArcheSiteTestCase):
         comp = [s for s in expected if s in got]
         self.assertEquals(comp, expected)
 
+
+class DocumentationTest(ZopeTestCase.FunctionalDocTestCase,
+                        ArchetypesTestCase.ArcheSiteTestCase):
+
+    def afterSetUp(self):
+        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        self.loginPortalOwner()
+        self.qi = self.portal.portal_quickinstaller
+        self.qi.installProduct('Marshall')
+        self.qi.installProduct('ArchExample')
+
 def test_suite():
     import unittest
+    from Testing.ZopeTestCase import FunctionalDocFileSuite
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(ATXMLReferenceMarshallTest))
+    suite.addTest(FunctionalDocFileSuite('doc/README.txt',
+                                         package='Products.Marshall',
+                                         test_class=DocumentationTest))
     dirs = glob.glob(os.path.join(PACKAGE_HOME, 'input', '*'))
     comps = [i['name'] for i in getRegisteredComponents()]
     for d in dirs:

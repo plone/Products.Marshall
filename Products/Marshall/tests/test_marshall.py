@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: test_marshall.py,v 1.2 2004/07/27 22:24:31 dreamcatcher Exp $
+$Id: test_marshall.py,v 1.3 2004/08/05 00:22:43 dreamcatcher Exp $
 """
 
 import os, sys
@@ -53,6 +53,9 @@ class MarshallerTest(ArchetypesTestCase.ArcheSiteTestCase):
     def afterSetUp(self):
         super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
         self.loginPortalOwner()
+        # Refresh ATContentTypes to avoid a minor bug on setup.
+        cp = self.portal.Control_Panel['Products']
+        cp['ATContentTypes'].manage_performRefresh()
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')
         self.qi.installProduct('ATContentTypes')
@@ -404,6 +407,7 @@ def test_suite():
         for f in files:
             if os.path.isdir(f):
                 continue
+            print f
             f_name = os.path.basename(f)
             type_name = os.path.splitext(f_name)[0]
             k_dict = {'prefix':prefix,

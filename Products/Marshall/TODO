@@ -1,2 +1,15 @@
 - Add a template for exporting a single piece of content from the
   browser (document action?)
+
+- Ensure that unicode data roundtrips correctly. See SF#1105363
+
+- Import/export of boolean fields. (currently False fields exports as
+  False which imports as True).
+
+- Export of empty fields (e.g. unset dates) currently exported as
+  None.
+
+- Allow import and export of primary fields.
+
+- Add an encoding attribute to the <field> tag to allow for base64
+  encoding binary fields such as images.

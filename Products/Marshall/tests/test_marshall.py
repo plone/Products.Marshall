@@ -429,8 +429,33 @@ class ATXMLReferenceMarshallTest(ArchetypesTestCase.ArcheSiteTestCase):
         comp = [s for s in expected if s in got]
         self.assertEquals(comp, expected)
 
+from zExceptions.ExceptionFormatter import format_exception
+from ZPublisher.HTTPResponse import HTTPResponse
 
-class DocumentationTest(ZopeTestCase.FunctionalDocTestCase,
+orig_exception = HTTPResponse.exception
+def exception(self, **kw):
+    def tag_search(*args):
+        return False
+    kw['tag_search'] = tag_search
+    return orig_exception(self, **kw)
+
+orig_setBody = HTTPResponse.setBody
+def setBody(self, *args, **kw):
+    kw['is_error'] = 0
+    if len(args[0]) == 2:
+        title, body = args[0]
+        args = (body,) + args[1:]
+    return orig_setBody(self, *args, **kw)
+
+def _traceback(self, t, v, tb, as_html=1):
+    return ''.join(format_exception(t, v, tb, as_html=as_html))
+
+HTTPResponse._error_format = 'text/plain'
+HTTPResponse._traceback = _traceback
+HTTPResponse.exception = exception
+HTTPResponse.setBody = setBody
+
+class DocumentationTest(ZopeTestCase.Functional,
                         ArchetypesTestCase.ArcheSiteTestCase):
 
     def afterSetUp(self):
@@ -442,12 +467,13 @@ class DocumentationTest(ZopeTestCase.FunctionalDocTestCase,
 
 def test_suite():
     import unittest
-    from Testing.ZopeTestCase import FunctionalDocFileSuite
+    from Testing.ZopeTestCase import doctest
     suite = unittest.TestSuite()
+    suite.addTest(doctest.FunctionalDocFileSuite('doc/README.txt',
+                                                 package='Products.Marshall',
+                                                 test_class=DocumentationTest))
+    return suite
     suite.addTest(unittest.makeSuite(ATXMLReferenceMarshallTest))
-    suite.addTest(FunctionalDocFileSuite('doc/README.txt',
-                                         package='Products.Marshall',
-                                         test_class=DocumentationTest))
     dirs = glob.glob(os.path.join(PACKAGE_HOME, 'input', '*'))
     comps = [i['name'] for i in getRegisteredComponents()]
     for d in dirs:

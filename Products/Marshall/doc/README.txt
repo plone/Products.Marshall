@@ -138,10 +138,17 @@ still empty.
   >>> xml_input = """
   ... <?xml version="1.0" ?>
   ... <metadata xmlns="http://plone.org/ns/archetypes/"
-  ...           xmlns:dc="http://purl.org/dc/elements/1.1/">
+  ...           xmlns:dc="http://purl.org/dc/elements/1.1/"
+  ...           xmlns:xmp="adobe:ns:meta">
   ...   <dc:title>
   ...     Some Title
   ...   </dc:title>
+  ...   <xmp:CreateDate>
+  ...     2004-01-01T00:02:03Z
+  ...   </xmp:CreateDate>
+  ...   <field id="expirationDate">
+  ...     2004-09-09T09:09:08Z
+  ...   </field>
   ... </metadata>
   ... """
 
@@ -154,6 +161,12 @@ still empty.
 
   >>> article.Title()
   'Some Title'
+
+  >>> article.CreationDate()
+  '2004-01-01 00:02:03'
+
+  >>> article.ExpirationDate()
+  '2004-09-09 09:09:08'
 
   >>> article.getBody()
   ''

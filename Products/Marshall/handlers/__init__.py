@@ -19,20 +19,29 @@
 $Id$
 """
 from Products.Marshall.registry import registerComponent
-from Products.Marshall.handlers._xml import SimpleXMLMarshaller
-from Products.Marshall.handlers._xml import ATXMLMarshaller
+
+# Register default Archetypes marshallers
 from Products.Archetypes.Marshall import PrimaryFieldMarshaller
 from Products.Archetypes.Marshall import RFC822Marshaller
 
-
-# Register default Archetypes marshallers
 registerComponent('primary_field', 'Primary Field Marshaller',
                   PrimaryFieldMarshaller)
 registerComponent('rfc822', 'RFC822 Marshaller',
                   RFC822Marshaller)
 
 # Now register our own marshallers
-registerComponent('simple_xml', 'Simple XML Marshaller',
-                  SimpleXMLMarshaller)
-registerComponent('atxml', 'ATXML Marshaller',
-                  ATXMLMarshaller)
+try:
+    import libxml2
+except ImportError:
+    # XXX can't import libxml2
+    import warnings
+    warnings.warn('libxml2 not available. Unable to register libxml2 based ' \
+                  'marshallers')
+else:
+    from Products.Marshall.handlers._xml import SimpleXMLMarshaller
+    from Products.Marshall.handlers._xml import ATXMLMarshaller
+
+    registerComponent('simple_xml', 'Simple XML Marshaller',
+                      SimpleXMLMarshaller)
+    registerComponent('atxml', 'ATXML Marshaller',
+                      ATXMLMarshaller)

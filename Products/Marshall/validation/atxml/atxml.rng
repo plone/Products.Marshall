@@ -17,7 +17,7 @@
         <element name="dc:description"><text /></element>
       </zeroOrMore>
       <zeroOrMore>
-        <element name="dc:subject"><data type="NMTOKEN" /></element>
+        <element name="dc:subject"><text /></element>
       </zeroOrMore>
       <zeroOrMore>
         <element name="dc:contributor"><data type="NMTOKEN" /></element>

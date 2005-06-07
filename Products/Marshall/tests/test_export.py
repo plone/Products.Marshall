@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 # Load fixture
 from Testing import ZopeTestCase
-from Products.Archetypes.tests import ArchetypesTestCase
+from Products.Marshall.tests.base import BaseTest
 
 # Install our product
 ZopeTestCase.installProduct('Marshall')
@@ -96,10 +96,10 @@ def fromFS(base, target, metadata='atxml', data='primary_field'):
     os.path.walk(base, import_func, paths)
     return paths
 
-class ExportTest(ArchetypesTestCase.ArcheSiteTestCase):
+class ExportTest(BaseTest):
 
     def afterSetUp(self):
-        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        super(ExportTest, self).afterSetUp()
         self.loginPortalOwner()
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')

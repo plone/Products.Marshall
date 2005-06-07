@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
 # Load fixture
 from Testing import ZopeTestCase
-from Products.Archetypes.tests import ArchetypesTestCase
+from Products.Marshall.tests.base import BaseTest
 
 # Install our product
 ZopeTestCase.installProduct('Marshall')
@@ -36,10 +36,10 @@ from Products.CMFCore.utils import getToolByName
 from Products.Marshall.predicates import add_predicate
 from Products.Marshall.config import TOOL_ID as tool_id
 
-class PredicateTest(ArchetypesTestCase.ArcheSiteTestCase):
+class PredicateTest(BaseTest):
 
     def afterSetUp(self):
-        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        super(PredicateTest, self).afterSetUp()
         self.loginPortalOwner()
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')

@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 # Load fixture
 from Testing import ZopeTestCase
-from Products.Archetypes.tests import ArchetypesTestCase
+from Products.Marshall.tests.base import BaseTest
 
 # Install our product
 ZopeTestCase.installProduct('Marshall')
@@ -49,10 +49,10 @@ def normalize_xml(s):
     s = re.sub(r"[ \t]+", " ", s)
     return s
 
-class MarshallerTest(ArchetypesTestCase.ArcheSiteTestCase):
+class MarshallerTest(BaseTest):
 
     def afterSetUp(self):
-        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        super(MarshallerTest, self).afterSetUp()
         self.loginPortalOwner()
         # Refresh ATContentTypes to avoid a minor bug on setup.
         cp = self.portal.Control_Panel['Products']
@@ -68,7 +68,7 @@ class MarshallerTest(ArchetypesTestCase.ArcheSiteTestCase):
         self.obj = self.portal._getOb(self.type_name.lower())
 
     def beforeTearDown(self):
-        super(ArchetypesTestCase.ArcheSiteTestCase, self).beforeTearDown()
+        super(MarshallerTest, self).beforeTearDown()
         self.infile.close()
 
     def compare(self, one, two):
@@ -87,10 +87,10 @@ class MarshallerTest(ArchetypesTestCase.ArcheSiteTestCase):
         self.failUnless(got.splitlines() == content.splitlines(), diff)
 
 
-class ATXMLReferenceMarshallTest(ArchetypesTestCase.ArcheSiteTestCase):
+class ATXMLReferenceMarshallTest(BaseTest):
 
     def afterSetUp(self):
-        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        super(ATXMLReferenceMarshallTest, self).afterSetUp()
         self.loginPortalOwner()
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')
@@ -456,10 +456,10 @@ HTTPResponse.exception = exception
 HTTPResponse.setBody = setBody
 
 class DocumentationTest(ZopeTestCase.Functional,
-                        ArchetypesTestCase.ArcheSiteTestCase):
+                        BaseTest):
 
     def afterSetUp(self):
-        super(ArchetypesTestCase.ArcheSiteTestCase, self).afterSetUp()
+        super(DocumentationTest, self).afterSetUp()
         self.loginPortalOwner()
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')

@@ -34,7 +34,7 @@ def getContext(obj, REQUEST=None):
 
 class ControlledMarshaller(Marshaller):
 
-    def delegate(self, method, obj, data=None, **kw):
+    def delegate(self, method, obj, data=None, file=None, **kw):
         __traceback_info__ = (method, obj, kw)
         context = getContext(obj, kw.get('REQUEST'))
         if context is not obj:
@@ -51,6 +51,7 @@ class ControlledMarshaller(Marshaller):
             # hold of the tool. Should probably raise
             # an error or log somewere.
             return
+        kw['file'] = file
         info = kw.copy()
         info['data'] = data
         info['mode'] = method

@@ -149,13 +149,12 @@ still empty.
   ...   <field id="expirationDate">
   ...     2004-09-09T09:09:08Z
   ...   </field>
-  ... </metadata>
-  ... """
+  ... </metadata>"""
 
   >>> print http(r"""
-  ... PUT /portal/article HTTP/1.1
+  ... PUT /plone/article HTTP/1.1
   ... Content-Type: text/xml
-  ... Authorization: Basic portal_owner:
+  ... Authorization: Basic portal_owner:secret
   ... %s""" % xml_input, handle_errors=False)
   HTTP/1.1 204 No Content...
 
@@ -182,9 +181,9 @@ field was updated with the uploaded file contents.
   ... """
 
   >>> print http(r"""
-  ... PUT /portal/article HTTP/1.1
+  ... PUT /plone/article HTTP/1.1
   ... Content-Type: text/x-rst
-  ... Authorization: Basic portal_owner:
+  ... Authorization: Basic portal_owner:secret
   ... %s""" % rst_input, handle_errors=False)
   HTTP/1.1 204 No Content...
 

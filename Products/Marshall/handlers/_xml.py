@@ -240,7 +240,9 @@ class ATXMLMarshaller(Marshaller):
         error_callback.clear()
         # libxml2.debugMemory(1)
         libxml2.lineNumbersDefault(1)
-        input = StringIO(data)
+        input = kwargs.get('file')
+        if not input:
+            input = StringIO(data)
         input_source = libxml2.inputBuffer(input)
         reader = input_source.newTextReader("urn:%s" % instance.absolute_url())
 

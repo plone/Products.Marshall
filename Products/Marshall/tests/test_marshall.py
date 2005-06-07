@@ -455,8 +455,7 @@ HTTPResponse._traceback = _traceback
 HTTPResponse.exception = exception
 HTTPResponse.setBody = setBody
 
-class DocumentationTest(ZopeTestCase.Functional,
-                        BaseTest):
+class DocumentationTest(ZopeTestCase.Functional, BaseTest):
 
     def afterSetUp(self):
         super(DocumentationTest, self).afterSetUp()
@@ -467,12 +466,11 @@ class DocumentationTest(ZopeTestCase.Functional,
 
 def test_suite():
     import unittest
-    from Testing.ZopeTestCase import doctest
+    from Testing.ZopeTestCase import FunctionalDocFileSuite
     suite = unittest.TestSuite()
-    suite.addTest(doctest.FunctionalDocFileSuite('doc/README.txt',
-                                                 package='Products.Marshall',
-                                                 test_class=DocumentationTest))
-    return suite
+    suite.addTest(FunctionalDocFileSuite('doc/README.txt',
+                                         package='Products.Marshall',
+                                         test_class=DocumentationTest))
     suite.addTest(unittest.makeSuite(ATXMLReferenceMarshallTest))
     dirs = glob.glob(os.path.join(PACKAGE_HOME, 'input', '*'))
     comps = [i['name'] for i in getRegisteredComponents()]

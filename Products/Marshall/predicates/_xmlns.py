@@ -91,7 +91,14 @@ class XMLNS(Predicate):
             return ()
         body = kw.get('data')
         if not body:
-            return ()
+            f = kw.get('file')
+            if f is None:
+                return ()
+            # Try 'file', though that may bloat memory with big files :(
+            body = f.read()
+            f.seek(0)
+            if not body:
+                return ()
         try:
             doc = minidom.parseString(body)
         except:

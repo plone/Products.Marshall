@@ -72,3 +72,6 @@
 
   - Having a 'search and export'. Do a search in Plone and have a
     'export results as:' with a checkbox and multiple formats.
+
+- Here's a message from Nate Aune that triggered most of this TODO:
+  http://thread.gmane.org/gmane.comp.web.zope.plone.user/31065

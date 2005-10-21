@@ -79,10 +79,10 @@ sdist_tgz:
 
 
 mail :
-	mutt -nx -s 'New DavPack Release $(VERSION)' \
+	mutt -nx -s 'New $(NAME) Release $(VERSION)' \
 	-a $(BASE_DIR)/${PACKAGE_NAME}.tgz \
 	-a $(BASE_DIR)/$(PACKAGE_NAME).zip \
-	-i version.txt ${TO} < .
+	-i version.txt $(TO) < .
 
 upload :
 	curl -n -T $(BASE_DIR)/${PACKAGE_NAME}.tgz ${BASE_URL}/${PACKAGE_NAME}.tgz

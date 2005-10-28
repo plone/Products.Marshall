@@ -103,10 +103,6 @@ class ExportTest(BaseTest):
         self.loginPortalOwner()
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')
-        self.qi.installProduct('ATContentTypes')
-        # Needed so the one below works.
-        get_transaction().commit(1)
-        self.portal.switchCMF2ATCT()
         self.tool = getToolByName(self.portal, tool_id)
 
     def test_export(self):

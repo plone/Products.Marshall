@@ -54,14 +54,8 @@ class MarshallerTest(BaseTest):
     def afterSetUp(self):
         super(MarshallerTest, self).afterSetUp()
         self.loginPortalOwner()
-        # Refresh ATContentTypes to avoid a minor bug on setup.
-        cp = self.portal.Control_Panel['Products']
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')
-        self.qi.installProduct('ATContentTypes')
-        # Needed so the one below works.
-        get_transaction().commit(1)
-        self.portal.switchCMF2ATCT(skip_rename=True)
         self.tool = getToolByName(self.portal, tool_id)
         self.infile = open(self.input, 'rb+')
         self.portal.invokeFactory(self.type_name, self.type_name.lower())

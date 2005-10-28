@@ -133,7 +133,8 @@ Registry to decide what Marshaller to use at runtime.
 
 Upload a very simple ATXML file and make sure it used the ATXML
 Marshaller by checking that the Title got changed and the body is
-still empty.
+still empty. Note we also support CDATA sections, so we'll stick some
+stuff into the 'blurb' field using CDATA.
 
   >>> xml_input = """
   ... <?xml version="1.0" ?>
@@ -149,6 +150,9 @@ still empty.
   ...   <field id="expirationDate">
   ...     2004-09-09T09:09:08Z
   ...   </field>
+  ...   <field id="blurb">
+  ...    <![CDATA[<example>Here's a CDATA example.</example>]]>
+  ...   </field>
   ... </metadata>"""
 
   >>> print http(r"""
@@ -160,6 +164,9 @@ still empty.
 
   >>> article.Title()
   'Some Title'
+
+  >>> article.getBlurb()
+  "<example>Here's a CDATA example.</example>"
 
   >>> article.CreationDate()
   '2004-01-01 00:02:03'

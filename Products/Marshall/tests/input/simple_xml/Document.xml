@@ -6,9 +6,9 @@
   <title>
     Some Title
   </title>
-  <allowDiscussion>
-    0
-  </allowDiscussion>
+  <excludeFromNav>
+  False
+  </excludeFromNav>
   <subject>
     Test
     Data
@@ -46,7 +46,8 @@
   <modification_date>
     2004/09/09 10:09:08 GMT+1
   </modification_date>
-  <layout>
-    document_view
-  </layout>
+  <relatedItems/>
+  <allowDiscussion>
+    0
+  </allowDiscussion>
 </document>

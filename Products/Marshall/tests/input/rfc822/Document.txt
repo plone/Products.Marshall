@@ -1,13 +1,13 @@
 id: document
 title: Some Title
-allowDiscussion: 0
+excludeFromNav: False
 subject: Test
   Data
 description: Neque porro quisquam est qui dolorem ipsum quia dolor sit amet,
-  consectetur, adipisci velit...
-  There is no one who loves pain
-  itself, who seeks after it and wants to have it, simply because it
-  is pain...
+   consectetur, adipisci velit...
+   There is no one who loves pain
+   itself, who seeks after it and wants to have it, simply because it
+   is pain...
 contributors: sidnei
   alan
 creators: sidnei
@@ -18,7 +18,8 @@ language: en
 rights: Copyleft 2004, No Rights Reserved
 creation_date: 2004/01/01 01:02:03 GMT-1
 modification_date: 2004/09/09 10:09:08 GMT-1
-layout: document_view
+relatedItems: 
+allowDiscussion: 0
 Content-Type: text/plain
 
 

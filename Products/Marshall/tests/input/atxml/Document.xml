@@ -12,8 +12,8 @@
   <dc:title>
     Some Title
   </dc:title>
-  <field id="allowDiscussion">
-    0
+  <field id="excludeFromNav">
+    False
   </field>
   <dc:subject>
     Data
@@ -58,7 +58,7 @@ have it, simply because it is pain...
   <xmp:ModifyDate>
     2004-09-09T09:09:08Z
   </xmp:ModifyDate>
-  <field id="layout">
-    document_view
+  <field id="allowDiscussion">
+    0
   </field>
 </metadata>

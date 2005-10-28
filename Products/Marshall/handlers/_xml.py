@@ -174,6 +174,7 @@ XMLNS_NS = 'http://www.w3.org/2000/xmlns/'
 XMLREADER_START_ELEMENT_NODE_TYPE = 1
 XMLREADER_END_ELEMENT_NODE_TYPE = 15
 XMLREADER_TEXT_ELEMENT_NODE_TYPE = 3
+XMLREADER_CDATA_NODE_TYPE = 4
 
 # Initialize ATXML RNG Schema
 ATXML_RNG = open(os.path.join(ATXML_SCHEMA, 'atxml.rng'), 'rb+').read()
@@ -343,7 +344,9 @@ class ATXMLMarshaller(Marshaller):
                                 # fall into this category
                                 if defer_fields.get(c.fname):
                                     c.defer = True
-            elif reader.NodeType() == XMLREADER_TEXT_ELEMENT_NODE_TYPE:
+            elif reader.NodeType() in (
+                XMLREADER_TEXT_ELEMENT_NODE_TYPE,
+                XMLREADER_CDATA_NODE_TYPE):
                 # The value to be set on the field should always be
                 # in a #text element inside the field element.
                 c.value = reader.Value()

@@ -52,3 +52,5 @@ Requirements
 - Archetypes 1.3.5+ (a bug with BooleanField was fixed right after 1.3.5)
 
 - libxml2 2.6.6+ (previous versions seem to have a bug validating RelaxNG)
+
+- DavPack (optional) to support rename-on-upload

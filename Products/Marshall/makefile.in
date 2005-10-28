@@ -12,7 +12,7 @@ CURDIR=$(shell pwd)
 BASE_DIR=$(shell dirname ${CURDIR})
 INSTANCE_HOME=~/src/instance/pd11
 PACKAGES=${NAME}
-BASE_URL=https://www.enfoldsystems.com/Products/Open/Downloads/
+BASE_URL=https://www.enfoldsystems.com/Products/Open/Downloads
 TEST_OPTS=--keepbytecode -v -p --libdir Products/${NAME}
 
 RM=rm -f

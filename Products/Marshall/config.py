@@ -30,4 +30,4 @@ CMF_NS = 'http://cmf.zope.org/namespaces/default/'
 ATXML_SCHEMA = os.path.join(PACKAGE_HOME, 'validation', 'atxml')
 
 def log(msg, level=INFO):
-    LOG('Marshall', msg, level=level)
+    LOG('Marshall', level, msg)

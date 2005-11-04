@@ -34,6 +34,12 @@ def getContext(obj, REQUEST=None):
 
 class ControlledMarshaller(Marshaller):
 
+
+    def __init__(self, fallback=None,
+                 demarshall_hook=None, marshall_hook=None):
+        Marshaller.__init__(self, demarshall_hook, marshall_hook)
+        self.fallback = fallback
+
     def delegate(self, method, obj, data=None, file=None, **kw):
         __traceback_info__ = (method, obj, kw)
         context = getContext(obj, kw.get('REQUEST'))
@@ -57,10 +63,16 @@ class ControlledMarshaller(Marshaller):
         info['mode'] = method
         components = tool.getMarshallersFor(obj, **info)
         # We just use the first component, if one is returned.
-        if not components:
-            raise MarshallingException, ("Couldn't get a marshaller for"
-                                         "%r, %r" % (obj, kw))
-        marshaller = getComponent(components[0])
+        if components:
+            marshaller = getComponent(components[0])
+        else:
+            # If no default marshaller was provided then we complain.
+            if self.fallback is None:
+                raise MarshallingException(
+                    "Couldn't get a marshaller for %r, %r" % (obj, kw))
+            # Otherwise, use the default marshaller provided. Note it
+            # must be an instance, not a factory.
+            marshaller = self.fallback
         __traceback_info__ = (marshaller, method, obj, kw)
         args = (obj,)
         if method == 'demarshall':

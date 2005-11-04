@@ -21,7 +21,7 @@ $Id$
 
 from Products.CMFCore.utils import getToolByName
 from Products.Archetypes.Marshall import Marshaller
-from Products.Marshall.config import TOOL_ID
+from Products.Marshall.config import TOOL_ID, log
 from Products.Marshall.registry import getComponent
 from Products.Marshall.exceptions import MarshallingException
 from Acquisition import ImplicitAcquisitionWrapper
@@ -51,16 +51,19 @@ class ControlledMarshaller(Marshaller):
             # a reference to the wrapped object.
             obj = ImplicitAcquisitionWrapper(obj, context)
         tool = getToolByName(obj, TOOL_ID, None)
-        if tool is None:
+        components = None
+        if tool is not None:
+            kw['file'] = file
+            info = kw.copy()
+            info['data'] = data
+            info['mode'] = method
+            components = tool.getMarshallersFor(obj, **info)
+        else:
             # Couldn't find a context to get
-            # hold of the tool. Should probably raise
-            # an error or log somewere.
-            return
-        kw['file'] = file
-        info = kw.copy()
-        info['data'] = data
-        info['mode'] = method
-        components = tool.getMarshallersFor(obj, **info)
+            # hold of the tool or the tool is not installed.
+            log('Could not find the marshaller tool. '
+                'It might not be installed or you might not '
+                'be providing enough context to find it.')
         # We just use the first component, if one is returned.
         if components:
             marshaller = getComponent(components[0])

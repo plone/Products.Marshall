@@ -34,9 +34,8 @@ def getContext(obj, REQUEST=None):
 
 class ControlledMarshaller(Marshaller):
 
-
-    def __init__(self, fallback=None,
-                 demarshall_hook=None, marshall_hook=None):
+    def __init__(self, fallback=None, demarshall_hook=None,
+                 marshall_hook=None):
         Marshaller.__init__(self, demarshall_hook, marshall_hook)
         self.fallback = fallback
 

@@ -40,6 +40,7 @@ class ControlledMarshaller(Marshaller):
         self.fallback = fallback
 
     def delegate(self, method, obj, data=None, file=None, **kw):
+        kw['file'] = file
         __traceback_info__ = (method, obj, kw)
         context = getContext(obj, kw.get('REQUEST'))
         if context is not obj:
@@ -53,7 +54,6 @@ class ControlledMarshaller(Marshaller):
         tool = getToolByName(obj, TOOL_ID, None)
         components = None
         if tool is not None:
-            kw['file'] = file
             info = kw.copy()
             info['data'] = data
             info['mode'] = method

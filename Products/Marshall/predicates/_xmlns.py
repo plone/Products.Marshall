@@ -37,7 +37,7 @@ class XMLNS(Predicate):
     """
 
     security = ClassSecurityInfo()
-    security.declareProtected(ManagePortal, 'edit', 'getElementId',
+    security.declareProtected(ManagePortal, 'edit',
                               'getElementNS', 'getElementName',
                               'getAttributeNS', 'getAttributeName',
                               'getValue')

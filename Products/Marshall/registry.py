@@ -81,7 +81,7 @@ class Registry(OrderedFolder, Export):
     def all_meta_types(self):
         return OrderedFolder.all_meta_types(self, interfaces=(IPredicate,))
 
-    security.declareProtected(view, 'getMarshallerFor')
+    security.declareProtected(view, 'getMarshallersFor')
     def getMarshallersFor(self, obj, **kw):
         set = []
         for predicate in self.objectValues():

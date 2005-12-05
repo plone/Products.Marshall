@@ -69,6 +69,9 @@ class Predicate(SimpleItem):
         """ Evaluate expression using the object as
         context and return a component name if applicable.
         """
+        if not self.getExpression():
+            # Short-circuit for speedup when no expression.
+            return (self.getComponentName(),)
         context = createExprContext(obj, **kw)
         if self.expression(context):
             return (self.getComponentName(),)

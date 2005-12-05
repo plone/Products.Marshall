@@ -70,7 +70,10 @@ def createExprContext(obj, **kw):
         'modules':      SecureModuleImporter,
         'user':         user,
         }
+    if kw.has_key('mimetype') and not kw.has_key('content_type'):
+        # Alias content_type to mimetype
+        kw['content_type'] = kw['mimetype']
     data.update(kw)
-    for k in ('filename', 'content_type', 'data'):
+    for k in ('filename', 'content_type', 'data', 'mimetype'):
         data.setdefault(k, None)
     return getEngine().getContext(data)

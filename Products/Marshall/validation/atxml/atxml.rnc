@@ -5,14 +5,17 @@ namespace note = "atxml:annotations"
 namespace xmp = "adobe:ns:meta"
 
 start = Metadata
+MetaMeta =
+  attribute filename { text }?,
+  attribute content_type { text }?
 DublinCore =
   element dc:title { text }*
-  | element dc:description { text }*
+  | element dc:description { MetaMeta, text }*
   | element dc:subject { text }*
   | element dc:contributor { xsd:NMTOKEN }*
   | element dc:creator { xsd:NMTOKEN }+
   | element dc:language { xsd:language }*
-  | element dc:rights { text }*
+  | element dc:rights { MetaMeta, text }*
 DateInfo =
   element xmp:CreateDate { xsd:dateTime }*,
   element xmp:ModifyDate { xsd:dateTime }*
@@ -27,6 +30,7 @@ ArchetypesFields =
   ]
   element field {
     attribute id { text },
+    MetaMeta,
     (text
      | [
          note:info [

@@ -39,8 +39,12 @@ ZopeTestCase.installProduct('ATContentTypes')
 
 portal_owner = 'portal_owner'
 
-def normalize_xml(s):
+def normalize_tabs(s):
     s = re.sub(r"[ \t]+", " ", s)
+    return s
+
+def normalize_space(s):
+    s =  re.sub(r"[\r\n]+", r'\r\n', s)
     return s
 
 class BaseTest(ArchetypesTestCase.ArcheSiteTestCase):
@@ -63,6 +67,7 @@ class BaseTest(ArchetypesTestCase.ArcheSiteTestCase):
 
     def assertEqualsDiff(self, one, two, normalize=True):
         if normalize:
-            one, two = normalize_xml(one), normalize_xml(two)
+            one, two = normalize_tabs(one), normalize_tabs(two)
+        one, two = normalize_space(one), normalize_space(two)
         self.failUnless(one.splitlines() == two.splitlines(),
                         self.compare(one, two))

@@ -460,6 +460,10 @@ class BlobMarshallTest(BaseTest):
         data = get_data('file.pdf')
         self._test_blob_roundtrip('afile', data, 'application/pdf', 'file.pdf')
 
+    def test_blob_file_html(self):
+        data = get_data('file.html')
+        self._test_blob_roundtrip('afile', data, 'text/html', 'file.html')
+
     def test_blob_text_text(self):
         data = get_data('file.txt')
         self._test_blob_roundtrip('atext', data, 'text/plain', 'file.txt')
@@ -467,6 +471,10 @@ class BlobMarshallTest(BaseTest):
     def test_blob_text_binary(self):
         data = get_data('file.pdf')
         self._test_blob_roundtrip('atext', data, 'application/pdf', 'file.pdf')
+
+    def test_blob_text_html(self):
+        data = get_data('file.html')
+        self._test_blob_roundtrip('atext', data, 'text/html', 'file.html')
 
 from zExceptions.ExceptionFormatter import format_exception
 from ZPublisher.HTTPResponse import HTTPResponse

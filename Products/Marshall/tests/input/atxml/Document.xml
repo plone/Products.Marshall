@@ -21,12 +21,13 @@
   <dc:subject>
     Test
   </dc:subject>
-  <dc:description content_type="text/plain" filename="">
-<![CDATA[Neque porro quisquam est qui dolorem ipsum quia dolor sit amet,
+  <dc:description content_type="text/plain">
+ Neque porro quisquam est qui dolorem ipsum quia dolor sit amet,
 consectetur, adipisci velit...
 
 There is no one who loves pain itself, who seeks after it and wants to
-have it, simply because it is pain...]]> </dc:description>
+have it, simply because it is pain...
+  </dc:description>
   <dc:contributor>
     sidnei
   </dc:contributor>
@@ -48,14 +49,17 @@ have it, simply because it is pain...]]> </dc:description>
   <dc:language>
     en
   </dc:language>
-  <dc:rights content_type="text/plain" filename="">
-<![CDATA[Copyleft 2004, No Rights Reserved]]]> </dc:rights>
+  <dc:rights content_type="text/plain">
+    Copyleft 2004, No Rights Reserved
+  </dc:rights>
   <xmp:CreateDate>
     2004-01-01T00:02:03Z
   </xmp:CreateDate>
   <xmp:ModifyDate>
     2004-09-09T09:09:08Z
   </xmp:ModifyDate>
+  <field content_type="text/html" filename="file.html" id="text">
+    <![CDATA[Let <b>there</b> be <i>light</i>]]> </field>
   <field id="allowDiscussion">
     0
   </field>

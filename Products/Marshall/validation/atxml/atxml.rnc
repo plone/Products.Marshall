@@ -7,7 +7,8 @@ namespace xmp = "adobe:ns:meta"
 start = Metadata
 MetaMeta =
   attribute filename { text }?,
-  attribute content_type { text }?
+  attribute content_type { text }?,
+  attribute transfer_encoding { text }?
 DublinCore =
   element dc:title { text }*
   | element dc:description { MetaMeta, text }*

@@ -20,6 +20,7 @@ $Id$
 """
 
 import os
+import re
 import thread
 from types import ListType, TupleType
 from xml.dom import minidom
@@ -40,6 +41,15 @@ def stringify(value):
     if isinstance(value, File):
         value = getattr(value, 'data', value)
     return str(value)
+
+_markup = re.compile(r'[<>&]')
+def xml_safe(ct, value):
+    if ct is None:
+        return True
+    if ct.startswith('text'):
+        if not _markup.search(value):
+            return True
+    return False
 
 class SimpleXMLMarshaller(Marshaller):
 
@@ -349,7 +359,8 @@ class ATXMLMarshaller(Marshaller):
                                 if defer_fields.get(c.fname):
                                     c.defer = True
                             if reader.LocalName() in (
-                                'content_type', 'filename'):
+                                'content_type', 'filename',
+                                'transfer_encoding'):
                                 attr = reader.LocalName()
                                 setattr(c, attr, reader.Value())
             elif reader.NodeType() in (
@@ -403,13 +414,14 @@ class ATXMLMarshaller(Marshaller):
             else:
                 ct = getattr(c, 'content_type', None)
                 fn = getattr(c, 'filename', None)
+                te = getattr(c, 'transfer_encoding', None)
                 value = c.value
-                if fn is not None:
-                    # It's some file-ish thing.
-                    if ct is not None and not ct.startswith('text'):
-                        # It's a blob-ish thing, we expect it to be
-                        # base64 encoded.
-                        value = value.decode('base64')
+                if te is not None:
+                    # It's a blob-ish thing, we expect it to be
+                    # encoded (usually in base64).
+                    value = value.decode(te)
+
+                if ct is not None:
                     field_extras[c.fname] = {'mimetype': ct,
                                              'filename': fn}
                 field_values[c.fname] = value
@@ -544,7 +556,7 @@ class ATXMLMarshaller(Marshaller):
             values = [value]
             if type(value) in [ListType, TupleType]:
                 values = value
-            non_empty = lambda x: str(x) not in ('',)
+            non_empty = lambda x: str(x) not in ('', 'None')
             # Don't export empty values.
             values = filter(non_empty, values)
             if not values:
@@ -582,10 +594,12 @@ class ATXMLMarshaller(Marshaller):
                     ct = fn = None
                     if shasattr(f, 'getFilename'):
                         fn = f.getFilename(instance)
-                        attr = response.createAttributeNS(
-                            AT_NS, 'filename')
-                        attr.value = fn
-                        elm.setAttributeNode(attr)
+                        if fn:
+                            # Don't include an empty filename.
+                            attr = response.createAttributeNS(
+                                AT_NS, 'filename')
+                            attr.value = fn
+                            elm.setAttributeNode(attr)
                     if fn is not None and shasattr(f, 'getContentType'):
                         ct = f.getContentType(instance)
                         attr = response.createAttributeNS(
@@ -602,8 +616,14 @@ class ATXMLMarshaller(Marshaller):
                             # If it's non-text-ish then store it
                             # base64 encoded.
                             value = value.encode('base64')
-                    if ct is not None and fn is not None:
-                        # File-ish, make a CDATA section.
+                            attr = response.createAttributeNS(
+                                AT_NS, 'transfer_encoding')
+                            attr.value = 'base64'
+                            elm.setAttributeNode(attr)
+                    if value.startswith('Let'):
+                        import pdb;pdb.set_trace()
+                    if not xml_safe(ct, value):
+                        # If non-xml-safe, make a CDATA section.
                         value = response.createCDATASection(value)
                     else:
                         # Otherwise, just store it as a text node.

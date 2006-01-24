@@ -14,6 +14,9 @@
     <optional>
       <attribute name="content_type" />
     </optional>
+    <optional>
+      <attribute name="transfer_encoding" />
+    </optional>
   </define>
 
   <define name="DublinCore"

@@ -21,7 +21,6 @@ $Id$
 
 import os
 import thread
-import base64
 from types import ListType, TupleType
 from xml.dom import minidom
 from cStringIO import StringIO

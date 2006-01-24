@@ -59,7 +59,7 @@ have it, simply because it is pain...
     2004-09-09T09:09:08Z
   </xmp:ModifyDate>
   <field content_type="text/html" filename="file.html" id="text">
-   <![CDATA[Let <b>there</b> be <i>light</i>]]> </field>
+<![CDATA[Let <b>there</b> be <i>light</i>]]> </field>
   <field id="allowDiscussion">
     0
   </field>

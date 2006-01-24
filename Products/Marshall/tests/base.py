@@ -23,6 +23,9 @@ $Id: test_export.py 2886 2004-08-25 03:51:04Z dreamcatcher $
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 
+import re
+import difflib
+
 # Load fixture
 from Testing import ZopeTestCase
 from Products.Archetypes.tests import ArchetypesTestCase
@@ -36,6 +39,10 @@ ZopeTestCase.installProduct('ATContentTypes')
 
 portal_owner = 'portal_owner'
 
+def normalize_xml(s):
+    s = re.sub(r"[ \t]+", " ", s)
+    return s
+
 class BaseTest(ArchetypesTestCase.ArcheSiteTestCase):
     """Base Test"""
 
@@ -48,3 +55,15 @@ class BaseTest(ArchetypesTestCase.ArcheSiteTestCase):
         if not hasattr(user, 'aq_base'):
             user = user.__of__(uf)
         newSecurityManager(None, user)
+
+    def compare(self, one, two):
+        diff = difflib.ndiff(one.splitlines(), two.splitlines())
+        diff = '\n'.join(list(diff))
+        return diff
+
+    def assertEqualsDiff(self, one, two, normalize=True):
+        if normalize:
+            one, two = normalize_xml(one), normalize_xml(two)
+        self.failUnless(one.splitlines() == two.splitlines(),
+                        self.compare(one, two))
+

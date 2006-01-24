@@ -21,13 +21,12 @@
   <dc:subject>
     Test
   </dc:subject>
-  <dc:description>
-    Neque porro quisquam est qui dolorem ipsum quia dolor sit amet,
+  <dc:description content_type="text/plain" filename="">
+<![CDATA[Neque porro quisquam est qui dolorem ipsum quia dolor sit amet,
 consectetur, adipisci velit...
 
 There is no one who loves pain itself, who seeks after it and wants to
-have it, simply because it is pain...
-  </dc:description>
+have it, simply because it is pain...]]> </dc:description>
   <dc:contributor>
     sidnei
   </dc:contributor>
@@ -49,9 +48,8 @@ have it, simply because it is pain...
   <dc:language>
     en
   </dc:language>
-  <dc:rights>
-    Copyleft 2004, No Rights Reserved
-  </dc:rights>
+  <dc:rights content_type="text/plain" filename="">
+<![CDATA[Copyleft 2004, No Rights Reserved]]]> </dc:rights>
   <xmp:CreateDate>
     2004-01-01T00:02:03Z
   </xmp:CreateDate>

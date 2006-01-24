@@ -5,6 +5,17 @@
     <ref name="Metadata" />
   </start>
 
+  <define name="MetaMeta"
+          ns="http://plone.org/ns/archetypes/"
+          xmlns="http://relaxng.org/ns/structure/1.0">
+    <optional>
+      <attribute name="filename" />
+    </optional>
+    <optional>
+      <attribute name="content_type" />
+    </optional>
+  </define>
+
   <define name="DublinCore"
           xmlns:dc="http://purl.org/dc/elements/1.1/"
           datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
@@ -14,7 +25,10 @@
         <element name="dc:title"><text /></element>
       </zeroOrMore>
       <zeroOrMore>
-        <element name="dc:description"><text /></element>
+        <element name="dc:description">
+          <ref name="MetaMeta" />
+          <text />
+        </element>
       </zeroOrMore>
       <zeroOrMore>
         <element name="dc:subject"><text /></element>
@@ -29,7 +43,10 @@
         <element name="dc:language"><data type="language" /></element>
       </zeroOrMore>
       <zeroOrMore>
-        <element name="dc:rights"><text /></element>
+        <element name="dc:rights">
+          <ref name="MetaMeta" />
+          <text />
+        </element>
       </zeroOrMore>
     </choice>
   </define>
@@ -57,6 +74,7 @@
         element, their id specified by an attribute 'id'.
       </note:info>
       <attribute name="id" />
+      <ref name="MetaMeta" />
       <choice>
         <text />
         <zeroOrMore>

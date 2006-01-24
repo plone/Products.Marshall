@@ -20,9 +20,7 @@ $Id$
 """
 
 import os, sys
-import difflib
 import glob
-import re
 
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
@@ -43,11 +41,11 @@ from Products.Marshall.registry import getComponent
 from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall.tests import PACKAGE_HOME
 from Products.Marshall.tests.examples import person
+from Products.Marshall.tests.examples import blob
 tool_id = Registry.id
 
-def normalize_xml(s):
-    s = re.sub(r"[ \t]+", " ", s)
-    return s
+def get_data(fname):
+    return open(os.path.join(PACKAGE_HOME, 'data', fname), 'rb').read()
 
 class MarshallerTest(BaseTest):
 
@@ -65,21 +63,13 @@ class MarshallerTest(BaseTest):
         super(MarshallerTest, self).beforeTearDown()
         self.infile.close()
 
-    def compare(self, one, two):
-        diff = difflib.ndiff(one.splitlines(), two.splitlines())
-        diff = '\n'.join(list(diff))
-        return diff
-
     def test_marshall_roundtrip(self):
         marshaller = getComponent(self.prefix)
         content = self.infile.read()
         marshaller.demarshall(self.obj, content)
         ctype, length, got = marshaller.marshall(self.obj, filename=self.input)
-        if self.input.endswith('xml'):
-            content, got = normalize_xml(content), normalize_xml(got)
-        diff = self.compare(content, got)
-        self.failUnless(got.splitlines() == content.splitlines(), diff)
-
+        normalize = self.input.endswith('xml')
+        self.assertEqualsDiff(got, content, normalize=normalize)
 
 class ATXMLReferenceMarshallTest(BaseTest):
 
@@ -93,7 +83,9 @@ class ATXMLReferenceMarshallTest(BaseTest):
 
     def createPerson(self, ctx, id, **kw):
         person.addPerson(ctx, id, **kw)
-        return ctx._getOb(id)
+        ob = ctx._getOb(id)
+        ob.indexObject()
+        return ob
 
     def test_uid_references(self):
         paulo = self.createPerson(
@@ -423,6 +415,59 @@ class ATXMLReferenceMarshallTest(BaseTest):
         comp = [s for s in expected if s in got]
         self.assertEquals(comp, expected)
 
+class BlobMarshallTest(BaseTest):
+
+    def afterSetUp(self):
+        super(BlobMarshallTest, self).afterSetUp()
+        self.loginPortalOwner()
+        self.qi = self.portal.portal_quickinstaller
+        self.qi.installProduct('Marshall')
+        self.tool = getToolByName(self.portal, tool_id)
+        self.marshaller = getComponent('atxml')
+
+    def createBlob(self, ctx, id, **kw):
+        blob.addBlob(ctx, id, **kw)
+        ob = ctx._getOb(id)
+        ob.indexObject()
+        return ob
+
+    def _test_blob_roundtrip(self, fname, data, mimetype, filename):
+        blob = self.createBlob(self.portal, 'blob')
+
+        field = blob.Schema()[fname]
+        field.set(blob, data, mimetype=mimetype, filename=filename)
+
+        # Marshall to XML
+        ctype, length, got = self.marshaller.marshall(blob)
+
+        # Populate from XML
+        self.marshaller.demarshall(blob, got)
+
+        # Marshall from XML again and compare to see if it's
+        # unchanged.
+        ctype, length, got2 = self.marshaller.marshall(blob)
+        self.assertEqualsDiff(got, got2)
+
+    def test_blob_image(self):
+        data = get_data('image.gif')
+        self._test_blob_roundtrip('aimage', data, 'image/gif', 'image.gif')
+
+    def test_blob_file_text(self):
+        data = get_data('file.txt')
+        self._test_blob_roundtrip('afile', data, 'text/plain', 'file.txt')
+
+    def test_blob_file_binary(self):
+        data = get_data('file.pdf')
+        self._test_blob_roundtrip('afile', data, 'application/pdf', 'file.pdf')
+
+    def test_blob_text_text(self):
+        data = get_data('file.txt')
+        self._test_blob_roundtrip('atext', data, 'text/plain', 'file.txt')
+
+    def test_blob_text_binary(self):
+        data = get_data('file.pdf')
+        self._test_blob_roundtrip('atext', data, 'application/pdf', 'file.pdf')
+
 from zExceptions.ExceptionFormatter import format_exception
 from ZPublisher.HTTPResponse import HTTPResponse
 
@@ -466,6 +511,7 @@ def test_suite():
                                          package='Products.Marshall',
                                          test_class=DocumentationTest))
     suite.addTest(unittest.makeSuite(ATXMLReferenceMarshallTest))
+    suite.addTest(unittest.makeSuite(BlobMarshallTest))
     dirs = glob.glob(os.path.join(PACKAGE_HOME, 'input', '*'))
     comps = [i['name'] for i in getRegisteredComponents()]
     for d in dirs:

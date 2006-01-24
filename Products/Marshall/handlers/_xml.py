@@ -21,18 +21,26 @@ $Id$
 
 import os
 import thread
+import base64
 from types import ListType, TupleType
 from xml.dom import minidom
 from cStringIO import StringIO
 from DateTime import DateTime
+from OFS.Image import File
 from Products.CMFCore.utils import getToolByName
 from Products.Archetypes.BaseObject import BaseObject
 from Products.Archetypes.Marshall import Marshaller
 from Products.Archetypes.Field import ReferenceField
 from Products.Archetypes.config import REFERENCE_CATALOG, UUID_ATTR
+from Products.Archetypes.utils import shasattr
 from Products.Archetypes.debug import log
 from Products.Marshall.config import AT_NS, CMF_NS, ATXML_SCHEMA
 from Products.Marshall.exceptions import MarshallingException
+
+def stringify(value):
+    if isinstance(value, File):
+        value = getattr(value, 'data', value)
+    return str(value)
 
 class SimpleXMLMarshaller(Marshaller):
 
@@ -74,7 +82,7 @@ class SimpleXMLMarshaller(Marshaller):
                 values = [str(v) for v in value]
             elm = response.createElement(f.getName())
             for value in values:
-                value = response.createTextNode(str(value))
+                value = response.createTextNode(stringify(value))
                 elm.appendChild(value)
             doc.appendChild(elm)
 
@@ -256,22 +264,19 @@ class ATXMLMarshaller(Marshaller):
         # calling the mutator until we collected all the values.
         deferred = {}
         field_values = {}
+        field_extras = {}
         refs = {}
         stack = []
 
-        p = instance.getPrimaryField()
-        pname = p and p.getName() or None
-        # Filter out primary field. We just deal with metadata.
         schema_fields = instance.Schema().fields()
-        fields = [(f.getName(), f.getMutator(instance))
-                  for f in schema_fields
-                  if f.getName() != pname]
+        fields = [(f.getName(), (f.getMutator(instance), f))
+                  for f in schema_fields]
         # Collect LinesFields which may not present on our namespace definition
         defer_fields = dict([(f.getName(), True)
                              for f in schema_fields
                              if getattr(f, 'type', None) == 'lines'])
         # Filter out non-existing mutators (probably meaning read-only fields)
-        mutators = dict(filter(lambda x: x[1] is not None, fields))
+        mutators = dict(filter(lambda x: x[1][0] is not None, fields))
         c = ctx()
         c.is_at = c.is_ref = c.ns = c.name = c.fname = None
         c.value = _marker
@@ -335,7 +340,7 @@ class ATXMLMarshaller(Marshaller):
                         # Look for field name on at:id attribute
                         while reader.MoveToNextAttribute():
                             # Should be on AT_NS namespace
-                            if reader.LocalName() == 'id':
+                            if reader.LocalName() in ('id',):
                                 # Note that if there shouldn't exist
                                 # a field named 'uid' as that's a reserved
                                 # word for us.
@@ -344,15 +349,23 @@ class ATXMLMarshaller(Marshaller):
                                 # fall into this category
                                 if defer_fields.get(c.fname):
                                     c.defer = True
+                            if reader.LocalName() in (
+                                'content_type', 'filename'):
+                                attr = reader.LocalName()
+                                setattr(c, attr, reader.Value())
             elif reader.NodeType() in (
                 XMLREADER_TEXT_ELEMENT_NODE_TYPE,
                 XMLREADER_CDATA_NODE_TYPE):
-                # The value to be set on the field should always be
-                # in a #text element inside the field element.
+                # The value to be set on the field should always be in
+                # a #text element inside the field element or in a
+                # CDATA section.
                 c.value = reader.Value()
                 if c.value is not None:
-                    # Strip whitespace and newlines
-                    c.value = c.value.strip()
+                    if reader.NodeType() in (
+                        XMLREADER_TEXT_ELEMENT_NODE_TYPE,):
+                        # Strip whitespace and newlines only for text
+                        # elements.
+                        c.value = c.value.strip()
                     # Some values may require some extra processing.
                     if c.attr is not None:
                         for proc in c.attr.process:
@@ -365,7 +378,7 @@ class ATXMLMarshaller(Marshaller):
                     # It's the UID!
                     at_uid = c.value
                     continue
-                mutator = mutators.get(c.fname)
+                mutator, field = mutators.get(c.fname, (None, None))
                 if mutator is None:
                     # Found a field name, but doesn't match any
                     # schema field or the field didn't had a mutator.
@@ -389,8 +402,18 @@ class ATXMLMarshaller(Marshaller):
             if is_ref:
                 ref[c.fname] = c.value
             else:
-                field_values[c.fname] = c.value
-
+                ct = getattr(c, 'content_type', None)
+                fn = getattr(c, 'filename', None)
+                value = c.value
+                if fn is not None:
+                    # It's some file-ish thing.
+                    if ct is not None and not ct.startswith('text'):
+                        # It's a blob-ish thing, we expect it to be
+                        # base64 encoded.
+                        value = value.decode('base64')
+                    field_extras[c.fname] = {'mimetype': ct,
+                                             'filename': fn}
+                field_values[c.fname] = value
 
         is_input_valid = reader.IsValid()
         # libxml2 cleanups. Don't keep references around
@@ -445,8 +468,9 @@ class ATXMLMarshaller(Marshaller):
             # Mutator should be guaranteed to exist, given that
             # field_values is set *after* checking for an existing
             # mutator above.
-            mutator = mutators.get(fname)
-            mutator(value)
+            mutator, field = mutators.get(fname, (None, None))
+            kw = field_extras.get(fname, {})
+            mutator(value, **kw)
 
         # Now that we are done with normal fields, handle
         # deferred fields.
@@ -454,7 +478,7 @@ class ATXMLMarshaller(Marshaller):
             # Mutator should be guaranteed to exist, given that
             # deferred is set *after* checking for an existing
             # mutator above.
-            mutator = mutators.get(fname)
+            mutator, field = mutators.get(fname, (None, None))
             # Let's assume that if a field was deferred for having
             # multiple values that it is an LinesField and thus can
             # handle input joined with '\n'. This should be the case in
@@ -465,7 +489,7 @@ class ATXMLMarshaller(Marshaller):
         # And then, handle references
         for fname, _refs in refs.items():
             # Mutator is not guaranteed to exist in this case
-            mutator = mutators.get(fname)
+            mutator, field = mutators.get(fname, (None, None))
             if mutator is None:
                 continue
             values = []
@@ -507,20 +531,15 @@ class ATXMLMarshaller(Marshaller):
         elm.appendChild(value)
         doc.appendChild(elm)
 
-        # Filter out primary field
-        p = instance.getPrimaryField()
-        pname = p and p.getName() or None
-        fields = [f for f in instance.Schema().fields()
-                  if f.getName() != pname]
-
-        for f in fields:
+        for f in instance.Schema().fields():
             fname = f.getName()
+
+	    # We need to handle references in different ways.
             is_ref = isinstance(f, ReferenceField)
             __traceback_info__ = (instance, fname)
-            # Use BaseObject.__getitem__ directly, as
-            # Folder-based stuff overrides __getitem__
-            # XXX Can go away when fixed in Archetypes.
-            value = BaseObject.__getitem__(instance, fname)
+            # Use __getitem__ directly, which deals properly with edit
+            # accessors and normal accessors.
+            value = instance[fname]
             if isinstance(value, DateTime):
                 value = value.HTML4()
             values = [value]
@@ -550,9 +569,7 @@ class ATXMLMarshaller(Marshaller):
                     attr = response.createAttributeNS(AT_NS, 'id')
                     attr.value = fname
                     elm.setAttributeNode(attr)
-                if not is_ref:
-                    value = response.createTextNode(str(value))
-                else:
+                if is_ref:
                     # References have a <uid> element
                     r = response.createElementNS(AT_NS, 'reference')
                     u = response.createElementNS(AT_NS, 'uid')
@@ -560,9 +577,42 @@ class ATXMLMarshaller(Marshaller):
                     u.appendChild(value)
                     r.appendChild(u)
                     value = r
+                else:
+                    # Store content_type and filename as
+                    # attributes on the enclosing element.
+                    ct = fn = None
+                    if shasattr(f, 'getFilename'):
+                        fn = f.getFilename(instance)
+                        attr = response.createAttributeNS(
+                            AT_NS, 'filename')
+                        attr.value = fn
+                        elm.setAttributeNode(attr)
+                    if fn is not None and shasattr(f, 'getContentType'):
+                        ct = f.getContentType(instance)
+                        attr = response.createAttributeNS(
+                            AT_NS, 'content_type')
+                        attr.value = ct
+                        elm.setAttributeNode(attr)
+                    # Make sure it's a string
+                    # XXX Beware of memory consumption.
+                    value = stringify(value)
+                    if fn is not None:
+                        # If it has a filename, it's probably a
+                        # blob-ish field.
+                        if ct is not None and not ct.startswith('text'):
+                            # If it's non-text-ish then store it
+                            # base64 encoded.
+                            value = value.encode('base64')
+                    if ct is not None and fn is not None:
+                        # File-ish, make a CDATA section.
+                        value = response.createCDATASection(value)
+                    else:
+                        # Otherwise, just store it as a text node.
+                        value = response.createTextNode(value)
                 elm.appendChild(value)
                 elm.normalize()
                 doc.appendChild(elm)
+
         # Last thing: declare all namespaces.
         for n in ns:
             prefix = self.ns_map[n].prefix

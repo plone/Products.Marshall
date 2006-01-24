@@ -1,5 +1,5 @@
 # Marshall: A framework for pluggable marshalling policies
-# Copyright (C) 2004 Enfold Systems, LLC
+# Copyright (C) 2004-2006 Enfold Systems, LLC
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

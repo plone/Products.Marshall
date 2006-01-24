@@ -620,8 +620,6 @@ class ATXMLMarshaller(Marshaller):
                                 AT_NS, 'transfer_encoding')
                             attr.value = 'base64'
                             elm.setAttributeNode(attr)
-                    if value.startswith('Let'):
-                        import pdb;pdb.set_trace()
                     if not xml_safe(ct, value):
                         # If non-xml-safe, make a CDATA section.
                         value = response.createCDATASection(value)

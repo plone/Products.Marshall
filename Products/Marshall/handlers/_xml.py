@@ -534,7 +534,7 @@ class ATXMLMarshaller(Marshaller):
         for f in instance.Schema().fields():
             fname = f.getName()
 
-	    # We need to handle references in different ways.
+            # We need to handle references in different ways.
             is_ref = isinstance(f, ReferenceField)
             __traceback_info__ = (instance, fname)
             # Use __getitem__ directly, which deals properly with edit

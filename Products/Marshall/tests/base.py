@@ -66,4 +66,3 @@ class BaseTest(ArchetypesTestCase.ArcheSiteTestCase):
             one, two = normalize_xml(one), normalize_xml(two)
         self.failUnless(one.splitlines() == two.splitlines(),
                         self.compare(one, two))
-

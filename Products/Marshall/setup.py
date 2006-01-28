@@ -5,7 +5,7 @@ enabled depending on various aspects of the incoming request.
 """
 
 classifiers = """\
-Development Status :: 5 - Mature
+Development Status :: 5 - Production/Stable
 Environment :: Web Environment
 License :: OSI Approved :: GNU General Public License (GPL)
 Operating System :: OS Independent

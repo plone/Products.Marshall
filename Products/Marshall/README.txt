@@ -14,16 +14,19 @@ Copyright
 - This code is copyrighted by Enfold Systems, LLC.
   You can find more information at http://www.enfoldsystems.com/
 
+- Portions of this code are copyright ObjectRealms
+  You can find more information at http://www.objectrealms.net
+
 License
 -------
 
 - GPL, a LICENSE file should have accompanied this module.  If not
   please contact the package maintainer.
 
-Mantainer
----------
+Release Management
+------------------
 
-- Enfold Systems
+- Jens Klein <jens@bluedynamics.com>
 
 Acknowledgements
 ----------------

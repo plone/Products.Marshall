@@ -1,5 +1,7 @@
+##################################################################
 # Marshall: A framework for pluggable marshalling policies
-# Copyright (C) 2004-2006 Enfold Systems, LLC
+# Copyright (C) 2004 ObjectRealms, LLC
+# Copyright @ 2004 Enfold Systems, LLC
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,191 +16,51 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
+##################################################################
+
 """
-$Id$
+generic xml marshaller
+
+ based on registering namespaces with the marshaller,
+ the marshaller tries to delegate as much as possible
+ to the namespaces, the default implementation of which
+ delegates as much as possible to schema attributes
+ within that namespace.
+
+ see the Marshall.namespaces package for some sample and
+ default namespaces.
+ 
+caveats
+
+ - if you want to use multiple namespaces on the same
+   xml node, then this isn't the parser for you. you
+   can do some basic hacks around it w/ ParseContext
+   namespace delegation.
+
+Authors: kapil thangavelu <k_vertigo@objectrealms.net> (current impl)
+         sidnei de silva <sidnei@awkly.org>
+         
 """
 
-import os
-import re
+#################################
 import thread
-from types import ListType, TupleType
-from xml.dom import minidom
 from cStringIO import StringIO
-from DateTime import DateTime
-from OFS.Image import File
-from Products.CMFCore.utils import getToolByName
-from Products.Archetypes.BaseObject import BaseObject
+from xml.dom import minidom
+import libxml2
+
 from Products.Archetypes.Marshall import Marshaller
-from Products.Archetypes.Field import ReferenceField
-from Products.Archetypes.config import REFERENCE_CATALOG, UUID_ATTR
-from Products.Archetypes.utils import shasattr
 from Products.Archetypes.debug import log
-from Products.Marshall.config import AT_NS, CMF_NS, ATXML_SCHEMA
+from Products.Marshall import config
 from Products.Marshall.exceptions import MarshallingException
 
-def stringify(value):
-    if isinstance(value, File):
-        value = getattr(value, 'data', value)
-    return str(value)
+#################################
 
-_markup = re.compile(r'[<>&]')
-def xml_safe(ct, value):
-    if ct is None:
-        return True
-    if ct.startswith('text'):
-        if not _markup.search(value):
-            return True
-    return False
+_marker = object()
 
-class SimpleXMLMarshaller(Marshaller):
-
-    def demarshall(self, instance, data, **kwargs):
-        doc = libxml2.parseDoc(data)
-        p = instance.getPrimaryField()
-        pname = p and p.getName() or None
-        try:
-            fields = [f for f in instance.Schema().fields()
-                      if f.getName() != pname]
-            for f in fields:
-                items = doc.xpathEval('/*/%s' % f.getName())
-                if not len(items): continue
-                # Note that we ignore all but the first element if
-                # we get more than one
-                value = items[0].children
-                if not value:
-                    continue
-                mutator = f.getMutator(instance)
-                if mutator is not None:
-                    mutator(value.content.strip())
-        finally:
-            doc.freeDoc()
-
-    def marshall(self, instance, **kwargs):
-        response = minidom.Document()
-        doc = response.createElement(instance.portal_type.lower())
-        response.appendChild(doc)
-
-        p = instance.getPrimaryField()
-        pname = p and p.getName() or None
-        fields = [f for f in instance.Schema().fields()
-                  if f.getName() != pname]
-
-        for f in fields:
-            value = instance[f.getName()]
-            values = [value]
-            if type(value) in [ListType, TupleType]:
-                values = [str(v) for v in value]
-            elm = response.createElement(f.getName())
-            for value in values:
-                value = response.createTextNode(stringify(value))
-                elm.appendChild(value)
-            doc.appendChild(elm)
-
-        content_type = 'text/xml'
-        data = response.toprettyxml().encode('utf-8')
-        length = len(data)
-
-        return (content_type, length, data)
-
-class ns:
-
-    def __init__(self, xmlns, prefix, *attrs):
-        self.xmlns, self.prefix, self.attrs = xmlns, prefix, attrs
-        self._byfield = dict([(a.field, a) for a in attrs])
-        self._byname = dict([(a.name, a.field) for a in attrs])
-
-    def getField(self, name, default=None):
-        return self._byname.get(name, default)
-
-    def getAttr(self, field, default=None):
-        return self._byfield.get(field, default)
-
-class attr:
-
-    def __init__(self, name, field=None, many=False, process=()):
-        if field is None:
-            field = name
-        self.name, self.field, self.many = name, field, many
-        self.process = process
-
-class reference(dict):
-
-    index_map = dict([('title', 'Title'),
-                      ('description', 'Description'),
-                      ('creation_date', 'created'),
-                      ('modification_data', 'modified'),
-                      ('creators', 'Creator'),
-                      ('subject', 'Subject'),
-                      ('effectiveDate', 'effective'),
-                      ('expirationDate', 'expires'),
-                      ])
-
-    def resolve(self, context):
-        uid = self.get('uid')
-        rt = getToolByName(context, REFERENCE_CATALOG)
-        if uid is not None:
-            return rt.lookupObject(uid)
-        path = self.get('path')
-        if path is not None:
-            return context.restrictedTraverse(path, None)
-        ct = getToolByName(context, 'portal_catalog')
-        params = [(k, v) for k, v in self.items()
-                  if k not in ('uid', 'path')]
-        kw = [(self.index_map.get(k), v) for k, v in params]
-        kw = dict(filter(lambda x: x[0] is not None and x, kw))
-        res = ct(**kw)
-        if not res:
-            return None
-
-        # First step: Try to filter by brain metadata
-        # *Usually* a metadata item will exist with the same name
-        # as the index.
-        verify = lambda obj: filter(None, [obj[k] == v for k, v in kw.items()])
-        for r in res:
-            # Shortest path: If a match is found, return immediately
-            # instead of checking all of the results.
-            if verify(r):
-                return r.getObject()
-
-        # Second step: Try to get the real objects and look
-        # into them. Should be *very* slow, so use with care.
-        # We use __getitem__ to access the field raw data.
-        verify = lambda obj: filter(None, [obj[k] == v for k, v in params])
-        valid = filter(verify, [r.getObject() for r in res])
-        if not valid:
-            return None
-        if len(valid) > 1:
-            raise MarshallingException, ('Metadata reference does not '
-                                         'uniquely identifies the reference.')
-        return valid[0]
-
-class ctx: pass
-
-class normalizer:
-
-    def space(cls, text):
-        return '\n'.join([s.strip() for s in text.splitlines()])
-    space = classmethod(space)
-
-    def newline(cls, text):
-        return ' '.join([s.strip() for s in text.splitlines()])
-    newline = classmethod(newline)
-
-# Some constants for use below
-_marker = []
 XMLNS_NS = 'http://www.w3.org/2000/xmlns/'
 XMLREADER_START_ELEMENT_NODE_TYPE = 1
 XMLREADER_END_ELEMENT_NODE_TYPE = 15
 XMLREADER_TEXT_ELEMENT_NODE_TYPE = 3
-XMLREADER_CDATA_NODE_TYPE = 4
-
-# Initialize ATXML RNG Schema
-ATXML_RNG = open(os.path.join(ATXML_SCHEMA, 'atxml.rng'), 'rb+').read()
-
-# libxml2 initialization. Register a per-thread global error callback.
-import libxml2
-libxml2.initParser()
 
 class ErrorCallback:
 
@@ -223,237 +85,310 @@ class ErrorCallback:
         tid = thread.get_ident()
         msgs = self.msgs[tid] = []
 
+# libxml2 initialization. Register a per-thread global error callback.
+libxml2.initParser()
 error_callback = ErrorCallback()
 libxml2.registerErrorHandler(error_callback, "")
 
-class ATXMLMarshaller(Marshaller):
 
-    # Just a plain list of ns objects.
-    namespaces = [ns('adobe:ns:meta', 'xmp',
-                     attr('CreateDate', 'creation_date'),
-                     attr('ModifyDate', 'modification_date')),
-                  ns('http://purl.org/dc/elements/1.1/', 'dc',
-                     attr('title', process=(normalizer.space,
-                                            normalizer.newline)),
-                     attr('description', process=(normalizer.space,)),
-                     attr('subject', many=True),
-                     attr('contributor', 'contributors', many=True),
-                     attr('creator', 'creators', many=True),
-                     attr('rights'),
-                     attr('language')),
-                  ns(CMF_NS, 'cmf',
-                     attr('type'))
-                  ]
-    # Mapping of xmlns URI to ns object
-    ns_map = dict([(ns.xmlns, ns) for ns in namespaces])
-    # Mapping of prefix -> xmlns URI
-    prefix_map = dict([(ns.prefix, ns.xmlns) for ns in namespaces])
-    # Flatten ns into (ns, attr) tuples
-    flat_ns = []
-    [flat_ns.extend(zip((n,)*len(n.attrs), n.attrs)) for n in namespaces]
-    # Dict mapping an AT fieldname to a (prefix, element name) tuple
-    field_map = dict([(a.field, (n.prefix, a.name)) for n, a in flat_ns])
+class XmlNamespace(object):
 
-    def demarshall(self, instance, data, **kwargs):
+
+    #################################
+    # the framework does a bit of introspection on
+    # namespaces for some attributes, defined below
+
+    # whether or not this namespace uses fields from an
+    # object's at schema. if true then this namespace
+    # should also define the get getATFields below
+    uses_at_fields = False
+
+    # the xml namespace uri
+    xmlns = "http://example.com"
+
+    # the xml namespace prefix
+    prefix = "xxx"
+    #################################
+
+    def __init__(self):
+        for attribute in self.attributes:
+            attribute.setNamespace( self )
+
+    def getAttributeByName(self, name):
+        """ given an xml name return the schema attribute
+        """
+        for attribute in self.attributes:
+            if attribute.name == name:
+                return attribute
+        return None
+
+    def getRelaxNG(self):
+        """ get the relaxng fragment that defines
+        whats in the namespace
+        """
+        raise NotImplemented("Subclass Responsiblity")
+
+    def getATFields(self):
+        """ return the at schema field names which are
+        handled by this namespace, this is utilized by
+        the AT namespace so it doesn't also handle these
+        fields. """
+        raise NotImplemented("Subclass Responsiblity")
+
+    def serialize(self, dom_node, parent_node, instance, options):
+        """ serialize the instance values to xml
+        based on attributes in this namespace
+        """
+        for attribute in self.attributes:
+            attribute.serialize( dom_node, parent_node, instance)
+
+    def deserialize(self, instance, ns_data, options):
+        """ given the instance and the namespace data for
+        instance, reconstitute this namespace's attributes
+        on the instance.
+        """
+        if not ns_data:
+            return 
+        for attribute in self.attributes:
+            attribute.deserialize( instance, ns_data )
+
+    def processXml(self, context, node):
+        """ handle the start of a xml tag with this namespace
+        the namespace and the name of the tag are bound to node.
+
+        if this method return false then the node is assumed to
+        be junk and it is discarded.
+        """ 
+        attribute = self.getAttributeByName( node.name )
+        if attribute is None:
+            return False
+        node.attribute = attribute
+        return attribute.processXml( context, node)
+
+    def processXmlEnd(self, name, context):
+        """ callback invoked when the parser reaches the
+        end of an xml node in this namespace.
+        """
+
+    def getSchemaInfo( self ):
+        """ return information on this namespace's rng schema
+
+        should be an iterable of sets of ( 'defined_name', 'occurence', 'schema')
+        where defined name is the name of any top level defined entities in
+        the schema, occurence defines the rng occurence value for that entity
+        in the object's xml representation, and schema is the rng schema
+        definition for the defined entities
+        """
+        return ()
+
+class SchemaAttribute(object):
+
+    def __init__(self, name, field_name=None):
+        self.name, self.field_id = name, field_name or name
+        self.namespace = None
+        
+    def set(self, instance, data):
+        """ set the attribute's value on the instance
+        """
+        raise NotImplemented
+
+    def get(self, instance):
+        """ retrieve the schema attribute's value from the instance
+        """
+        raise NotImplemented
+
+    def serialize(self, dom, instance):
+        """ serialize the attribute's instance value into the dom
+        """
+        raise NotImplemented
+
+    def deserialize(self, instance, ns_data):
+        """ give the instance and the namespace data for
+        instance, reconstitute this attribute on the instance
+        """ 
+        self.set( instance, ns_data )
+
+    def processXml(self, context, ctx_node):
+        """ callback invoked with a node from the xml stream
+        if false is returned the current node is assumed to be
+        not interesting and is ignored.
+        """
+        return True
+
+    def processXmlValue(self, context, value):
+        """ callback to process text nodes
+        """
+        value = value.strip()
+        if not value:
+            return
+        data = context.getDataFor( self.namespace.xmlns )
+        data[self.name] = value
+
+    def setNamespace(self, namespace):
+        """ sets which namespace the attribute belongs to
+        """
+        self.namespace = namespace
+
+class DataNode(object):
+    """ a data bag holding a namespace uri and a node name
+    """
+    __slots__ = (
+        'ns',
+        'name',
+        'attribute',
+        )
+
+    def __init__(self, ns, name):
+        self.ns = ns
+        self.name = name
+        self.attribute = None
+
+class ParseContext(object):
+    """ a bag for holding data values from and for parsing
+    """
+    def __init__(self, instance, reader, ns_map):
+        self.instance = instance
+        self.reader = reader # xml reader
+        self.ns_map = ns_map # ns_uri -> namepace
+        self.data = {} # ns_uri -> ns_data
+        self.node = None # current node if any
+        self.ns_delegate = None
+        
+    def getDataFor(self, ns_uri):
+        return self.data.setdefault(ns_uri, {})
+
+    def getNamespaceFor(self, ns_uri):
+        if self.ns_delegate is not None:
+            return self.ns_delegate
+        return self.ns_map.get( ns_uri )
+
+    def setNamespaceDelegate( self, namespace):
+        self.ns_delegate = namespace
+
+class XmlParser(object):
+    """ an abstraction for setting up the xml parser
+    """
+
+    def __init__(self, instance, data, use_validation=False, debug_memory=False):
         error_callback.clear()
-        # libxml2.debugMemory(1)
+
+        if debug_memory:
+            libxml2.debugMemory(1)
         libxml2.lineNumbersDefault(1)
-        input = kwargs.get('file')
-        if not input:
-            input = StringIO(data)
-        input_source = libxml2.inputBuffer(input)
-        reader = input_source.newTextReader("urn:%s" % instance.absolute_url())
+        self.input = StringIO(data)
+        self.input_source = libxml2.inputBuffer(self.input)
+        self.reader = self.input_source.newTextReader("urn:%s" % instance.absolute_url())
 
         # Initialize RNG schema validation.
-        rngp = libxml2.relaxNGNewMemParserCtxt(ATXML_RNG, len(ATXML_RNG))
-        rngs = rngp.relaxNGParse()
-        reader.RelaxNGSetSchema(rngs)
+        if use_validation:
+            self.rngp = libxml2.relaxNGNewMemParserCtxt(ATXML_RNG, len(ATXML_RNG))
+            self.rngs = self.rngp.relaxNGParse()
+            self.reader.RelaxNGSetSchema(self.rngs)
 
-        # Some elements may occur more than once, so we defer
-        # calling the mutator until we collected all the values.
-        deferred = {}
-        field_values = {}
-        field_extras = {}
-        refs = {}
-        stack = []
+        self.debug_memory = debug_memory
 
-        schema_fields = instance.Schema().fields()
-        fields = [(f.getName(), (f.getMutator(instance), f))
-                  for f in schema_fields]
-        # Collect LinesFields which may not present on our namespace definition
-        defer_fields = dict([(f.getName(), True)
-                             for f in schema_fields
-                             if getattr(f, 'type', None) == 'lines'])
-        # Filter out non-existing mutators (probably meaning read-only fields)
-        mutators = dict(filter(lambda x: x[1][0] is not None, fields))
-        c = ctx()
-        c.is_at = c.is_ref = c.ns = c.name = c.fname = None
-        c.value = _marker
-        at_uid = _marker
-        stack.append(c)
-        ret = reader.Read()
-        is_ref = False
-        read = False
-        while ret == 1:
-            if read:
-                ret = reader.Read()
-            read = True
-            if reader.NodeType() == XMLREADER_END_ELEMENT_NODE_TYPE:
-                c = stack.pop()
-                if c.is_at and reader.LocalName() == 'reference':
-                    is_ref = False
-            if reader.NodeType() == XMLREADER_START_ELEMENT_NODE_TYPE:
-                c = ctx()
-                c.is_at = c.attr = c.ns = c.name = c.defer = c.fname = None
-                c.value = _marker
-                stack.append(c)
-                # By default, anything that isn't an AT field should
-                # be registered with an namespace. If it isn't, then
-                # we plain ignore it.
-                c.is_at = reader.NamespaceUri() == AT_NS
-                if not c.is_at:
-                    c.ns = self.ns_map.get(reader.NamespaceUri())
-                    if c.ns is None:
-                        # Unknown namespace
-                        continue
-                    c.name = reader.LocalName()
-                    c.fname = c.ns.getField(c.name)
-                    if c.fname is None:
-                        # Unknown field
-                        continue
-                    c.attr = c.ns.getAttr(c.fname)
-                    if c.attr.many:
-                        c.defer = True
-                # If it's in the AT_NS namespace, then it should
-                # map to a field. The field name is then given by the
-                # 'id' attribute of the element.
-                if c.is_at:
-                    if reader.LocalName() == 'metadata':
-                        # It's the outermost element
-                        continue
-                    if reader.LocalName() == 'reference':
-                        # It's a reference
-                        is_ref = True
-                        fname = stack[-2].fname
-                        _refs = refs.setdefault(fname, [])
-                        ref = reference()
-                        _refs.append(ref)
-                        continue
-                    if reader.LocalName() in ('uid', 'path',):
-                        # If uid and not is_ref, it's the object UID
-                        # If path and not is_ref, then it's an error. RelaxNG
-                        # validation should catch that though.
-                        # If uid or path and is_ref, then its a reference.
-                        c.name = c.fname = reader.LocalName()
-                    else:
-                        # Look for field name on at:id attribute
-                        while reader.MoveToNextAttribute():
-                            # Should be on AT_NS namespace
-                            if reader.LocalName() in ('id',):
-                                # Note that if there shouldn't exist
-                                # a field named 'uid' as that's a reserved
-                                # word for us.
-                                c.name = c.fname = reader.Value()
-                                # Currently, only LinesFields will
-                                # fall into this category
-                                if defer_fields.get(c.fname):
-                                    c.defer = True
-                            if reader.LocalName() in (
-                                'content_type', 'filename',
-                                'transfer_encoding'):
-                                attr = reader.LocalName()
-                                setattr(c, attr, reader.Value())
-            elif reader.NodeType() in (
-                XMLREADER_TEXT_ELEMENT_NODE_TYPE,
-                XMLREADER_CDATA_NODE_TYPE):
-                # The value to be set on the field should always be in
-                # a #text element inside the field element or in a
-                # CDATA section.
-                c.value = reader.Value()
-                if c.value is not None:
-                    if reader.NodeType() in (
-                        XMLREADER_TEXT_ELEMENT_NODE_TYPE,):
-                        # Strip whitespace and newlines only for text
-                        # elements.
-                        c.value = c.value.strip()
-                    # Some values may require some extra processing.
-                    if c.attr is not None:
-                        for proc in c.attr.process:
-                            c.value = proc(c.value)
-            if c.fname is None:
-                # Couldn't find a field name.
-                continue
-            if not is_ref:
-                if c.fname in ('uid',):
-                    # It's the UID!
-                    at_uid = c.value
-                    continue
-                mutator, field = mutators.get(c.fname, (None, None))
-                if mutator is None:
-                    # Found a field name, but doesn't match any
-                    # schema field or the field didn't had a mutator.
-                    continue
-            if c.value is _marker:
-                # Didn't get to the value yet. Most likely on the
-                # next iteration. Notice that value is given by the
-                # #text node inside the element in which we found
-                # the field name.
-                continue
-            # If an element can have multiple values, we defer
-            # changing it until we collected all the values.
-            if c.defer is True:
-                if is_ref:
-                    vdefer = ref.setdefault(c.fname, [])
-                else:
-                    vdefer = deferred.setdefault(c.fname, [])
-                if c.value not in vdefer:
-                    vdefer.append(c.value)
-                continue
-            if is_ref:
-                ref[c.fname] = c.value
-            else:
-                ct = getattr(c, 'content_type', None)
-                fn = getattr(c, 'filename', None)
-                te = getattr(c, 'transfer_encoding', None)
-                value = c.value
-                if te is not None:
-                    # It's a blob-ish thing, we expect it to be
-                    # encoded (usually in base64).
-                    value = value.decode(te)
+    def getReader(self):
+        return self.reader
+    
+    def clear(self):
+        debug_memory = self.debug_memory
+        self.__dict__.clear()
 
-                if ct is not None:
-                    field_extras[c.fname] = {'mimetype': ct,
-                                             'filename': fn}
-                field_values[c.fname] = value
-
-        is_input_valid = reader.IsValid()
-        # libxml2 cleanups. Don't keep references around
-        # for longer than we need.
-        del rngp
-        del rngs
-        del reader
-        del input_source
-        del input
+        # XXX are these affecting some global state ?
         libxml2.relaxNGCleanupTypes()
         # Memory debug specific
         libxml2.cleanupParser()
-        # Useful for debugging memory errors
-        # if libxml2.debugMemory(1) == 0:
-        #    print "OK"
-        # else:
-        #    print "Memory leak %d bytes" % (libxml2.debugMemory(1))
-        # libxml2.dumpMemory()
 
-        __traceback_info__ = (data, stack, c.__dict__.items())
+        if debug_memory:
+            # Useful for debugging memory errors
+            if libxml2.debugMemory(1) == 0:
+                print "OK"
+            else:
+                print "Memory leak %d bytes" % (libxml2.debugMemory(1))
+            libxml2.dumpMemory()
+        
 
-        if ret != 0:
-            errors = error_callback.get(clear=True)
-            log(errors)
-            raise MarshallingException, ("There was an error parsing the "
-                                         "input. Please make sure that it "
-                                         "is well formed and try again.\n"
-                                         "%s" % errors)
-        if is_input_valid != 1:
+class XmlMarshaller(Marshaller):
+
+    # Just a plain list of ns objects.
+    namespaces = []
+
+    # options for a subclass
+    use_validation = False
+
+    def getFieldNamespace(self, field):
+        namespaces = self.getNamespaceURIMap()
+        # Flatten ns into (ns, attr) tuples
+        flat_ns = []
+        [flat_ns.extend(zip((n,)*len(n.attrs), n.attrs)) for n in namespaces]        
+        # Dict mapping an AT fieldname to a (prefix, element name) tuple
+        field_map = dict([(a.field, (n.prefix, a.name)) for n, a in flat_ns])
+        return field_map
+    
+    def getNamespaceURIMap(self):
+        """ Mapping of xmlns URI to ns object
+        """
+        ns_map = dict([(ns.xmlns, ns) for ns in self.namespaces])
+        return ns_map
+
+    def getNamespacePrefixMap(self):
+        """ Mapping of prefix -> xmlns URI
+        """
+        prefix_map = dict([(ns.prefix, ns.xmlns) for ns in namespaces])
+
+    def getNamespaces(self, namespaces=None):
+        if namespaces is None:
+            for ns in getRegisteredNamespaces():
+                yield ns
+            raise StopIteration
+
+        ns = getRegisteredNamespaces()
+        for n in ns:
+            if n.prefix in namespaces or \
+               n.xmlns in namespaces:
+                yield n
+
+    def demarshall(self, instance, data, **kwargs):
+        context = self.parseContext( instance, data)
+        self.processContext( instance, context, kwargs )
+
+    def marshall(self, instance, use_namespaces=None, **kwargs):
+        response = minidom.Document()
+        node = response.createElementNS( config.AT_NS, 'metadata')
+        response.appendChild( node )
+
+        # setup default namespace
+        attr = response.createAttribute('xmlns')
+        attr.value = config.AT_NS
+        node.setAttributeNode(attr)
+
+        for ns in self.getNamespaces( use_namespaces ):
+            ns.serialize( response, node, instance, kwargs )
+            if not ns.prefix:
+                continue
+            attrname = 'xmlns:%s' % ns.prefix
+            attr = response.createAttribute(attrname)
+            attr.value = ns.xmlns
+            node.setAttributeNode(attr)                
+
+        content_type = 'text/xml'
+        data = response.toprettyxml().encode('utf-8')
+        length = len(data)
+        return (content_type, length, data)
+
+    def parseContext(self, instance, data):        
+        parser = XmlParser( instance, data, use_validation=self.use_validation)
+        ns_map = self.getNamespaceURIMap()
+        reader = parser.getReader()
+        context = ParseContext(instance, reader, ns_map)
+
+        self.parseXml( reader, context )
+
+        # libxml2 cleanups. Don't keep references for any longer then nesc.
+        del reader, context.reader
+        parser.clear()
+
+        if self.use_validation: # and not reader.IsValid():
             errors = error_callback.get(clear=True)
             log(errors)
             raise MarshallingException, ("Input failed to validate against "
@@ -461,185 +396,83 @@ class ATXMLMarshaller(Marshaller):
                                          "%s" % errors)
         error_callback.clear()
 
-        # First thing to do: Try to set the UID if there's one.
-        if at_uid is not _marker:
-            existing = getattr(instance, UUID_ATTR, _marker)
-            if existing is _marker or existing != at_uid:
-                ref = reference(uid=at_uid)
-                target = ref.resolve(instance)
-                if target is not None:
-                    raise MarshallingException, (
-                        "Trying to set uid of "
-                        "%s to an already existing uid "
-                        "clashed with %s" % (
-                        instance.absolute_url(), target.absolute_url()))
-                instance._setUID(at_uid)
+        return context
 
-        for fname, value in field_values.items():
-            # Mutator should be guaranteed to exist, given that
-            # field_values is set *after* checking for an existing
-            # mutator above.
-            mutator, field = mutators.get(fname, (None, None))
-            kw = field_extras.get(fname, {})
-            mutator(value, **kw)
 
-        # Now that we are done with normal fields, handle
-        # deferred fields.
-        for fname, value in deferred.items():
-            # Mutator should be guaranteed to exist, given that
-            # deferred is set *after* checking for an existing
-            # mutator above.
-            mutator, field = mutators.get(fname, (None, None))
-            # Let's assume that if a field was deferred for having
-            # multiple values that it is an LinesField and thus can
-            # handle input joined with '\n'. This should be the case in
-            # 90% of the cases anyway.
-            value = '\n'.join(value)
-            mutator(value)
+    def parseXml(self, reader, context):
+        """
+        input read and dispatch loop
+        """
+        read_result = 1
+        
+        while read_result == 1:
+            read_result = reader.Read()
 
-        # And then, handle references
-        for fname, _refs in refs.items():
-            # Mutator is not guaranteed to exist in this case
-            mutator, field = mutators.get(fname, (None, None))
-            if mutator is None:
-                continue
-            values = []
-            for ref in _refs:
-                value = ref.resolve(instance)
-                if value is None:
-                    raise MarshallingException, ('Could not resolve '
-                                                 'reference %r' % ref)
-                values.append(value)
-            if values:
-                mutator(values)
+            if reader.NodeType() == XMLREADER_END_ELEMENT_NODE_TYPE:
+                namespace_uri  = reader.NamespaceUri()
+                namespace = context.getNamespaceFor(namespace_uri)
+                if namespace is not None:
+                    namespace.processXmlEnd( reader.LocalName(), context )
+                context.node = None
+            
+            elif reader.NodeType() == XMLREADER_START_ELEMENT_NODE_TYPE:
+                namespace_uri  = reader.NamespaceUri()
+                namespace = context.getNamespaceFor(namespace_uri)
+                if namespace is None:
+                    continue
 
-    def marshall(self, instance, **kwargs):
-        ns = []
-        add_ns = lambda n: n != AT_NS and n not in ns and ns.append(n)
-        response = minidom.Document()
+                name = reader.LocalName()
+                node = DataNode(namespace, name)
+                if namespace.processXml( context, node ):
+                    context.node = node
+                
+            elif reader.NodeType() == XMLREADER_TEXT_ELEMENT_NODE_TYPE:
+                # The value to be set on the field should always be
+                # in a #text element inside the field element.
+                if context.node is None:
+                    continue
+                context.node.attribute.processXmlValue( context,
+                                                        reader.Value() )
+                
+        return read_result
 
-        # The outermost element is AT_NS:metadata
-        doc = response.createElementNS(AT_NS, 'metadata')
-        response.appendChild(doc)
+    def processContext(self, instance, context, options):
+        """ instantiate instance with data from context
+        """
+        for ns in getRegisteredNamespaces():
+            ns_data = context.getDataFor( ns.xmlns )
+            ns.deserialize( instance, ns_data, options )
 
-        # Set the default xmlns attribute
-        attr = response.createAttribute('xmlns')
-        attr.value = AT_NS
-        doc.setAttributeNode(attr)
 
-        # Then, the next thing should be the cmf:type element
-        # containing the portal_type of the item
-        elm = response.createElementNS(CMF_NS, 'cmf:type')
-        value = response.createTextNode(str(instance.portal_type))
-        elm.appendChild(value)
-        doc.appendChild(elm)
-        add_ns(CMF_NS)
+class _NamespaceCatalog( object ):
 
-        # And then, the object uid.
-        elm = response.createElementNS(AT_NS, 'uid')
-        # The UUID_ATTR should *always* exist.
-        value = response.createTextNode(getattr(instance, UUID_ATTR))
-        elm.appendChild(value)
-        doc.appendChild(elm)
+    def __init__( self ):
+        self._namespaces = {}
+        self._order = []
 
-        for f in instance.Schema().fields():
-            fname = f.getName()
+    def registerNamespace( self, namespace, override=False, position=-1):
+        if namespace.xmlns in self._namespaces and not override:
+            raise RuntimeError("Duplicate Namespace Registration %s"%namespace.xmlns )
+        self._namespaces[ namespace.xmlns ] = namespace
+        if position == -1:
+            position = len( self._order )
+        self._order.append( position, namespace.xmlns )
 
-            # We need to handle references in different ways.
-            is_ref = isinstance(f, ReferenceField)
-            __traceback_info__ = (instance, fname)
-            # Use __getitem__ directly, which deals properly with edit
-            # accessors and normal accessors.
-            value = instance[fname]
-            if isinstance(value, DateTime):
-                value = value.HTML4()
-            values = [value]
-            if type(value) in [ListType, TupleType]:
-                values = value
-            non_empty = lambda x: str(x) not in ('', 'None')
-            # Don't export empty values.
-            values = filter(non_empty, values)
-            if not values:
-                continue
-            if is_ref and values in ([None],):
-                # Don't export null refs
-                continue
-            elns = AT_NS
-            elname = 'field'
-            elinfo = self.field_map.get(fname)
-            if elinfo is not None:
-                elname = '%s:%s' % elinfo
-                elns = self.prefix_map[elinfo[0]]
-            add_ns(elns)
-            for value in values:
-                # In the case of multiple values, we create one element for
-                # each value.
-                elm = response.createElementNS(elns, elname)
-                # AT_NS elements have an 'id' attribute with the field name.
-                if elns == AT_NS:
-                    attr = response.createAttributeNS(AT_NS, 'id')
-                    attr.value = fname
-                    elm.setAttributeNode(attr)
-                if is_ref:
-                    # References have a <uid> element
-                    r = response.createElementNS(AT_NS, 'reference')
-                    u = response.createElementNS(AT_NS, 'uid')
-                    value = response.createTextNode(str(value))
-                    u.appendChild(value)
-                    r.appendChild(u)
-                    value = r
-                else:
-                    # Store content_type and filename as
-                    # attributes on the enclosing element.
-                    ct = fn = None
-                    if shasattr(f, 'getFilename'):
-                        fn = f.getFilename(instance)
-                        if fn:
-                            # Don't include an empty filename.
-                            attr = response.createAttributeNS(
-                                AT_NS, 'filename')
-                            attr.value = fn
-                            elm.setAttributeNode(attr)
-                    if fn is not None and shasattr(f, 'getContentType'):
-                        ct = f.getContentType(instance)
-                        attr = response.createAttributeNS(
-                            AT_NS, 'content_type')
-                        attr.value = ct
-                        elm.setAttributeNode(attr)
-                    # Make sure it's a string
-                    # XXX Beware of memory consumption.
-                    value = stringify(value)
-                    if fn is not None:
-                        # If it has a filename, it's probably a
-                        # blob-ish field.
-                        if ct is not None and not ct.startswith('text'):
-                            # If it's non-text-ish then store it
-                            # base64 encoded.
-                            value = value.encode('base64')
-                            attr = response.createAttributeNS(
-                                AT_NS, 'transfer_encoding')
-                            attr.value = 'base64'
-                            elm.setAttributeNode(attr)
-                    if not xml_safe(ct, value):
-                        # If non-xml-safe, make a CDATA section.
-                        value = response.createCDATASection(value)
-                    else:
-                        # Otherwise, just store it as a text node.
-                        value = response.createTextNode(value)
-                elm.appendChild(value)
-                elm.normalize()
-                doc.appendChild(elm)
+    def getRegisteredNamespaces( self ):
+        return [ self._namespaces[ xmlns ] for xmlns in self._order ]
 
-        # Last thing: declare all namespaces.
-        for n in ns:
-            prefix = self.ns_map[n].prefix
-            attrname = 'xmlns:%s' % prefix
-            attr = response.createAttribute(attrname)
-            attr.value = n
-            doc.setAttributeNode(attr)
 
-        content_type = 'text/xml'
-        data = response.toprettyxml().encode('utf-8')
-        length = len(data)
+NamespaceCatalog = _NamespaceCatalog()
 
-        return (content_type, length, data)
+registerNamespace = NamespaceCatalog.registerNamespace
+getRegisteredNamespaces = NamespaceCatalog.getRegisteredNamespaces
+
+def registerNamespace( namespace ):
+    if not isinstance( namespace, XmlNamespace):
+        namespace = namespace()
+    XmlMarshaller.namespaces.append( namespace )
+
+def getRegisteredNamespaces():
+    return tuple( XmlMarshaller.namespaces )
+
+

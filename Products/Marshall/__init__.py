@@ -25,6 +25,10 @@ del Install
 
 # Kick off handler registration
 from Products.Marshall import handlers
+
+# Kick off namespace registration
+from Products.Marshall import namespaces
+
 from Products.Marshall.marshaller import ControlledMarshaller
 
 def initialize(context):

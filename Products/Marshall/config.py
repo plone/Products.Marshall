@@ -27,6 +27,9 @@ PACKAGE_HOME = package_home(globals())
 TOOL_ID = 'marshaller_registry'
 AT_NS = 'http://plone.org/ns/archetypes/'
 CMF_NS = 'http://cmf.zope.org/namespaces/default/'
+DC_NS = "http://purl.org/dc/elements/1.1/"
+ADOBE_NS = "adobe:ns:meta"
+
 ATXML_SCHEMA = os.path.join(PACKAGE_HOME, 'validation', 'atxml')
 
 def log(msg, level=INFO):

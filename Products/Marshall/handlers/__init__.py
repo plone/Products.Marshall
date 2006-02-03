@@ -38,7 +38,7 @@ except ImportError:
     warnings.warn('libxml2 not available. Unable to register libxml2 based ' \
                   'marshallers')
 else:
-    from Products.Marshall.handlers._xml import SimpleXMLMarshaller
+    from Products.Marshall.handlers.simple import SimpleXMLMarshaller
     from Products.Marshall.handlers._xml import ATXMLMarshaller
 
     registerComponent('simple_xml', 'Simple XML Marshaller',

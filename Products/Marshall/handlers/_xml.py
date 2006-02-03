@@ -308,7 +308,7 @@ class XmlParser(object):
             libxml2.dumpMemory()
         
 
-class XmlMarshaller(Marshaller):
+class ATXMLMarshaller(Marshaller):
 
     # Just a plain list of ns objects.
     namespaces = []

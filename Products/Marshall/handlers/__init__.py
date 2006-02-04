@@ -18,6 +18,8 @@
 """
 $Id$
 """
+
+from Products.Marshall import config
 from Products.Marshall.registry import registerComponent
 
 # Register default Archetypes marshallers
@@ -29,17 +31,10 @@ registerComponent('primary_field', 'Primary Field Marshaller',
 registerComponent('rfc822', 'RFC822 Marshaller',
                   RFC822Marshaller)
 
-# Now register our own marshallers
-try:
-    import libxml2
-except ImportError:
-    # XXX can't import libxml2
-    import warnings
-    warnings.warn('libxml2 not available. Unable to register libxml2 based ' \
-                  'marshallers')
-else:
+if config.hasLibxml2:    
+    # Now register our own xml marshallers
     from Products.Marshall.handlers.simple import SimpleXMLMarshaller
-    from Products.Marshall.handlers._xml import ATXMLMarshaller
+    from Products.Marshall.handlers.atxml import ATXMLMarshaller
 
     registerComponent('simple_xml', 'Simple XML Marshaller',
                       SimpleXMLMarshaller)

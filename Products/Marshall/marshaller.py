@@ -34,7 +34,13 @@ def getContext(obj, REQUEST=None):
 
 class ControlledMarshaller(Marshaller):
 
-    def delegate(self, method, obj, data=None, **kw):
+    def __init__(self, fallback=None, demarshall_hook=None,
+                 marshall_hook=None):
+        Marshaller.__init__(self, demarshall_hook, marshall_hook)
+        self.fallback = fallback
+
+    def delegate(self, method, obj, data=None, file=None, **kw):
+        kw['file'] = file
         __traceback_info__ = (method, obj, kw)
         context = getContext(obj, kw.get('REQUEST'))
         if context is not obj:
@@ -54,13 +60,10 @@ class ControlledMarshaller(Marshaller):
             components = tool.getMarshallersFor(obj, **info)
         else:
             # Couldn't find a context to get
-            # hold of the tool. Should probably raise
-            # an error or log somewere.
-            return
-        info = kw.copy()
-        info['data'] = data
-        info['mode'] = method
-        components = tool.getMarshallersFor(obj, **info)
+            # hold of the tool or the tool is not installed.
+            log('Could not find the marshaller tool. '
+                'It might not be installed or you might not '
+                'be providing enough context to find it.')
         # We just use the first component, if one is returned.
         if components:
             marshaller = getComponent(components[0])

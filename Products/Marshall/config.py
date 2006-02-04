@@ -22,6 +22,15 @@ import os
 from Globals import package_home
 from zLOG import LOG, INFO, DEBUG
 
+try:
+    import libxml2
+except ImportError:
+    hasLibxml2 = False
+    warnings.warn('libxml2 not available. Unable to register libxml2 based ' \
+                  'marshallers')    
+else:
+    hasLibxml2 = True
+
 PACKAGE_HOME = package_home(globals())
 
 TOOL_ID = 'marshaller_registry'

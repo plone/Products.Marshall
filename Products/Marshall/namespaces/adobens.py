@@ -23,7 +23,9 @@ $Id: $
 """
 
 from DateTime import DateTime
-from Products.Marshall.public import XmlNamespace, SchemaAttribute
+
+from Products.Marshall.handlers.atxml import XmlNamespace
+from Products.Marshall.handlers.atxml import SchemaAttribute
 
 
 RNGSchemaFragment = '''

@@ -19,6 +19,9 @@
 $Id$
 """
 
+# import config
+import config
+
 # Kick off Extensions.Install import
 from Products.Marshall.Extensions import Install
 del Install
@@ -26,8 +29,9 @@ del Install
 # Kick off handler registration
 from Products.Marshall import handlers
 
-# Kick off namespace registration
-from Products.Marshall import namespaces
+if config.hasLibxml2:
+    # Kick off namespace registration
+    from Products.Marshall import namespaces
 
 from Products.Marshall.marshaller import ControlledMarshaller
 

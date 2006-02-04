@@ -1,4 +1,4 @@
-from Products.Marshall.handlers import registerNamespace
+from Products.Marshall.handlers.atxml import registerNamespace
 
 from adobens import AdobeXMP
 from atns import Archetypes

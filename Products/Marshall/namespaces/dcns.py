@@ -23,7 +23,8 @@ $Id: $
 """
 
 from Products.CMFCore.utils import getToolByName
-from Products.Marshall.public import XmlNamespace, SchemaAttribute
+from Products.Marshall.handlers.atxml import XmlNamespace
+from Products.Marshall.handlers.atxml import SchemaAttribute
 
 RNGSchemaFragment = '''
   <define name="DublinCore"

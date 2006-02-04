@@ -54,7 +54,7 @@ that can handle uploading either a ``ATXML`` file, or some other file
 containing whatever you like.
 
 Assuming you already installed the ``Marshall`` and the
-``ArchExample`` products using the quick-installer tool, the next step
+``ATContentTypes`` products using the quick-installer tool, the next step
 is to add a couple marshaller predicates.
 
 Our setup will consist of two predicates: one for handling ``ATXML``
@@ -97,24 +97,24 @@ The next step is making your Archetypes-based schema aware of the
 Marshaller Registry, by making it use the ``ControlledMarshaller``
 implementation.
 
-For our example, we will use the ``Article`` class from the
-``ArchExample`` product.
+For our example, we will use the ``ATDocument`` class from the
+``ATContentTypes`` product.
 
-    >>> from Products.ArchExample.Article import Article
+    >>> from Products.ATContentTypes.atct import ATDocument
     >>> from Products.Marshall import ControlledMarshaller
 
 Save current marshaller implementation, and register
 ``ControlledMarshaller`` on it's place.
 
-    >>> old_marshall = Article.schema.getLayerImpl('marshall')
-    >>> Article.schema.registerLayer('marshall',
+    >>> old_marshall = ATDocument.schema.getLayerImpl('marshall')
+    >>> ATDocument.schema.registerLayer('marshall',
     ...                              ControlledMarshaller())
 
 At this point, our Article should be able to use the Marshaller
 Registry to decide what Marshaller to use at runtime.
 
     >>> from Products.Archetypes.tests.utils import makeContent
-    >>> article = makeContent(self.portal, 'Article', 'article')
+    >>> article = makeContent(self.portal, 'Document', 'article')
     >>> article.getId()
     'article'
 
@@ -126,9 +126,9 @@ Registry to decide what Marshaller to use at runtime.
     'Example Article'
 
     >>> article.getPortalTypeName()
-    'Article'
+    'Document'
 
-    >>> article.getBody()
+    >>> article.getText()
     ''
 
 Upload a very simple ATXML file and make sure it used the ATXML
@@ -209,5 +209,5 @@ Get the ``raw`` body value. Using getBody() would return the rendered HTML.
 Now, just restore the previous marshaller, as to leave everything in
 the same state it was found:
 
-    >>> Article.schema.registerLayer('marshall',
-    ...                              old_marshall)
+    >>> ATDocument.schema.registerLayer('marshall',
+    ...                                  old_marshall)

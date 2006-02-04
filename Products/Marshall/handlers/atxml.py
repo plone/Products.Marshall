@@ -470,9 +470,9 @@ getRegisteredNamespaces = NamespaceCatalog.getRegisteredNamespaces
 def registerNamespace( namespace ):
     if not isinstance( namespace, XmlNamespace):
         namespace = namespace()
-    XmlMarshaller.namespaces.append( namespace )
+    ATXMLMarshaller.namespaces.append( namespace )
 
 def getRegisteredNamespaces():
-    return tuple( XmlMarshaller.namespaces )
+    return tuple( ATXMLMarshaller.namespaces )
 
 

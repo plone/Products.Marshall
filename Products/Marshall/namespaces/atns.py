@@ -34,8 +34,10 @@ from Products.CMFCore.utils import getToolByName
 from Products.Archetypes import config as atcfg
 from Products.Archetypes import public as atapi
 from Products.Marshall import config
-from Products.Marshall.public import XmlNamespace, SchemaAttribute, \
-     MarshallingException, getRegisteredNamespaces
+from Products.Marshall.handlers.atxml import XmlNamespace
+from Products.Marshall.handlers.atxml import SchemaAttribute
+from Products.Marshall.handlers.atxml import getRegisteredNamespaces
+from Products.Marshall.exceptions import MarshallingException
 
 _marker = object()
 

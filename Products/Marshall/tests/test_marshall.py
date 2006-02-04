@@ -32,7 +32,6 @@ from Products.Marshall.tests.base import BaseTest
 # Install our product
 ZopeTestCase.installProduct('Marshall')
 ZopeTestCase.installProduct('Archetypes')
-ZopeTestCase.installProduct('ArchExample')
 ZopeTestCase.installProduct('ATContentTypes')
 
 from Products.CMFCore.utils import getToolByName
@@ -509,7 +508,7 @@ class DocumentationTest(ZopeTestCase.Functional, BaseTest):
         self.loginPortalOwner()
         self.qi = self.portal.portal_quickinstaller
         self.qi.installProduct('Marshall')
-        self.qi.installProduct('ArchExample')
+        self.qi.installProduct('ATContentTypes')
 
 def test_suite():
     import unittest

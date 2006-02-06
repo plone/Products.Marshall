@@ -76,7 +76,7 @@ class ATAttribute(SchemaAttribute):
             id_attr.value = self.name
             node.setAttributeNode( id_attr )
             
-            if is_ref:
+            if config.HANDLE_REFS and is_ref:
                 if options.get('serialize_refs',1):
                     ref_node = dom.createElementNS( self.namespace.xmlns,
                                                     'reference' )
@@ -146,9 +146,10 @@ class ATAttribute(SchemaAttribute):
         return ref_values
         
     def isReference(self, instance):
-        return not not isinstance(instance.Schema()[self.name],
+        res = not not isinstance(instance.Schema()[self.name],
                                   atapi.ReferenceField)
 
+        return config.HANDLE_REFS and res
 
 class ReferenceAttribute(SchemaAttribute):
 
@@ -304,11 +305,9 @@ class Archetypes(XmlNamespace):
     def deserialize(self, instance, ns_data, options):
         if not ns_data:
             return
-
-        defer_refs = options.get('atns_defer_references', False )
-        
+            
         for attribute in self.getAttributes( instance ):
-            if defer_refs and attribute.isReference( instance ):
+            if not config.HANDLE_REFS and hasattr(attribute, 'isReference') and attribute.isReference( instance ):
                 refs = options['atns_import_references'] 
                 # XXX do we want to hold an instance ref or just a uid for latter lookup
                 refs.append( BoundReference( ns_data, attribute, instance ) )

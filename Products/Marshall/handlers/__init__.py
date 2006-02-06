@@ -23,8 +23,8 @@ from Products.Marshall import config
 from Products.Marshall.registry import registerComponent
 
 # Register default Archetypes marshallers
-from Products.Archetypes.Marshall import PrimaryFieldMarshaller
-from Products.Archetypes.Marshall import RFC822Marshaller
+from primaryfield import PrimaryFieldMarshaller
+from rfc822header import RFC822Marshaller
 
 registerComponent('primary_field', 'Primary Field Marshaller',
                   PrimaryFieldMarshaller)

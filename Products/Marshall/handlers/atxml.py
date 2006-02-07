@@ -372,7 +372,7 @@ class ATXMLMarshaller(Marshaller):
             node.setAttributeNode(attr)                
 
         content_type = 'text/xml'
-        data = response.toprettyxml().encode('utf-8')
+        data = response.toprettyxml()#.encode('utf-8')
         length = len(data)
         return (content_type, length, data)
 

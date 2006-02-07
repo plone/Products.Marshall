@@ -119,7 +119,9 @@ class ATAttribute(SchemaAttribute):
 	# check if we are a schema attribute
         if self.isReference( instance ):
             values = self.resolveReferences( instance, values)
-            
+            if not config.HANDLE_REFS :
+                return
+                
         mutator = instance.Schema()[self.name].getMutator(instance)
         if not mutator:
             # read only field no mutator, but try to set value still
@@ -128,7 +130,7 @@ class ATAttribute(SchemaAttribute):
             #raise AttributeError("No Mutator for %s"%self.name)
             return
         
-        
+        import pdb;pdb.set_trace() 
         mutator(values)
 
     def resolveReferences(self, instance, values):
@@ -298,8 +300,10 @@ class Archetypes(XmlNamespace):
     def serialize(self, dom, parent_node, instance, options ):
         
         exclude_attrs = options.get('atns_exclude', () )
-        
+            
         for attribute in self.getAttributes( instance, exclude_attrs):
+            if hasattr(attribute, 'isReference') and attribute.isReference( instance ):
+                continue
             attribute.serialize( dom, parent_node, instance, options )
 
     def deserialize(self, instance, ns_data, options):

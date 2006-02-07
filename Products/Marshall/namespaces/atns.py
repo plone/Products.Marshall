@@ -76,8 +76,8 @@ class ATAttribute(SchemaAttribute):
             id_attr.value = self.name
             node.setAttributeNode( id_attr )
             
-            if config.HANDLE_REFS and is_ref:
-                if options.get('serialize_refs',1):
+            if is_ref:
+                if config.HANDLE_REFS:
                     ref_node = dom.createElementNS( self.namespace.xmlns,
                                                     'reference' )
                     uid_node = dom.createElementNS( self.namespace.xmlns,
@@ -130,7 +130,6 @@ class ATAttribute(SchemaAttribute):
             #raise AttributeError("No Mutator for %s"%self.name)
             return
         
-        import pdb;pdb.set_trace() 
         mutator(values)
 
     def resolveReferences(self, instance, values):
@@ -148,10 +147,8 @@ class ATAttribute(SchemaAttribute):
         return ref_values
         
     def isReference(self, instance):
-        res = not not isinstance(instance.Schema()[self.name],
+        return not not isinstance(instance.Schema()[self.name],
                                   atapi.ReferenceField)
-
-        return config.HANDLE_REFS and res
 
 class ReferenceAttribute(SchemaAttribute):
 
@@ -312,9 +309,7 @@ class Archetypes(XmlNamespace):
             
         for attribute in self.getAttributes( instance ):
             if not config.HANDLE_REFS and hasattr(attribute, 'isReference') and attribute.isReference( instance ):
-                refs = options['atns_import_references'] 
-                # XXX do we want to hold an instance ref or just a uid for latter lookup
-                refs.append( BoundReference( ns_data, attribute, instance ) )
+                # simply skip it then... Gogo
                 continue
             attribute.deserialize( instance, ns_data )
 

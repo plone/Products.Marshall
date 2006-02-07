@@ -26,8 +26,7 @@ from xml.dom import minidom
 from cStringIO import StringIO
 from DateTime import DateTime
 from Products.CMFCore.utils import getToolByName
-from Products.Archetypes.BaseObject import BaseObject
-from Products.Archetypes.Marshall import Marshaller
+from Products.Marshall.handlers.base import Marshaller
 from Products.Archetypes.Field import ReferenceField
 from Products.Archetypes.config import REFERENCE_CATALOG, UUID_ATTR
 from Products.Archetypes.debug import log

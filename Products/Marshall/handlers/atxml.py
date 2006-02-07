@@ -43,12 +43,13 @@ Authors: kapil thangavelu <k_vertigo@objectrealms.net> (current impl)
 """
 
 #################################
+import sys
 import thread
 from cStringIO import StringIO
 from xml.dom import minidom
 import libxml2
 
-from Products.Archetypes.Marshall import Marshaller
+from Products.Marshall.handlers.base import Marshaller
 from Products.Archetypes.debug import log
 from Products.Marshall import config
 from Products.Marshall.exceptions import MarshallingException
@@ -297,7 +298,10 @@ class XmlParser(object):
         # XXX are these affecting some global state ?
         libxml2.relaxNGCleanupTypes()
         # Memory debug specific
-        libxml2.cleanupParser()
+        if sys.platform != 'win32':
+            # python segfault on windows (or at least some windows?)
+            # if we do the cleanup line below
+            libxml2.cleanupParser()
 
         if debug_memory:
             # Useful for debugging memory errors

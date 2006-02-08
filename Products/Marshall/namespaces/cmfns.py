@@ -344,7 +344,10 @@ def demarshall_value( value, type ):
     elif type == 'float':
         return float(value)
     elif type == 'date':
-        return DateTime(value)
+        if value.strip()=='':
+            return None
+        else:
+            return DateTime(value)
     elif type == 'None':
         return None
     else:

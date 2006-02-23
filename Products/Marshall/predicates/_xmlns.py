@@ -82,7 +82,7 @@ class XMLNS(Predicate):
                 manage_tabs_message=message,
                 management_view='Settings')
 
-    security.declareProtected(ManagePortal, 'edit')
+    security.declareProtected(ManagePortal, 'apply')
     def apply(self, obj, **kw):
         """ Return component name if the rule matches, else an empty tuple.
         """

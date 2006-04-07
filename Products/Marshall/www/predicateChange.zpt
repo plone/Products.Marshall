@@ -43,7 +43,7 @@
       <b>Examples: </b>
 
       <pre>
-        python: mode == 'marshall' and obj.portal_type == 'News Item'
+        python: mode == 'marshall' and object.portal_type == 'News Item'
         python: mode == 'demarshall' and content_type == 'text/xml'
       </pre>
 

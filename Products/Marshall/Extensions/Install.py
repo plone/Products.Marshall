@@ -4,7 +4,6 @@ $Id$
 
 from cStringIO import StringIO
 from Products.CMFCore.utils import getToolByName
-from Products.CMFCore.CMFCorePermissions import View
 from Products.Marshall import registry
 from Products.Marshall.config import TOOL_ID as tool_id
 

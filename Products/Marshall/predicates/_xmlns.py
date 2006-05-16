@@ -22,7 +22,11 @@ $Id$
 from xml.dom import minidom
 from AccessControl import ClassSecurityInfo
 from Globals import InitializeClass
-from Products.CMFCore.CMFCorePermissions import ManagePortal
+# BBB: CMF < 1.5
+try:
+    from Products.CMFCore.permissions import ManagePortal
+except ImportError:
+    from Products.CMFCore.CMFCorePermissions import ManagePortal
 from _base import Predicate
 from Products.Marshall.registry import registerPredicate
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile

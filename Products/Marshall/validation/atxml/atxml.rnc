@@ -13,8 +13,8 @@ DublinCore =
   element dc:title { text }*
   | element dc:description { MetaMeta, text }*
   | element dc:subject { text }*
-  | element dc:contributor { xsd:NMTOKEN }*
-  | element dc:creator { xsd:NMTOKEN }+
+  | element dc:contributor { xsd:string }*
+  | element dc:creator { xsd:string }+
   | element dc:language { xsd:language }*
   | element dc:rights { MetaMeta, text }*
 DateInfo =

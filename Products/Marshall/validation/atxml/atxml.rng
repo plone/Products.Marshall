@@ -37,10 +37,10 @@
         <element name="dc:subject"><text /></element>
       </zeroOrMore>
       <zeroOrMore>
-        <element name="dc:contributor"><data type="NMTOKEN" /></element>
+        <element name="dc:contributor"><data type="string" /></element>
       </zeroOrMore>
       <oneOrMore>
-        <element name="dc:creator"><data type="NMTOKEN" /></element>
+        <element name="dc:creator"><data type="string" /></element>
       </oneOrMore>
       <zeroOrMore>
         <element name="dc:language"><data type="language" /></element>

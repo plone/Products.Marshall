@@ -58,13 +58,11 @@ class PrimaryFieldMarshaller(Marshaller):
     security.declareObjectPrivate()
     security.setDefaultAccess('deny')
 
-    def demarshall(self, instance, data, **kwargs):
+    def demarshall(self, instance, data, file=None, **kwargs):
         p = instance.getPrimaryField()
-        file = kwargs.get('file')
         # XXX Hardcoding field types is bad. :(
         if isinstance(p, (FileField, TextField)) and file:
             data = file
-            del kwargs['file']
         mutator = p.getMutator(instance)
         mutator(data, **kwargs)
 

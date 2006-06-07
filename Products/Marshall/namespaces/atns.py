@@ -282,10 +282,11 @@ class Archetypes(XmlNamespace):
         field_keys = Set(instance.Schema().keys())-mset
 
         # remove primary field if still present
-        p = instance.getPrimaryField()
-        pk = p and p.getName() or None
-        if pk and pk in field_keys:
-            field_keys.remove( pk )
+## XXX: we dont want to remove the PF, but want to be backward compatible (how to do that best?)        
+##        p = instance.getPrimaryField()
+##        pk = p and p.getName() or None
+##        if pk and pk in field_keys:
+##            field_keys.remove( pk )
             
         for fk in field_keys:
             yield self.getAttributeByName( fk )

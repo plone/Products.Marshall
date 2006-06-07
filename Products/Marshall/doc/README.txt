@@ -131,10 +131,12 @@ Registry to decide what Marshaller to use at runtime.
     >>> article.getText()
     ''
 
+    
 Upload a very simple ATXML file and make sure it used the ATXML
 Marshaller by checking that the Title got changed and the body is
 still empty. Note we also support CDATA sections, so we'll stick some
 stuff into the 'blurb' field using CDATA.
+
 
   >>> xml_input = """
   ... <?xml version="1.0" ?>
@@ -145,13 +147,13 @@ stuff into the 'blurb' field using CDATA.
   ...     Some Title
   ...   </dc:title>
   ...   <xmp:CreateDate>
-  ...     2004-01-01T00:02:03Z
+  ...     2004-01-01T00:02:04Z
   ...   </xmp:CreateDate>
   ...   <field id="expirationDate">
   ...     2004-09-09T09:09:08Z
   ...   </field>
-  ...   <field id="blurb">
-  ...    <![CDATA[<example>Here's a CDATA example.</example>]]>
+  ...   <field id="text">
+  ...    Here is some Text
   ...   </field>
   ... </metadata>"""
 
@@ -159,23 +161,22 @@ stuff into the 'blurb' field using CDATA.
   ... PUT /plone/article HTTP/1.1
   ... Content-Type: text/xml
   ... Authorization: Basic portal_owner:secret
-  ... %s""" % xml_input, handle_errors=False)
+  ... %s""" %  xml_input, handle_errors=False)
   HTTP/1.1 204 No Content...
 
+  
   >>> article.Title()
   'Some Title'
 
-  >>> article.getBlurb()
-  "<example>Here's a CDATA example.</example>"
+  >>> article.getText()
+  '<p>Here is some Text</p>'
 
   >>> article.CreationDate()
-  '2004-01-01 00:02:03'
+  '2004-01-01 00:02:04'
 
   >>> article.ExpirationDate()
   '2004-09-09 09:09:08'
 
-  >>> article.getBody()
-  ''
 
 Upload a text file (in this case, 'text/x-rst') and make sure the body
 field was updated with the uploaded file contents.
@@ -199,7 +200,7 @@ field was updated with the uploaded file contents.
 
 Get the ``raw`` body value. Using getBody() would return the rendered HTML.
 
-  >>> print article.getField('body').getRaw(article)
+  >>> print article.getField('text').getRaw(article)
   Title
   =====
   <BLANKLINE>

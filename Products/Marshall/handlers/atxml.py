@@ -380,7 +380,7 @@ class ATXMLMarshaller(Marshaller):
         length = len(data)
         return (content_type, length, data)
 
-    def parseContext(self, instance, data):        
+    def parseContext(self, instance, data):  
         parser = XmlParser( instance, data, use_validation=self.use_validation)
         ns_map = self.getNamespaceURIMap()
         reader = parser.getReader()

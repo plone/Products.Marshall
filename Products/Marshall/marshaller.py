@@ -88,4 +88,14 @@ class ControlledMarshaller(Marshaller):
         return self.delegate('marshall', obj, **kw)
 
     def demarshall(self, obj, data, **kw):
+        if kw.has_key('file'):
+            if not data:
+                # XXX Yuck! Shouldn't read the whole file, never.
+                # OTOH, if you care about large files, you should be
+                # using the PrimaryFieldMarshaller or something
+                # similar.
+                data = kw['file'].read()
+            del kw['file']
+
+
         return self.delegate('demarshall', obj, data, **kw)

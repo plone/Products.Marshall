@@ -38,6 +38,7 @@ from Products.Marshall.handlers.atxml import XmlNamespace
 from Products.Marshall.handlers.atxml import SchemaAttribute
 from Products.Marshall.handlers.atxml import getRegisteredNamespaces
 from Products.Marshall.exceptions import MarshallingException
+from Products.Marshall import utils
 
 _marker = object()
 
@@ -316,11 +317,13 @@ class Archetypes(XmlNamespace):
 
     def processXml(self, context, data_node):
 
-        if data_node.name == 'metadata':
+        tagname, namespace = utils.fixtag(data_node.tag, context.ns_map)
+        
+        if tagname == 'metadata':
             # ignore the container
             return False
 
-        elif data_node.name == 'reference':
+        elif tagname == 'reference':
             # switch to reference mode, we tell the parser that we want
             # to explictly recieve all new node parse events, so we
             # can introspect the nested metadata that can be used
@@ -331,14 +334,15 @@ class Archetypes(XmlNamespace):
             context.setNamespaceDelegate( self )
             return False
 
-        elif data_node.name == 'field':
+        elif tagname == 'field':
             # basic at field specified, find the matching attribute
             # and annotate the data node with it
-            schema_name = None
-            while context.reader.MoveToNextAttribute():
-                if context.reader.LocalName() == 'id':
-                    schema_name = context.reader.Value()
-                    break
+            schema_name = data_node.attrib.get('id')
+
+##            while context.reader.MoveToNextAttribute():
+##                if context.reader.LocalName() == 'id':
+##                    schema_name = context.reader.Value()
+##                    break
             assert schema_name, "No Schema Field Specified"
             #print "field", schema_name
             self.last_schema_id = schema_name            
@@ -370,9 +374,9 @@ class Archetypes(XmlNamespace):
             data_node.attribute = attribute
             return True
 
-        elif data_node.name in self.at_fields:
+        elif tagname in self.at_fields:
             # pseudo fields like uid which are specified in a custom manner
-            attribute = self.getAttributeByName( data_node.name )
+            attribute = self.getAttributeByName( tagname )
             if attribute is None:
                 return False
             data_node.attribute = attribute

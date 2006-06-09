@@ -49,10 +49,12 @@ from cStringIO import StringIO
 from xml.dom import minidom
 import libxml2
 
+from elementtree import ElementTree
 from Products.Marshall.handlers.base import Marshaller
 from Products.Archetypes.debug import log
 from Products.Marshall import config
 from Products.Marshall.exceptions import MarshallingException
+from Products.Marshall import utils
 
 #################################
 
@@ -160,7 +162,8 @@ class XmlNamespace(object):
         if this method return false then the node is assumed to
         be junk and it is discarded.
         """ 
-        attribute = self.getAttributeByName( node.name )
+        tag, ns = utils.fixtag(node.tag,context.ns_map)
+        attribute = self.getAttributeByName( tag )
         if attribute is None:
             return False
         node.attribute = attribute
@@ -181,6 +184,10 @@ class XmlNamespace(object):
         definition for the defined entities
         """
         return ()
+    
+    
+        
+    
 
 class SchemaAttribute(object):
 
@@ -247,9 +254,9 @@ class DataNode(object):
 class ParseContext(object):
     """ a bag for holding data values from and for parsing
     """
-    def __init__(self, instance, reader, ns_map):
+    def __init__(self, instance, root, ns_map):
         self.instance = instance
-        self.reader = reader # xml reader
+        self.root = root # root node
         self.ns_map = ns_map # ns_uri -> namepace
         self.data = {} # ns_uri -> ns_data
         self.node = None # current node if any
@@ -270,6 +277,7 @@ class XmlParser(object):
     """ an abstraction for setting up the xml parser
     """
 
+    #XXX doesnt work for elementtree since ET is a domtree parser cannot be abstracted by this class
     def __init__(self, instance, data, use_validation=False, debug_memory=False):
         error_callback.clear()
 
@@ -381,16 +389,16 @@ class ATXMLMarshaller(Marshaller):
         return (content_type, length, data)
 
     def parseContext(self, instance, data):  
-        parser = XmlParser( instance, data, use_validation=self.use_validation)
+        #parser = XmlParser( instance, data, use_validation=self.use_validation)
+        try:
+            root = ElementTree.fromstring(data)
+        except:
+            import pdb;pdb.set_trace()
         ns_map = self.getNamespaceURIMap()
-        reader = parser.getReader()
-        context = ParseContext(instance, reader, ns_map)
+        context = ParseContext(instance, root, ns_map)
 
-        self.parseXml( reader, context )
+        self.parseXml( root, context, ns_map )
 
-        # libxml2 cleanups. Don't keep references for any longer then nesc.
-        del reader, context.reader
-        parser.clear()
 
         if self.use_validation: # and not reader.IsValid():
             errors = error_callback.get(clear=True)
@@ -403,40 +411,60 @@ class ATXMLMarshaller(Marshaller):
         return context
 
 
-    def parseXml(self, reader, context):
+    def parseXml(self, root, context, ns_map):
         """
         input read and dispatch loop
         """
         read_result = 1
-        
-        while read_result == 1:
-            read_result = reader.Read()
-
-            if reader.NodeType() == XMLREADER_END_ELEMENT_NODE_TYPE:
-                namespace_uri  = reader.NamespaceUri()
-                namespace = context.getNamespaceFor(namespace_uri)
-                if namespace is not None:
-                    namespace.processXmlEnd( reader.LocalName(), context )
-                context.node = None
-            
-            elif reader.NodeType() == XMLREADER_START_ELEMENT_NODE_TYPE:
-                namespace_uri  = reader.NamespaceUri()
-                namespace = context.getNamespaceFor(namespace_uri)
-                if namespace is None:
-                    continue
-
-                name = reader.LocalName()
-                node = DataNode(namespace, name)
-                if namespace.processXml( context, node ):
-                    context.node = node
+#        import pdb;pdb.set_trace()
+        for node in root:
+            try:
+                tag, namespace = utils.fixtag(node.tag, context.ns_map)
+                if namespace.processXml(context, node):
+                    context.node=node
+                    context.node.attribute.processXmlValue(context,node.text)
+                else:
+                    ## XXX: raise a warning that the attribute isnt defined in the schema
+                    pass
+            except:
+                import pdb;pdb.set_trace()
+                tag, namespace = utils.fixtag(node.tag, context.ns_map)
+                namespace.processXml(context, node)
+                context.node=node
+                context.node.attribute.processXmlValue(context,node.text)
                 
-            elif reader.NodeType() == XMLREADER_TEXT_ELEMENT_NODE_TYPE:
-                # The value to be set on the field should always be
-                # in a #text element inside the field element.
-                if context.node is None:
-                    continue
-                context.node.attribute.processXmlValue( context,
-                                                        reader.Value() )
+
+#        import pdb;pdb.set_trace()
+            
+            
+##        while read_result == 1:
+##            read_result = reader.Read()
+##
+##            if reader.NodeType() == XMLREADER_END_ELEMENT_NODE_TYPE:
+##                namespace_uri  = reader.NamespaceUri()
+##                namespace = context.getNamespaceFor(namespace_uri)
+##                if namespace is not None:
+##                    namespace.processXmlEnd( reader.LocalName(), context )
+##                context.node = None
+##            
+##            elif reader.NodeType() == XMLREADER_START_ELEMENT_NODE_TYPE:
+##                namespace_uri  = reader.NamespaceUri()
+##                namespace = context.getNamespaceFor(namespace_uri)
+##                if namespace is None:
+##                    continue
+##
+##                name = reader.LocalName()
+##                node = DataNode(namespace, name)
+##                if namespace.processXml( context, node ):
+##                    context.node = node
+##                
+##            elif reader.NodeType() == XMLREADER_TEXT_ELEMENT_NODE_TYPE:
+##                # The value to be set on the field should always be
+##                # in a #text element inside the field element.
+##                if context.node is None:
+##                    continue
+##                context.node.attribute.processXmlValue( context,
+##                                                        reader.Value() )
                 
         return read_result
 

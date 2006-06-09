@@ -31,6 +31,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.Marshall import config
 from Products.Marshall.handlers.atxml import XmlNamespace
 from Products.Marshall.handlers.atxml import SchemaAttribute
+from Products.Marshall import utils
 
 TypeRNGSchemaFragment = '''
   <define name="TypeInfo"
@@ -206,7 +207,7 @@ class WorkflowAttribute(SchemaAttribute):
     """
 
     def getAttributeNames(self):
-        return ("workflow", "var", "history")
+        return ("workflow", "var", "history", 'workflow_history')
         
     def get(self, instance):
         return getattr(instance, 'workflow_history', None)
@@ -282,7 +283,15 @@ class WorkflowAttribute(SchemaAttribute):
                 
     def processXml(self, context, node):
 
+        tag,namespace=utils.fixtag(node.tag,context.ns_map)
         data = context.getDataFor(self.namespace.xmlns)
+
+        return
+        #XXX: WF_History still to be implemented
+        
+        if tag=='workflow_history':
+            import pdb;pdb.set_trace()
+
         reader = context.reader
 
         if node.name == 'workflow':
@@ -359,7 +368,7 @@ class CMF(XmlNamespace):
     prefix = 'cmf'
     attributes = (
         TypeAttribute('type'),
-        WorkflowAttribute('workflow'),
+        WorkflowAttribute('workflow_history '),
         LocalRolesAttribute('local_role')
         )
 
@@ -369,6 +378,10 @@ class CMF(XmlNamespace):
             if name in attr.getAttributeNames():
                 return attr
             
+    def processXml(self, context, node):
+##        import pdb;pdb.set_trace()
+        return XmlNamespace.processXml(self,context,node)
+
     def getSchemaInfo( self ):
 
         return [

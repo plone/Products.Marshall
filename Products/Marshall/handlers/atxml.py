@@ -47,7 +47,6 @@ import sys
 import thread
 from cStringIO import StringIO
 from xml.dom import minidom
-import libxml2
 
 from elementtree import ElementTree
 from Products.Marshall.handlers.base import Marshaller
@@ -87,11 +86,6 @@ class ErrorCallback:
     def clear(self):
         tid = thread.get_ident()
         msgs = self.msgs[tid] = []
-
-# libxml2 initialization. Register a per-thread global error callback.
-libxml2.initParser()
-error_callback = ErrorCallback()
-libxml2.registerErrorHandler(error_callback, "")
 
 
 class XmlNamespace(object):
@@ -273,52 +267,6 @@ class ParseContext(object):
     def setNamespaceDelegate( self, namespace):
         self.ns_delegate = namespace
 
-class XmlParser(object):
-    """ an abstraction for setting up the xml parser
-    """
-
-    #XXX doesnt work for elementtree since ET is a domtree parser cannot be abstracted by this class
-    def __init__(self, instance, data, use_validation=False, debug_memory=False):
-        error_callback.clear()
-
-        if debug_memory:
-            libxml2.debugMemory(1)
-        libxml2.lineNumbersDefault(1)
-        self.input = StringIO(data)
-        self.input_source = libxml2.inputBuffer(self.input)
-        self.reader = self.input_source.newTextReader("urn:%s" % instance.absolute_url())
-
-        # Initialize RNG schema validation.
-        if use_validation:
-            self.rngp = libxml2.relaxNGNewMemParserCtxt(ATXML_RNG, len(ATXML_RNG))
-            self.rngs = self.rngp.relaxNGParse()
-            self.reader.RelaxNGSetSchema(self.rngs)
-
-        self.debug_memory = debug_memory
-
-    def getReader(self):
-        return self.reader
-    
-    def clear(self):
-        debug_memory = self.debug_memory
-        self.__dict__.clear()
-
-        # XXX are these affecting some global state ?
-        libxml2.relaxNGCleanupTypes()
-        # Memory debug specific
-        if sys.platform != 'win32':
-            # python segfault on windows (or at least some windows?)
-            # if we do the cleanup line below
-            libxml2.cleanupParser()
-
-        if debug_memory:
-            # Useful for debugging memory errors
-            if libxml2.debugMemory(1) == 0:
-                print "OK"
-            else:
-                print "Memory leak %d bytes" % (libxml2.debugMemory(1))
-            libxml2.dumpMemory()
-        
 
 class ATXMLMarshaller(Marshaller):
 
@@ -390,10 +338,7 @@ class ATXMLMarshaller(Marshaller):
 
     def parseContext(self, instance, data):  
         #parser = XmlParser( instance, data, use_validation=self.use_validation)
-        try:
-            root = ElementTree.fromstring(data)
-        except:
-            import pdb;pdb.set_trace()
+        root = ElementTree.fromstring(data)
         ns_map = self.getNamespaceURIMap()
         context = ParseContext(instance, root, ns_map)
 
@@ -406,7 +351,6 @@ class ATXMLMarshaller(Marshaller):
             raise MarshallingException, ("Input failed to validate against "
                                          "the ATXML RelaxNG schema.\n"
                                          "%s" % errors)
-        error_callback.clear()
 
         return context
 
@@ -419,7 +363,9 @@ class ATXMLMarshaller(Marshaller):
 #        import pdb;pdb.set_trace()
         for node in root:
             try:
+                
                 tag, namespace = utils.fixtag(node.tag, context.ns_map)
+                    
                 if namespace.processXml(context, node):
                     context.node=node
                     context.node.attribute.processXmlValue(context,node.text)

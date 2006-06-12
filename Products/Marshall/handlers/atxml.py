@@ -341,7 +341,7 @@ class ATXMLMarshaller(Marshaller):
         root = ElementTree.fromstring(data)
         ns_map = self.getNamespaceURIMap()
         context = ParseContext(instance, root, ns_map)
-
+        context.xmlsource=data
         self.parseXml( root, context, ns_map )
 
 
@@ -360,58 +360,16 @@ class ATXMLMarshaller(Marshaller):
         input read and dispatch loop
         """
         read_result = 1
-#        import pdb;pdb.set_trace()
         for node in root:
-            try:
+            tag, namespace = utils.fixtag(node.tag, context.ns_map)
                 
-                tag, namespace = utils.fixtag(node.tag, context.ns_map)
-                    
-                if namespace.processXml(context, node):
-                    context.node=node
-                    context.node.attribute.processXmlValue(context,node.text)
-                else:
-                    ## XXX: raise a warning that the attribute isnt defined in the schema
-                    pass
-            except:
-                import pdb;pdb.set_trace()
-                tag, namespace = utils.fixtag(node.tag, context.ns_map)
-                namespace.processXml(context, node)
+            if namespace.processXml(context, node):
                 context.node=node
                 context.node.attribute.processXmlValue(context,node.text)
-                
+            else:
+                ## XXX: raise a warning that the attribute isnt defined in the schema
+                pass
 
-#        import pdb;pdb.set_trace()
-            
-            
-##        while read_result == 1:
-##            read_result = reader.Read()
-##
-##            if reader.NodeType() == XMLREADER_END_ELEMENT_NODE_TYPE:
-##                namespace_uri  = reader.NamespaceUri()
-##                namespace = context.getNamespaceFor(namespace_uri)
-##                if namespace is not None:
-##                    namespace.processXmlEnd( reader.LocalName(), context )
-##                context.node = None
-##            
-##            elif reader.NodeType() == XMLREADER_START_ELEMENT_NODE_TYPE:
-##                namespace_uri  = reader.NamespaceUri()
-##                namespace = context.getNamespaceFor(namespace_uri)
-##                if namespace is None:
-##                    continue
-##
-##                name = reader.LocalName()
-##                node = DataNode(namespace, name)
-##                if namespace.processXml( context, node ):
-##                    context.node = node
-##                
-##            elif reader.NodeType() == XMLREADER_TEXT_ELEMENT_NODE_TYPE:
-##                # The value to be set on the field should always be
-##                # in a #text element inside the field element.
-##                if context.node is None:
-##                    continue
-##                context.node.attribute.processXmlValue( context,
-##                                                        reader.Value() )
-                
         return read_result
 
     def processContext(self, instance, context, options):

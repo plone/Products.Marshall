@@ -217,7 +217,8 @@ class WorkflowAttribute(SchemaAttribute):
         wf_tool = getToolByName(instance, 'portal_workflow')
 
         for wf_id in wf_records:
-            history = list( instance.workflow_history.setdefault( wf_id, () ) )
+            #history = list( instance.workflow_history.setdefault( wf_id, () ) )
+            history=[]
             for record in wf_records[ wf_id ]:
                 history.append( record )
             instance.workflow_history[ wf_id ] = tuple( history )
@@ -230,8 +231,8 @@ class WorkflowAttribute(SchemaAttribute):
         
         elname = "%s:workflow_history"%(self.namespace.prefix)
         node = dom.createElementNS( self.namespace.xmlns, elname )
-
-        for wf_id in history.keys():
+        keys = history.keys()
+        for wf_id in keys:
             wf_node = self.serializeWorkflow( dom, wf_id, history )
             node.appendChild( wf_node )
         parent_node.appendChild( node )
@@ -254,8 +255,10 @@ class WorkflowAttribute(SchemaAttribute):
         for history in wf_hist[wf_id]:
             elname = "%s:%s"%(prefix, "history")
             history_node = dom.createElementNS(xmlns, elname)
+            items = history.items()
+            items.sort(lambda a,b: cmp(a[0],b[0]))
             
-            for k,v in history.items():
+            for k,v in items:
                 elname = "%s:%s"%(prefix, "var" )
                 var_node = dom.createElementNS(xmlns, elname)
                 elname = "%s:%s"%(prefix, "value" )
@@ -285,48 +288,40 @@ class WorkflowAttribute(SchemaAttribute):
 
         tag,namespace=utils.fixtag(node.tag,context.ns_map)
         data = context.getDataFor(self.namespace.xmlns)
+        nsprefix=node.tag[:node.tag.find('}')+1]
 
-        return
-        #XXX: WF_History still to be implemented
+        #iworkflow
+        wf_node=node.find(nsprefix+'workflow')
+        wf_id = wf_node.attrib[nsprefix+'id']
+        assert wf_id
         
-        if tag=='workflow_history':
-            import pdb;pdb.set_trace()
-
-        reader = context.reader
-
-        if node.name == 'workflow':
-            wf_id = None            
-            while reader.MoveToNextAttribute():
-                if reader.LocalName() == 'id':
-                    wf_id = reader.Value()
-                    break
-            assert wf_id
+        wf_data = data.setdefault(self.name, {})
+        wf_data.setdefault( wf_id, [] )
+        wf_pstate = data.setdefault('_wf_pstate', wf_id)
             
-            wf_data = data.setdefault(self.name, {})
-            wf_data.setdefault( wf_id, [] )
-            wf_pstate = data.setdefault('_wf_pstate', wf_id)
-            
-        elif node.name == 'history':
-            wf_pstate = data['_wf_pstate']
+        #history
+        hist_nodes=wf_node.findall(nsprefix+'history')
+        wf_pstate = data['_wf_pstate']
+        for hist_node in hist_nodes:
             record = {}
             data[self.name][wf_pstate].append( record )
-
-        elif node.name == 'var':
+    
+            #var
+            var_nodes=hist_node.findall(nsprefix+'var')
             vid = vtype = value = None
-            while reader.MoveToNextAttribute():
-                if reader.LocalName() == 'id':
-                    vid = reader.Value()
-                elif reader.LocalName() == 'type':
-                    vtype = reader.Value()
-                elif reader.LocalName() == 'value':
-                    value = reader.Value()
-            assert vid and vtype and not value is None
+            
+            for var_node in var_nodes:
+                vid=var_node.attrib[nsprefix+'id']
+                vtype=var_node.attrib[nsprefix+'type']
+                value=var_node.attrib[nsprefix+'value']
+                
+                assert vid and vtype and not value is None
+    
+                value = demarshall_value( value, vtype )
+                wf_pstate = data['_wf_pstate']            
+                data[self.name][wf_pstate][-1][vid]=value
 
-            value = demarshall_value( value, vtype )
-            wf_pstate = data['_wf_pstate']            
-            data[self.name][wf_pstate][-1][vid]=value
-
-        return False
+        return True
     
 
 def marshall_value( value ):
@@ -379,7 +374,6 @@ class CMF(XmlNamespace):
                 return attr
             
     def processXml(self, context, node):
-##        import pdb;pdb.set_trace()
         return XmlNamespace.processXml(self,context,node)
 
     def getSchemaInfo( self ):

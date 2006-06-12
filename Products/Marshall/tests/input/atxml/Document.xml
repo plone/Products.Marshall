@@ -65,9 +65,16 @@ have it, simply because it is pain...
 		<cmf:workflow cmf:id="plone_workflow">
 			<cmf:history>
 				<cmf:var cmf:id="action" cmf:type="None" cmf:value="None"/>
-				<cmf:var cmf:id="review_state" cmf:type="str" cmf:value="published"/>
-				<cmf:var cmf:id="comments" cmf:type="str" cmf:value=""/>
 				<cmf:var cmf:id="actor" cmf:type="str" cmf:value="portal_owner"/>
+				<cmf:var cmf:id="comments" cmf:type="str" cmf:value=""/>
+				<cmf:var cmf:id="review_state" cmf:type="str" cmf:value="visible"/>
+				<cmf:var cmf:id="time" cmf:type="date" cmf:value="2006-06-12 06:17:57"/>
+			</cmf:history>
+			<cmf:history>
+				<cmf:var cmf:id="action" cmf:type="None" cmf:value="None"/>
+				<cmf:var cmf:id="actor" cmf:type="str" cmf:value="portal_owner"/>
+				<cmf:var cmf:id="comments" cmf:type="str" cmf:value=""/>
+				<cmf:var cmf:id="review_state" cmf:type="str" cmf:value="published"/>
 				<cmf:var cmf:id="time" cmf:type="date" cmf:value="2006-06-09 14:14:03"/>
 			</cmf:history>
 		</cmf:workflow>

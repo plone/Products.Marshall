@@ -23,7 +23,12 @@ License
 Mantainer
 ---------
 
-- Enfold Systems
+Archetypes Release Manager
+
+  - for Archetypes 1.4: Jens Klein
+
+  - for Archetypes 1.5+: Daniel Nouri
+
 
 Acknowledgements
 ----------------

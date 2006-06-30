@@ -117,7 +117,7 @@ class DCAttribute(SchemaAttribute):
         return True
 
     def processXmlValue(self, context, value):
-        value = value.strip()
+        value = value and value.strip()
         if not value:
             return
         data = context.getDataFor( self.namespace.xmlns )

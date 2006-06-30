@@ -292,9 +292,10 @@ class WorkflowAttribute(SchemaAttribute):
 
         #iworkflow
         wf_node=node.find(nsprefix+'workflow')
-        wf_id = wf_node.attrib[nsprefix+'id']
+        wf_id = wf_node.attrib.get(nsprefix+'id',wf_node.attrib['id']) #be tolerant withnamespace sloppyness;)
         assert wf_id
-        
+            
+            
         wf_data = data.setdefault(self.name, {})
         wf_data.setdefault( wf_id, [] )
         wf_pstate = data.setdefault('_wf_pstate', wf_id)
@@ -311,9 +312,9 @@ class WorkflowAttribute(SchemaAttribute):
             vid = vtype = value = None
             
             for var_node in var_nodes:
-                vid=var_node.attrib[nsprefix+'id']
-                vtype=var_node.attrib[nsprefix+'type']
-                value=var_node.attrib[nsprefix+'value']
+                vid=var_node.attrib.get(nsprefix+'id',var_node.attrib['id'])
+                vtype=var_node.attrib.get(nsprefix+'type',var_node.attrib['type'])
+                value=var_node.attrib.get(nsprefix+'value',var_node.attrib['value'])
                 
                 assert vid and vtype and not value is None
     

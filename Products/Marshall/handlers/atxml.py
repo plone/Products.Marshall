@@ -220,7 +220,7 @@ class SchemaAttribute(object):
     def processXmlValue(self, context, value):
         """ callback to process text nodes
         """
-        value = value.strip()
+        value = value and value.strip()
         if not value:
             return
         data = context.getDataFor( self.namespace.xmlns )

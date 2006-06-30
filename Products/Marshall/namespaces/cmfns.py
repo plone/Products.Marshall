@@ -292,7 +292,7 @@ class WorkflowAttribute(SchemaAttribute):
 
         #iworkflow
         wf_node=node.find(nsprefix+'workflow')
-        wf_id = wf_node.attrib.get(nsprefix+'id',wf_node.attrib['id']) #be tolerant withnamespace sloppyness;)
+        wf_id = wf_node.attrib.get(nsprefix+'id',None) or wf_node.attrib['id'] #be tolerant withnamespace sloppyness;)
         assert wf_id
             
             
@@ -312,9 +312,9 @@ class WorkflowAttribute(SchemaAttribute):
             vid = vtype = value = None
             
             for var_node in var_nodes:
-                vid=var_node.attrib.get(nsprefix+'id',var_node.attrib['id'])
-                vtype=var_node.attrib.get(nsprefix+'type',var_node.attrib['type'])
-                value=var_node.attrib.get(nsprefix+'value',var_node.attrib['value'])
+                vid=var_node.attrib.get(nsprefix+'id',None) or var_node.attrib['id']
+                vtype=var_node.attrib.get(nsprefix+'type',None) or var_node.attrib['type']
+                value=var_node.attrib.get(nsprefix+'value',None) or var_node.attrib['value']
                 
                 assert vid and vtype and not value is None
     

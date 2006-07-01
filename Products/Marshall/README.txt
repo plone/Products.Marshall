@@ -20,7 +20,7 @@ License
 - GPL, a LICENSE file should have accompanied this module.  If not
   please contact the package maintainer.
 
-Mantainer
+Maintainer
 ---------
 
 Archetypes Release Manager

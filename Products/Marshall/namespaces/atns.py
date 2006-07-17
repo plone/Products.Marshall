@@ -39,6 +39,9 @@ from Products.Marshall.handlers.atxml import SchemaAttribute
 from Products.Marshall.handlers.atxml import getRegisteredNamespaces
 from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall import utils
+from Products.Archetypes.debug import log
+
+import transaction
 
 _marker = object()
 
@@ -73,9 +76,9 @@ class ATAttribute(SchemaAttribute):
         
         for value in values:
             node = dom.createElementNS( self.namespace.xmlns, "field")
-            id_attr = dom.createAttributeNS( self.namespace.xmlns, "id")
-            id_attr.value = self.name
-            node.setAttributeNode( id_attr )
+            name_attr = dom.createAttribute( self.namespace.xmlns, "name")
+            name_attr.value = self.name
+            node.setAttributeNode( name_attr )
             
             if is_ref:
                 if config.HANDLE_REFS:
@@ -112,8 +115,6 @@ class ATAttribute(SchemaAttribute):
         
     def deserialize(self, instance, ns_data, options={}):
         values = ns_data.get( self.name )
-
-            
         if not values:
             return
 
@@ -122,7 +123,7 @@ class ATAttribute(SchemaAttribute):
             values = self.resolveReferences( instance, values)
             if not config.HANDLE_REFS :
                 return
-                
+
         mutator = instance.Schema()[self.name].getMutator(instance)
         if not mutator:
             # read only field no mutator, but try to set value still
@@ -131,6 +132,8 @@ class ATAttribute(SchemaAttribute):
             #raise AttributeError("No Mutator for %s"%self.name)
             return
         
+        if self.name == "id":
+            transaction.savepoint()
         mutator(values)
 
     def resolveReferences(self, instance, values):
@@ -337,15 +340,17 @@ class Archetypes(XmlNamespace):
         elif tagname == 'field':
             # basic at field specified, find the matching attribute
             # and annotate the data node with it
-            schema_name = data_node.attrib.get('id')
-
+            schema_name = data_node.attrib.get('name', None)
+            if schema_name is None:
+                log("'id' attribute for at:field is deprecated, use 'name' instead")
+                schema_name = data_node.attrib.get('id')
 ##            while context.reader.MoveToNextAttribute():
 ##                if context.reader.LocalName() == 'id':
 ##                    schema_name = context.reader.Value()
 ##                    break
-            assert schema_name, "No Schema Field Specified"
+            assert schema_name, "No field name specified in at:field element"
             #print "field", schema_name
-            self.last_schema_id = schema_name            
+            self.last_schema_id = schema_name
             attribute = self.getAttributeByName(schema_name, context)
             if attribute is None:
                 #print "na", schema_name

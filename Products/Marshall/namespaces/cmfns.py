@@ -76,8 +76,8 @@ SecurityRNGSchemaFragment = '''
             <element name="zs:security">
               <zeroOrMore>
                <element name="zs:local_role">
-                 <attribute name="zs:user_id" />
-                 <attribute name="zs:role" />                 
+                 <attribute name="user_id" />
+                 <attribute name="role" />
                </element>
               </zeroOrMore>
             </element>
@@ -127,13 +127,11 @@ class LocalRolesAttribute(SchemaAttribute):
             for role in roles:
                 elname = "%s:%s"%(self.namespace.prefix, self.name )
                 lr_node = dom.createElementNS( CMF.xmlns, elname )
-                elname = "%s:%s"%(self.namespace.prefix, "user_id")
-                user_attr = dom.createAttributeNS( CMF.xmlns, elname)
+                user_attr = dom.createAttribute("user_id")
                 user_attr.value = user_id
                 lr_node.setAttributeNode( user_attr )
                 
-                elname = "%s:%s"%(self.namespace.prefix, "role")
-                role_attr = dom.createAttributeNS( CMF.xmlns, elname)
+                role_attr = dom.createAttribute( "role")
                 role_attr.value = role
                 lr_node.setAttributeNode( role_attr )
                 node.appendChild( lr_node )
@@ -177,9 +175,9 @@ WorkflowRNGSchemaFragment = '''
              <element name="wf_var">
               <attribute name="id" />
               <attribute name="type" />
-              <attribute name="value" />              
+              <attribute name="value" />
              </element>
-            </oneOrMore>            
+            </oneOrMore>
            </element>
         </element>
        </oneOrMore>
@@ -200,7 +198,7 @@ class WorkflowAttribute(SchemaAttribute):
        <!-- in chronological order -->
        <history>
          <wf_var id="" type="" value="" />
-         <wf_var id="" type="" value="" />         
+         <wf_var id="" type="" value="" />
        </history>
       </workflow>
     </workflow_history>
@@ -246,8 +244,7 @@ class WorkflowAttribute(SchemaAttribute):
         elname = "%s:workflow"%prefix
         node = dom.createElementNS(xmlns, elname)
 
-        elname = "%s:id"%prefix
-        wfid_attr = dom.createAttributeNS(xmlns, elname)
+        wfid_attr = dom.createAttribute( "id" )
         wfid_attr.value = wf_id
         
         node.setAttributeNode( wfid_attr )
@@ -261,12 +258,10 @@ class WorkflowAttribute(SchemaAttribute):
             for k,v in items:
                 elname = "%s:%s"%(prefix, "var" )
                 var_node = dom.createElementNS(xmlns, elname)
-                elname = "%s:%s"%(prefix, "value" )
-                value_attr = dom.createAttributeNS(xmlns, elname)
-                elname = "%s:%s"%(prefix, "type" )
-                type_attr = dom.createAttributeNS(xmlns, elname)
-                elname = "%s:%s"%(prefix, "id" )
-                id_attr = dom.createAttributeNS(xmlns, elname)
+                # Attributes normally do not have a namespace
+                value_attr = dom.createAttribute("value")
+                type_attr = dom.createAttribute("type")
+                id_attr = dom.createAttribute("id")
 
                 value, vtype = marshall_value( v )
 

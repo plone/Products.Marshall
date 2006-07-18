@@ -76,7 +76,7 @@ class ATAttribute(SchemaAttribute):
         
         for value in values:
             node = dom.createElementNS( self.namespace.xmlns, "field")
-            name_attr = dom.createAttribute( self.namespace.xmlns, "name")
+            name_attr = dom.createAttribute("name")
             name_attr.value = self.name
             node.setAttributeNode( name_attr )
             

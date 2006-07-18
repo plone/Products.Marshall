@@ -267,6 +267,9 @@ class ParseContext(object):
     def setNamespaceDelegate( self, namespace):
         self.ns_delegate = namespace
 
+class ATXMLMarker: pass
+
+_marker = ATXMLMarker()
 
 class ATXMLMarshaller(Marshaller):
 
@@ -275,6 +278,15 @@ class ATXMLMarshaller(Marshaller):
 
     # options for a subclass
     use_validation = False
+
+    
+    def __init__(self, demarshall_hook=None, marshall_hook=None, 
+                 root_tag='metadata', namespace=_marker):
+        Marshaller.__init__(self, demarshall_hook, marshall_hook)
+        self.root_tag = root_tag
+        self.namespace = namespace
+        if namespace is _marker:
+            self.namespace = config.AT_NS
 
     def getFieldNamespace(self, field):
         namespaces = self.getNamespaceURIMap()
@@ -313,26 +325,26 @@ class ATXMLMarshaller(Marshaller):
         self.processContext( instance, context, kwargs )
 
     def marshall(self, instance, use_namespaces=None, **kwargs):
-        response = minidom.Document()
-        node = response.createElementNS( config.AT_NS, 'metadata')
-        response.appendChild( node )
+        doc = minidom.Document()
+        node = doc.createElementNS( self.namespace, self.root_tag)         
+        doc.appendChild( node )
 
         # setup default namespace
-        attr = response.createAttribute('xmlns')
-        attr.value = config.AT_NS
+        attr = doc.createAttribute('xmlns')
+        attr.value = self.namespace
         node.setAttributeNode(attr)
-
+    
         for ns in self.getNamespaces( use_namespaces ):
-            ns.serialize( response, node, instance, kwargs )
+            ns.serialize( doc, node, instance, kwargs )
             if not ns.prefix:
                 continue
             attrname = 'xmlns:%s' % ns.prefix
-            attr = response.createAttribute(attrname)
+            attr = doc.createAttribute(attrname)
             attr.value = ns.xmlns
             node.setAttributeNode(attr)                
 
         content_type = 'text/xml'
-        data = response.toprettyxml()#.encode('utf-8')
+        data = doc.toprettyxml()#.encode('utf-8')
         length = len(data)
         return (content_type, length, data)
 
@@ -341,7 +353,7 @@ class ATXMLMarshaller(Marshaller):
         root = ElementTree.fromstring(data)
         ns_map = self.getNamespaceURIMap()
         context = ParseContext(instance, root, ns_map)
-        context.xmlsource=data
+        context.xmlsource = data
         self.parseXml( root, context, ns_map )
 
 

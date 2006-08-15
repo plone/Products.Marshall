@@ -194,7 +194,7 @@ XMLREADER_TEXT_ELEMENT_NODE_TYPE = 3
 XMLREADER_CDATA_NODE_TYPE = 4
 
 # Initialize ATXML RNG Schema
-ATXML_RNG = open(os.path.join(ATXML_SCHEMA, 'atxml.rng'), 'rb+').read()
+ATXML_RNG = open(os.path.join(ATXML_SCHEMA, 'atxml.rng'), 'rb').read()
 
 # libxml2 initialization. Register a per-thread global error callback.
 import libxml2

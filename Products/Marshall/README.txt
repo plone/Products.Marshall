@@ -31,13 +31,23 @@ Release Management
 Acknowledgements
 ----------------
 
-- The workers: Sidnei da Silva
+- The workers: 
 
   o Sidnei da Silva - Designer, Test Champion and Master of Laziness
 
   o Alan Runyan - Cheerleading.
 
+  o Kapil Thangavelu - ATXML handler
+
+  o Phil Auersperg - refactoring for elementree
+
+  o Gogo Bernhard - uuns namespace for ATXML
+
+- The sponsors:
+
   o Zope Europe Association - Sponsoring
+
+  o Bibliotheca Hertziana, Max Planck Institute for Art History - Sponsoring
 
 - Zope Corporation for providing such a wonderful application server.
 
@@ -46,14 +56,18 @@ Acknowledgements
 Requirements
 ------------
 
-- Python 2.3.5 or greater
+Marshall is tested with
 
-- Zope 2.7.8 or greater
+- Python 2.4.3 or greater
 
-- Plone 2.1.1 or greater
+- Zope 2.9.4 or greater
 
-- Archetypes 1.3.5+ (a bug with BooleanField was fixed right after 1.3.5)
+- Plone 2.1.3 or greater
+
+- Archetypes 1.3.9 or later
 
 - libxml2 2.6.6+ (previous versions seem to have a bug validating RelaxNG)
+
+- Python elementtree 1.2.6+ 
 
 - DavPack (optional) to support rename-on-upload

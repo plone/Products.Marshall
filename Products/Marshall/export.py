@@ -29,7 +29,7 @@ from ExtensionClass import Base
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base
 from Products.CMFCore.utils import getToolByName
-from Products.CMFCore.CMFCorePermissions import ManagePortal
+from Products.CMFCore.permissions import ManagePortal
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
 class Export(Base):

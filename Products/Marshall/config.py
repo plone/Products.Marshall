@@ -19,6 +19,7 @@
 $Id$
 """
 import os
+import warnings
 from Globals import package_home
 from zLOG import LOG, INFO, DEBUG
 

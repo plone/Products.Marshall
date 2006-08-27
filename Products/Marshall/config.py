@@ -21,7 +21,6 @@ $Id$
 import os
 import warnings
 from Globals import package_home
-from zLOG import LOG, INFO, DEBUG
 
 try:
     import libxml2
@@ -42,6 +41,3 @@ DC_NS = "http://purl.org/dc/elements/1.1/"
 ADOBE_NS = "adobe:ns:meta"
 
 ATXML_SCHEMA = os.path.join(PACKAGE_HOME, 'validation', 'atxml')
-
-def log(msg, level=INFO):
-    LOG('Marshall', level, msg)

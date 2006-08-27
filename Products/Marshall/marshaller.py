@@ -20,8 +20,9 @@ $Id$
 """
 
 from Products.CMFCore.utils import getToolByName
+from Products.Archetypes.debug import log
 from Products.Archetypes.Marshall import Marshaller
-from Products.Marshall.config import TOOL_ID, log
+from Products.Marshall.config import TOOL_ID
 from Products.Marshall.registry import getComponent
 from Products.Marshall.exceptions import MarshallingException
 from Acquisition import ImplicitAcquisitionWrapper

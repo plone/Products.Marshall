@@ -32,6 +32,7 @@ from sets import Set
 
 from Products.CMFCore.utils import getToolByName
 from Products.Archetypes import config as atcfg
+from Products.Archetypes.debug import log
 from Products.Archetypes import public as atapi
 from Products.Marshall import config
 from Products.Marshall.handlers.atxml import XmlNamespace
@@ -39,7 +40,6 @@ from Products.Marshall.handlers.atxml import SchemaAttribute
 from Products.Marshall.handlers.atxml import getRegisteredNamespaces
 from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall import utils
-from Products.Archetypes.debug import log
 
 import transaction
 

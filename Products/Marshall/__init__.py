@@ -19,7 +19,6 @@
 $Id$
 """
 
-# import config
 import config
 
 # Kick off Extensions.Install import

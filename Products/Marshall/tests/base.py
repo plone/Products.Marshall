@@ -19,7 +19,6 @@
 $Id: test_export.py 2886 2004-08-25 03:51:04Z dreamcatcher $
 """
 
-
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 
@@ -28,13 +27,12 @@ import difflib
 
 # Load fixture
 from Testing import ZopeTestCase
-from Products.Archetypes.tests import ArchetypesTestCase
+from Products.Archetypes.tests.atsitetestcase import ATSiteTestCase
 
 from AccessControl.SecurityManagement import newSecurityManager
 
 # Install our product
 ZopeTestCase.installProduct('Marshall')
-ZopeTestCase.installProduct('Archetypes')
 ZopeTestCase.installProduct('ATContentTypes')
 
 portal_owner = 'portal_owner'
@@ -47,7 +45,7 @@ def normalize_space(s):
     s =  re.sub(r"[\r\n]+", r'\r\n', s)
     return s
 
-class BaseTest(ArchetypesTestCase.ArcheSiteTestCase):
+class BaseTest(ATSiteTestCase):
     """Base Test"""
 
     def loginPortalOwner(self):

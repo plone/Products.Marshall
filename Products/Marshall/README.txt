@@ -58,9 +58,9 @@ Requirements
 
 Marshall is tested with
 
-- Python 2.4.3 or greater
+- Python 2.3.5 or greater
 
-- Zope 2.9.4 or greater
+- Zope 2.8.8 or greater
 
 - Plone 2.1.3 or greater
 

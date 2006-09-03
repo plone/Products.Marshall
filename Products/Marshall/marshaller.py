@@ -41,7 +41,8 @@ class ControlledMarshaller(Marshaller):
         self.fallback = fallback
 
     def delegate(self, method, obj, data=None, file=None, **kw):
-        kw['file'] = file
+        if file is not None:
+            kw['file'] = file
         __traceback_info__ = (method, obj, kw)
         context = getContext(obj, kw.get('REQUEST'))
         if context is not obj:
@@ -97,6 +98,5 @@ class ControlledMarshaller(Marshaller):
                 # similar.
                 data = kw['file'].read()
             del kw['file']
-
 
         return self.delegate('demarshall', obj, data, **kw)

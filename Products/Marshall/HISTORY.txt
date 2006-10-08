@@ -1,0 +1,15 @@
+Changelog for Marshall
+
+    (name of developer listed in brackets)
+
+Marshall 1.0.0 - Unreleased
+
+    - Fixed some deprecation warnings for guess_content_type.
+      [hannosch]
+
+    - Updated a test for generated XML export format.
+      [hannosch]
+
+    - Initial version, see README.txt for details.
+      [lots of people]
+

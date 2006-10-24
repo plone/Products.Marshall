@@ -1,1 +1,1 @@
-1.0-devel (svn/unreleased)
+1.0.0-a1

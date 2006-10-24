@@ -1,8 +1,5 @@
-Changelog for Marshall
-
-    (name of developer listed in brackets)
-
 Marshall 1.0.0 - Unreleased
+
 
     - Fixed some deprecation warnings for guess_content_type.
       [hannosch]

@@ -86,10 +86,10 @@ class ATAttribute(SchemaAttribute):
                                                     'reference' )
                     uid_node = dom.createElementNS( self.namespace.xmlns,
                                                     'uid' )
-                    value = response.createTextNode( str( value ) )
-                    uid_node.append( value )
-                    ref_node.append( uid_node )
-                    node.append( ref_node )
+                    value = dom.createTextNode( str( value ) )
+                    uid_node.appendChild( value )
+                    ref_node.appendChild( uid_node )
+                    node.appendChild( ref_node )
             else:
                 value_node = dom.createTextNode( str( value ) )
                 node.appendChild( value_node )
@@ -150,9 +150,6 @@ class ATAttribute(SchemaAttribute):
             ref_values.append( ref )
         return ref_values
         
-    def isReference(self, instance):
-        return not not isinstance(instance.Schema()[self.name],
-                                  atapi.ReferenceField)
 
 class ReferenceAttribute(SchemaAttribute):
 
@@ -303,8 +300,6 @@ class Archetypes(XmlNamespace):
         exclude_attrs = options.get('atns_exclude', () )
             
         for attribute in self.getAttributes( instance, exclude_attrs):
-            if hasattr(attribute, 'isReference') and attribute.isReference( instance ):
-                continue
             attribute.serialize( dom, parent_node, instance, options )
 
     def deserialize(self, instance, ns_data, options):

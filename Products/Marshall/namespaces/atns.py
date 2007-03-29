@@ -277,13 +277,12 @@ class Archetypes(XmlNamespace):
         for ns in getRegisteredNamespaces():
             if ns.uses_at_fields:
                 fields.extend( ns.getATFields() )
-        mset = Set(fields)
-        assert len(mset) == len(fields), "Multiple NS multiplexing field"
+        assert len(Set(fields)) == len(fields), (
+            "Multiple NS multiplexing field")
 
-        for ea in exclude_attrs:
-            mset.add( ea )
-        
-        field_keys = Set(instance.Schema().keys())-mset
+        field_keys = [k for k in instance.Schema().keys()
+                      if k not in exclude_attrs and k not in fields]
+        #Set(instance.Schema().keys())-mset
 
         # remove primary field if still present
 ## XXX: we dont want to remove the PF, but want to be backward compatible (how to do that best?)        

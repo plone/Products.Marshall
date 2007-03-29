@@ -231,6 +231,9 @@ class SchemaAttribute(object):
         """
         self.namespace = namespace
 
+    def isReference(self, instance):
+        return False
+
 class DataNode(object):
     """ a data bag holding a namespace uri and a node name
     """

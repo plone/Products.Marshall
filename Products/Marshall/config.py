@@ -32,7 +32,7 @@ else:
     hasLibxml2 = True
 
 PACKAGE_HOME = package_home(globals())
-HANDLE_REFS = False
+HANDLE_REFS = True
 
 TOOL_ID = 'marshaller_registry'
 AT_NS = 'http://plone.org/ns/archetypes/'

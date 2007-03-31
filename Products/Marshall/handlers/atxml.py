@@ -43,13 +43,14 @@ Authors: kapil thangavelu <k_vertigo@objectrealms.net> (current impl)
 """
 
 #################################
+import sys
 import thread
+from cStringIO import StringIO
 from xml.dom import minidom
 
 from elementtree import ElementTree
 from Products.Marshall.handlers.base import Marshaller
 from Products.Archetypes.debug import log
-from Products.Archetypes import public as atapi
 from Products.Marshall import config
 from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall import utils
@@ -230,10 +231,6 @@ class SchemaAttribute(object):
         """
         self.namespace = namespace
 
-    def isReference(self, instance):
-        return not not isinstance(instance.Schema()[self.name],
-                                  atapi.ReferenceField)
-
 class DataNode(object):
     """ a data bag holding a namespace uri and a node name
     """
@@ -309,7 +306,7 @@ class ATXMLMarshaller(Marshaller):
     def getNamespacePrefixMap(self):
         """ Mapping of prefix -> xmlns URI
         """
-        prefix_map = dict([(ns.prefix, ns.xmlns) for ns in self.namespaces])
+        prefix_map = dict([(ns.prefix, ns.xmlns) for ns in namespaces])
 
     def getNamespaces(self, namespaces=None):
         if namespaces is None:

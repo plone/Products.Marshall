@@ -81,15 +81,15 @@ class ATAttribute(SchemaAttribute):
             node.setAttributeNode( name_attr )
             
             if is_ref:
-                if options.get('handle_refs', config.HANDLE_REFS):
+                if config.HANDLE_REFS:
                     ref_node = dom.createElementNS( self.namespace.xmlns,
                                                     'reference' )
                     uid_node = dom.createElementNS( self.namespace.xmlns,
                                                     'uid' )
-                    value = dom.createTextNode( str( value ) )
-                    uid_node.appendChild( value )
-                    ref_node.appendChild( uid_node )
-                    node.appendChild( ref_node )
+                    value = response.createTextNode( str( value ) )
+                    uid_node.append( value )
+                    ref_node.append( uid_node )
+                    node.append( ref_node )
             else:
                 value_node = dom.createTextNode( str( value ) )
                 node.appendChild( value_node )
@@ -150,6 +150,9 @@ class ATAttribute(SchemaAttribute):
             ref_values.append( ref )
         return ref_values
         
+    def isReference(self, instance):
+        return not not isinstance(instance.Schema()[self.name],
+                                  atapi.ReferenceField)
 
 class ReferenceAttribute(SchemaAttribute):
 
@@ -300,25 +303,19 @@ class Archetypes(XmlNamespace):
         exclude_attrs = options.get('atns_exclude', () )
             
         for attribute in self.getAttributes( instance, exclude_attrs):
+            if hasattr(attribute, 'isReference') and attribute.isReference( instance ):
+                continue
             attribute.serialize( dom, parent_node, instance, options )
 
     def deserialize(self, instance, ns_data, options):
         if not ns_data:
             return
-
-        handle_refs = options.get('handle_refs', config.HANDLE_REFS)
-        defer_refs = options.get('atns_defer_references', False)
-
+            
         for attribute in self.getAttributes( instance ):
-            if attribute.isReference( instance ):
-                if not handle_refs:
-                    continue
-                if defer_refs:
-                    refs = options['atns_import_references'] 
-                    # XXX do we want to hold an instance ref or just a uid for latter lookup
-                    refs.append( BoundReference( ns_data, attribute, instance.UID() ) )
-                    continue
-            attribute.deserialize( instance, ns_data )        
+            if not config.HANDLE_REFS and hasattr(attribute, 'isReference') and attribute.isReference( instance ):
+                # simply skip it then... Gogo
+                continue
+            attribute.deserialize( instance, ns_data )
 
     def processXml(self, context, data_node):
 

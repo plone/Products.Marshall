@@ -116,4 +116,3 @@ class PrimaryFieldMarshaller(Marshaller):
         return (content_type, length, data)
 
 InitializeClass(PrimaryFieldMarshaller)
- 

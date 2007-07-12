@@ -38,7 +38,7 @@ caveats
    namespace delegation.
 
 Authors: kapil thangavelu <k_vertigo@objectrealms.net> (current impl)
-         sidnei de silva <sidnei@awkly.org>
+         sidnei da silva <sidnei@awkly.org>
          
 """
 

@@ -19,6 +19,8 @@
 $Id$
 """
 
+from zope.interface import implements
+
 from OFS.SimpleItem import SimpleItem
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
@@ -39,9 +41,11 @@ class Predicate(SimpleItem):
     a component name to be used for that object.
     """
 
-    __implements__ = (IPredicate,)
+    implements(IPredicate)
 
     meta_type = "Marshaller Predicate"
+    predicate_type = None
+    predicate_name = None
     security = ClassSecurityInfo()
 
     manage_options = (
@@ -63,6 +67,14 @@ class Predicate(SimpleItem):
         self.title = title
         self.setExpression(expression)
         self.setComponentName(component_name)
+
+    security.declareProtected(view, 'getPredicateType')
+    def getPredicateType(self):
+        return self.predicate_type
+
+    security.declareProtected(view, 'getPredicateName')
+    def getPredicateName(self):
+        return self.predicate_name
 
     security.declareProtected(view, 'apply')
     def apply(self, obj, **kw):

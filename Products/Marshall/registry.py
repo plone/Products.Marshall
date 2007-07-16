@@ -19,11 +19,15 @@
 $Id$
 """
 
+from zope.interface import implements
+
 from OFS.OrderedFolder import OrderedFolder
 from Globals import PersistentMapping, InitializeClass
 from AccessControl import ClassSecurityInfo
 from AccessControl.Permissions import view, manage_properties
+
 from Products.Marshall.interfaces import IPredicate
+from Products.Marshall.interfaces import IMarshallRegistry
 from Products.Marshall.config import TOOL_ID
 from Products.Marshall.export import Export
 
@@ -56,6 +60,7 @@ def getComponent(name):
 registry = {}
 def registerPredicate(name, title, component):
     component.predicate_type = title
+    component.predicate_name = name
     registry[name] = RegistryItem(name, title, component)
 
 def getRegisteredPredicates():
@@ -73,6 +78,7 @@ class Registry(OrderedFolder, Export):
     meta_type = 'Marshaller Registry'
     id = TOOL_ID
     security = ClassSecurityInfo()
+    implements(IMarshallRegistry)
 
     def __init__(self, id='', title=''):
         OrderedFolder.__init__(self, self.id)

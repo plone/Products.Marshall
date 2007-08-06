@@ -19,15 +19,17 @@
 $Id$
 """
 import os
-import warnings
+import logging
 from Globals import package_home
 
 try:
     import libxml2
 except ImportError:
     hasLibxml2 = False
-    warnings.warn('libxml2 not available. Unable to register libxml2 based ' \
-                  'marshallers')    
+    logger = logging.getLogger('Marshall')
+    logger.log(logging.INFO, \
+    	'libxml2-python not available.' \
+    	' Unable to register libxml2 based marshallers.')
 else:
     hasLibxml2 = True
 

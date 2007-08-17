@@ -68,7 +68,7 @@ class PrimaryFieldMarshaller(Marshaller):
         if isinstance(p, (FileField, TextField)) and file:
             data = file
         mutator = p.getMutator(instance)
-        mutator(data, **kwargs)
+        mapply(mutator, data, **kwargs)
 
     def marshall(self, instance, **kwargs):
         p = instance.getPrimaryField()

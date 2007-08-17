@@ -22,6 +22,7 @@ $Id$
 from Products.CMFCore.utils import getToolByName
 from Products.Archetypes.debug import log
 from Products.Archetypes.Marshall import Marshaller
+from Products.Archetypes.utils import mapply
 from Products.Marshall.config import TOOL_ID
 from Products.Marshall.registry import getComponent
 from Products.Marshall.exceptions import MarshallingException
@@ -82,7 +83,7 @@ class ControlledMarshaller(Marshaller):
         if method == 'demarshall':
             args += (data,)
         method = getattr(marshaller, method)
-        return method(*args, **kw)
+        return mapply(method, *args, **kw)
 
     def marshall(self, obj, **kw):
         if not 'data' in kw:

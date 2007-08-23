@@ -1,6 +1,10 @@
 trunk - unreleased
 ==================
 
+    - make demarshall of SchemaAttributes more verbose. Now it raises its
+      own Exception with information on which attribute and value it fails.
+      [jensens]
+
 1.0.0-b1 - 2007-04-28
 =====================
 

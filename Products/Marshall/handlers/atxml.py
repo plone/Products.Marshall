@@ -45,10 +45,13 @@ Authors: kapil thangavelu <k_vertigo@objectrealms.net> (current impl)
 #################################
 import sys
 import thread
+import traceback
 from cStringIO import StringIO
 from xml.dom import minidom
-
-from elementtree import ElementTree
+try:
+    from celementtree import ElementTree
+except ImportError:
+    from elementtree import ElementTree
 from Products.Marshall.handlers.base import Marshaller
 from Products.Archetypes.debug import log
 from Products.Marshall import config
@@ -63,6 +66,9 @@ XMLNS_NS = 'http://www.w3.org/2000/xmlns/'
 XMLREADER_START_ELEMENT_NODE_TYPE = 1
 XMLREADER_END_ELEMENT_NODE_TYPE = 15
 XMLREADER_TEXT_ELEMENT_NODE_TYPE = 3
+
+class SchemaAttributeDemarshallException(Exception):
+    """Exception mus be raised when demershall of SchemaAtribute fails."""
 
 class ErrorCallback:
 
@@ -147,7 +153,18 @@ class XmlNamespace(object):
         if not ns_data:
             return 
         for attribute in self.attributes:
-            attribute.deserialize( instance, ns_data )
+            try:
+                attribute.deserialize( instance, ns_data )
+            except Exception, e:                
+                ec, e, tb = sys.exc_info()
+                ftb = traceback.format_tb(tb,)
+                msg = "failure while demarshalling schema attribute %s\n" % \
+                      attribute.name 
+                msg += "data: %s\n" % ns_data.get(attribute.name, None)
+                msg += "original exception: %s\n" % str(ec)
+                msg += "original traceback:\n%s" % '\n'.join(ftb)
+                raise SchemaAttributeDemarshallException, msg
+                
 
     def processXml(self, context, node):
         """ handle the start of a xml tag with this namespace

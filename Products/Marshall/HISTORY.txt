@@ -5,6 +5,11 @@ trunk - unreleased
       own Exception with information on which attribute and value it fails.
       [jensens]
 
+    - Demote libxml2-python missing log message from "warning" to "info".
+      This warning has been a common source of confusion for new users
+      trying to track down real errors.
+      [smcmahon]
+
 1.0.0-b1 - 2007-04-28
 =====================
 

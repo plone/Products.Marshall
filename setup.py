@@ -7,7 +7,7 @@ setup(name='Products.Marshall',
       version=version,
       description="framework for pluggable marshalling policies",
       long_description=open("README.txt").read() + "\n" + \
-              open(os.path.join("docs", "HiSTORY.txt")).read(),
+              open(os.path.join("docs", "HISTORY.txt")).read(),
       classifiers=[
         "Framework :: Zope2",
         "License :: OSI Approved :: GNU General Public License (GPL)",

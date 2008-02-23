@@ -21,7 +21,7 @@ Interfaces for Predicate
 $Id$
 """
 
-from Interface import Interface
+from zope.interface import Interface
 
 class IPredicate(Interface):
     """ A Predicate """

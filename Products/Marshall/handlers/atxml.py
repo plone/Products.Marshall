@@ -296,6 +296,7 @@ class ATXMLMarshaller(Marshaller):
     # options for a subclass
     use_validation = False
 
+    __name__ = 'ATXML Marshaller'
     
     def __init__(self, demarshall_hook=None, marshall_hook=None, 
                  root_tag='metadata', namespace=_marker):

@@ -1,5 +1,5 @@
 # Marshall: A framework for pluggable marshalling policies
-# Copyright (C) 2004-2006 Enfold Systems, LLC
+# Copyright (C) 2004-2008 Enfold Systems, LLC
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 $Id$
 """
 
-import config
+import pkg_resources
+from Products.Marshall import config
 
 # Kick off Extensions.Install import
 from Products.Marshall.Extensions import Install
@@ -50,3 +51,9 @@ def initialize(context):
         permission='Add Marshaller Predicate',
         constructors=predicates.constructors,
         icon='www/registry.png')
+
+    # Load marshallers registered by the way of egg entry points.
+    for ep in pkg_resources.iter_entry_points('marshall.component'):
+        component = ep.load()
+        registry.registerComponent(
+            ep.name, getattr(component, '__name__', ep.name), component)

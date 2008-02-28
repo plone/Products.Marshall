@@ -145,6 +145,8 @@ class RFC822Marshaller(Marshaller):
     security.declareObjectPrivate()
     security.setDefaultAccess('deny')
 
+    __name__ = 'RFC822 Marshaller'
+
     def demarshall(self, instance, data, **kwargs):
         # We don't want to pass file forward.
         if kwargs.has_key('file'):

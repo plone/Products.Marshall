@@ -62,6 +62,8 @@ class PrimaryFieldMarshaller(Marshaller):
     security.declareObjectPrivate()
     security.setDefaultAccess('deny')
 
+    __name__ = 'Primary Field Marshaller'
+    
     def demarshall(self, instance, data, file=None, **kwargs):
         p = instance.getPrimaryField()
         # XXX Hardcoding field types is bad. :(

@@ -181,7 +181,7 @@ class RFC822Marshaller(Marshaller):
         pname = p and p.getName() or None
         content_type = length = None
         # Gather/Guess content type
-        if IBaseUnit.isImplementedBy(body):
+        if IBaseUnit.providedBy(body):
             content_type = str(body.getContentType())
             body   = body.getRaw()
         else:

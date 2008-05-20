@@ -79,7 +79,7 @@ class PrimaryFieldMarshaller(Marshaller):
         data = p and instance[p.getName()] or ''
         content_type = length = None
         # Gather/Guess content type
-        if IBaseUnit.isImplementedBy(data):
+        if IBaseUnit.providedBy(data):
             content_type = data.getContentType()
             length = data.get_size()
             data   = data.getRaw()

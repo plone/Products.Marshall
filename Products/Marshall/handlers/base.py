@@ -33,9 +33,10 @@ from Acquisition import aq_base
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.interfaces.marshall import IMarshall
 from Products.Archetypes.interfaces.layer import ILayer
+from zope.interface import implements
 
 class Marshaller:
-    __implements__ = IMarshall, ILayer
+    implements(IMarshall, ILayer)
 
     security = ClassSecurityInfo()
     security.declareObjectPrivate()

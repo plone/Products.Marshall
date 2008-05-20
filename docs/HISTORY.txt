@@ -4,6 +4,9 @@ Changelog
 trunk - unreleased
 ------------------
 
+- Purged old Zope 2 Interface interfaces for Zope 2.12 compatibility.
+  [elro]
+
 1.0.0 - 2007-11-07
 ------------------
 

@@ -49,7 +49,7 @@ import traceback
 from cStringIO import StringIO
 from xml.dom import minidom
 try:
-    from celementtree import ElementTree
+    import cElementTree as ElementTree
 except ImportError:
     from elementtree import ElementTree
 from Products.Marshall.handlers.base import Marshaller

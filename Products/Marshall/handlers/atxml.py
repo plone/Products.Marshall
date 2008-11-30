@@ -46,16 +46,16 @@ Authors: kapil thangavelu <k_vertigo@objectrealms.net> (current impl)
 import sys
 import thread
 import traceback
-from cStringIO import StringIO
 from xml.dom import minidom
 try:
-    import cElementTree as ElementTree
+    from xml.etree import cElementTree as ElementTree
 except ImportError:
-    from elementtree import ElementTree
+    try:
+        import cElementTree as ElementTree
+    except ImportError:
+        from elementtree import ElementTree
 from Products.Marshall.handlers.base import Marshaller
-from Products.Archetypes.debug import log
 from Products.Marshall import config
-from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall import utils
 
 #################################
@@ -310,7 +310,7 @@ class ATXMLMarshaller(Marshaller):
         namespaces = self.getNamespaceURIMap()
         # Flatten ns into (ns, attr) tuples
         flat_ns = []
-        [flat_ns.extend(zip((n,)*len(n.attrs), n.attrs)) for n in namespaces]        
+        [flat_ns.extend(zip((n,)*len(n.attrs), n.attrs)) for n in self.namespaces]
         # Dict mapping an AT fieldname to a (prefix, element name) tuple
         field_map = dict([(a.field, (n.prefix, a.name)) for n, a in flat_ns])
         return field_map
@@ -324,7 +324,7 @@ class ATXMLMarshaller(Marshaller):
     def getNamespacePrefixMap(self):
         """ Mapping of prefix -> xmlns URI
         """
-        prefix_map = dict([(ns.prefix, ns.xmlns) for ns in namespaces])
+        prefix_map = dict([(ns.prefix, ns.xmlns) for ns in self.namespaces])
 
     def getNamespaces(self, namespaces=None):
         if namespaces is None:
@@ -373,15 +373,6 @@ class ATXMLMarshaller(Marshaller):
         context = ParseContext(instance, root, ns_map)
         context.xmlsource = data
         self.parseXml( root, context, ns_map )
-
-
-        if self.use_validation: # and not reader.IsValid():
-            errors = error_callback.get(clear=True)
-            log(errors)
-            raise MarshallingException, ("Input failed to validate against "
-                                         "the ATXML RelaxNG schema.\n"
-                                         "%s" % errors)
-
         return context
 
 

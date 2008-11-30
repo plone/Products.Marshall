@@ -4,6 +4,10 @@ Changelog
 trunk - unreleased
 ------------------
 
+- Made the dependency on elementree conditional on the Python version. For
+  Python 2.5 and later, we use the xml.etree modules.
+  [hannosch]
+
 - Purged old Zope 2 Interface interfaces for Zope 2.12 compatibility.
   [elro]
 

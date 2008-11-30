@@ -1,7 +1,17 @@
-from setuptools import setup, find_packages
 import os
+import sys
+from setuptools import setup, find_packages
 
 version = '1.1'
+
+install_requires=[
+  'setuptools',
+  'Products.CMFCore',
+],
+
+if sys.version_info[:3] < (2,5,0):
+    install_requires.append('elementtree')
+
 
 setup(name='Products.Marshall',
       version=version,
@@ -21,9 +31,5 @@ setup(name='Products.Marshall',
       namespace_packages=['Products'],
       include_package_data=True,
       zip_safe=False,
-      install_requires=[
-          'setuptools',
-#          'Products.Archetypes', # This does not exist yet
-          'Products.CMFCore',
-      ],
+      install_requires=install_requires,
       )

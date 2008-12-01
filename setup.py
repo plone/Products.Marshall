@@ -7,7 +7,7 @@ version = '1.1'
 install_requires=[
   'setuptools',
   'Products.CMFCore',
-],
+]
 
 if sys.version_info[:3] < (2,5,0):
     install_requires.append('elementtree')

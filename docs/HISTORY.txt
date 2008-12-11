@@ -4,6 +4,9 @@ Changelog
 trunk - unreleased
 ------------------
 
+- Made test runs that require libxml2 dependent on the availability of it.
+  [hannosch]
+
 - Made the dependency on elementree conditional on the Python version. For
   Python 2.5 and later, we use the xml.etree modules.
   [hannosch]

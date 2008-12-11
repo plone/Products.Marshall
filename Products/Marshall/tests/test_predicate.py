@@ -35,6 +35,8 @@ ZopeTestCase.installProduct('Archetypes')
 from Products.CMFCore.utils import getToolByName
 from Products.Marshall.predicates import add_predicate
 from Products.Marshall.config import TOOL_ID as tool_id
+from Products.Marshall import config
+
 
 class PredicateTest(BaseTest):
 
@@ -90,42 +92,43 @@ class DefaultPredicateTest(PredicateTest):
         # Make sure it works even if no filename kw is passed in
         self.assertEquals(self.get(None), ('primary_field',))
 
-    def test_expression_content_type(self):
-        add_predicate(
-            self.tool, id='text_xml',
-            title='text/xml content type',
-            predicate='default',
-            expression="python: content_type and content_type == 'text/xml'",
-            component_name='simple_xml')
-        add_predicate(
-            self.tool,
-            id='text_plain',
-            title='text/plain content type',
-            predicate='default',
-            expression="python: content_type and content_type == 'text/plain'",
-            component_name='rfc822')
-        add_predicate(
-            self.tool,
-            id='default',
-            title='default',
-            predicate='default',
-            expression="",
-            component_name='primary_field')
+    if config.hasLibxml2:
+        def test_expression_content_type(self):
+            add_predicate(
+                self.tool, id='text_xml',
+                title='text/xml content type',
+                predicate='default',
+                expression="python: content_type and content_type == 'text/xml'",
+                component_name='simple_xml')
+            add_predicate(
+                self.tool,
+                id='text_plain',
+                title='text/plain content type',
+                predicate='default',
+                expression="python: content_type and content_type == 'text/plain'",
+                component_name='rfc822')
+            add_predicate(
+                self.tool,
+                id='default',
+                title='default',
+                predicate='default',
+                expression="",
+                component_name='primary_field')
 
-        self.assertEquals(
-            self.get(None, content_type='text/xml'),
-            ('simple_xml', 'primary_field'))
-        self.assertEquals(self.get(None, content_type='text/plain'),
-                          ('rfc822', 'primary_field'))
+            self.assertEquals(
+                self.get(None, content_type='text/xml'),
+                ('simple_xml', 'primary_field'))
+            self.assertEquals(self.get(None, content_type='text/plain'),
+                              ('rfc822', 'primary_field'))
 
-        # Make sure reordering the predicates does change the order
-        # in which ids are returned.
-        self.reverse()
-        self.assertEquals(self.get(None, content_type='text/plain'),
-                          ('primary_field', 'rfc822'))
+            # Make sure reordering the predicates does change the order
+            # in which ids are returned.
+            self.reverse()
+            self.assertEquals(self.get(None, content_type='text/plain'),
+                              ('primary_field', 'rfc822'))
 
-        # Make sure it works even if no content_type kw is passed in
-        self.assertEquals(self.get(None), ('primary_field',))
+            # Make sure it works even if no content_type kw is passed in
+            self.assertEquals(self.get(None), ('primary_field',))
 
     def test_expression_data(self):
         add_predicate(

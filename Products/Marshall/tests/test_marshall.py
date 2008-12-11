@@ -515,6 +515,12 @@ def test_suite():
     import unittest
     from Testing.ZopeTestCase import FunctionalDocFileSuite
     suite = unittest.TestSuite()
+
+    # These tests depend on libxml2 being installed
+    from Products.Marshall import config
+    if not config.hasLibxml2:
+        return suite
+
     suite.addTest(FunctionalDocFileSuite('doc/README.txt',
                                          package='Products.Marshall',
                                          test_class=DocumentationTest))

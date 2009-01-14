@@ -4,6 +4,10 @@ Changelog
 trunk - unreleased
 ------------------
 
+- Declare package dependencies and fixed deprecation warnings for use
+  of Globals.
+  [hannosch]
+
 - Made test runs that require libxml2 dependent on the availability of it.
   [hannosch]
 

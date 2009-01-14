@@ -21,7 +21,7 @@ $Id$
 
 from xml.dom import minidom
 from AccessControl import ClassSecurityInfo
-from Globals import InitializeClass
+from App.class_init import InitializeClass
 from Products.CMFCore.permissions import ManagePortal
 from _base import Predicate
 from Products.Marshall.registry import registerPredicate

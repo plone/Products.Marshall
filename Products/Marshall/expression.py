@@ -22,7 +22,8 @@ from CMFCore's Expression.
 $Id$
 """
 
-from Globals import Persistent, InitializeClass
+from Persistence import Persistent
+from App.class_init import InitializeClass
 from Acquisition import aq_inner, aq_parent
 from AccessControl import getSecurityManager, ClassSecurityInfo
 

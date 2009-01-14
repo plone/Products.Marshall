@@ -20,7 +20,7 @@ $Id$
 """
 import os
 import logging
-from Globals import package_home
+from App.Common import package_home
 
 try:
     import libxml2

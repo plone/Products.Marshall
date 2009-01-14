@@ -22,7 +22,7 @@ $Id$
 from zope.interface import implements
 
 from OFS.SimpleItem import SimpleItem
-from Globals import InitializeClass
+from App.class_init import InitializeClass
 from AccessControl import ClassSecurityInfo
 from AccessControl.Permissions import view, manage_properties
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile

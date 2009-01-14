@@ -24,7 +24,7 @@ import tempfile
 import zipfile
 import shutil
 from cStringIO import StringIO
-from Globals import InitializeClass
+from App.class_init import InitializeClass
 from ExtensionClass import Base
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base

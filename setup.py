@@ -5,8 +5,16 @@ from setuptools import setup, find_packages
 version = '1.1'
 
 install_requires=[
-  'setuptools',
-  'Products.CMFCore',
+    'setuptools',
+    'zope.contenttype',
+    'zope.interface',
+    'Products.Archetypes',
+    'Products.CMFCore',
+    'Products.GenericSetup',
+    # 'Acquisition',
+    # 'DateTime',
+    # 'ExtensionClass',
+    # 'Zope2',
 ]
 
 if sys.version_info[:3] < (2,5,0):
@@ -31,5 +39,11 @@ setup(name='Products.Marshall',
       namespace_packages=['Products'],
       include_package_data=True,
       zip_safe=False,
+      extras_require=dict(
+        test=[
+            'zope.schema',
+            'Products.ATContentTypes',
+        ]
+      ),
       install_requires=install_requires,
       )

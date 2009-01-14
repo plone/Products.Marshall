@@ -22,7 +22,8 @@ $Id$
 from zope.interface import implements
 
 from OFS.OrderedFolder import OrderedFolder
-from Globals import PersistentMapping, InitializeClass
+from Persistence import PersistentMapping
+from App.class_init import InitializeClass
 from AccessControl import ClassSecurityInfo
 from AccessControl.Permissions import view, manage_properties
 

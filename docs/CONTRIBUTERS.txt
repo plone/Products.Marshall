@@ -1,0 +1,24 @@
+Acknowledgements
+----------------
+
+- The workers: 
+
+  o Sidnei da Silva - Designer, Test Champion and Master of Laziness
+
+  o Alan Runyan - Cheerleading.
+
+  o Kapil Thangavelu - ATXML handler
+
+  o Phil Auersperg - refactoring for elementree
+
+  o Gogo Bernhard - uuns namespace for ATXML
+
+- The sponsors:
+
+  o Zope Europe Association - Sponsoring
+
+  o Bibliotheca Hertziana, Max Planck Institute for Art History - Sponsoring
+
+- Zope Corporation for providing such a wonderful application server.
+
+- Python Developers for making things so damn easy.

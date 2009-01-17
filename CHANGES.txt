@@ -1,8 +1,11 @@
 Changelog
 =========
 
-trunk - unreleased
-------------------
+2.0 - unreleased
+----------------
+
+- Updated package metadata and cleaned up a bit.
+  [hannosch]
 
 - Declare package dependencies and fixed deprecation warnings for use
   of Globals.
@@ -18,10 +21,15 @@ trunk - unreleased
 - Purged old Zope 2 Interface interfaces for Zope 2.12 compatibility.
   [elro]
 
+1.2.0 - 2008-09-30
+------------------
+
+- Intial egg release.
+
 1.0.0 - 2007-11-07
 ------------------
 
-- make demarshall of SchemaAttributes more verbose. Now it raises its
+- Made demarshall of SchemaAttributes more verbose. Now it raises its
   own Exception with information on which attribute and value it fails.
   [jensens]
 

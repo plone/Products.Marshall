@@ -19,9 +19,6 @@
 $Id: test_export.py 2886 2004-08-25 03:51:04Z dreamcatcher $
 """
 
-if __name__ == '__main__':
-    execfile(os.path.join(sys.path[0], 'framework.py'))
-
 import re
 import difflib
 

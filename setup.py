@@ -2,7 +2,7 @@ import os
 import sys
 from setuptools import setup, find_packages
 
-version = '1.1'
+version = '2.0'
 
 install_requires=[
     'setuptools',
@@ -11,10 +11,10 @@ install_requires=[
     'Products.Archetypes',
     'Products.CMFCore',
     'Products.GenericSetup',
-    # 'Acquisition',
-    # 'DateTime',
-    # 'ExtensionClass',
-    # 'Zope2',
+    'Acquisition',
+    'DateTime',
+    'ExtensionClass',
+    'Zope2',
 ]
 
 if sys.version_info[:3] < (2,5,0):
@@ -23,15 +23,20 @@ if sys.version_info[:3] < (2,5,0):
 
 setup(name='Products.Marshall',
       version=version,
-      description="framework for pluggable marshalling policies",
+      description="Configurable Marshallers for Archetypes",
       long_description=open("README.txt").read() + "\n" + \
-              open(os.path.join("docs", "HISTORY.txt")).read(),
+              open("CHANGES.txt").read(),
       classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Web Environment",
         "Framework :: Zope2",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Topic :: Internet :: WWW/HTTP",
+        "Topic :: Internet :: File Transfer Protocol (FTP)",
         ],
-      keywords='Zope marshall',
+      keywords='web zope application server webdav ftp',
       license="GPL",
       author='Sidnei da Silve and others',
       author_email='plone-developers@lists.sourceforge.net',

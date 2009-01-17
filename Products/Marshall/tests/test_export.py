@@ -24,9 +24,6 @@ import zipfile
 import glob
 import re
 
-if __name__ == '__main__':
-    execfile(os.path.join(sys.path[0], 'framework.py'))
-
 # Load fixture
 from Testing import ZopeTestCase
 from Products.Marshall.tests.base import BaseTest
@@ -134,6 +131,3 @@ def test_suite():
                      k_dict)
         suite.addTest(unittest.makeSuite(klass))
     return suite
-
-if __name__ == '__main__':
-    framework(descriptions=1, verbosity=1)

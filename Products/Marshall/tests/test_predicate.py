@@ -33,6 +33,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.Marshall.predicates import add_predicate
 from Products.Marshall.config import TOOL_ID as tool_id
 from Products.Marshall import config
+from Products.Marshall import registry
 
 
 class PredicateTest(BaseTest):
@@ -40,8 +41,7 @@ class PredicateTest(BaseTest):
     def afterSetUp(self):
         super(PredicateTest, self).afterSetUp()
         self.loginPortalOwner()
-        self.qi = self.portal.portal_quickinstaller
-        self.qi.installProduct('Marshall')
+        registry.manage_addRegistry(self.portal)
         self.tool = getToolByName(self.portal, tool_id)
 
     def get(self, obj, **kw):

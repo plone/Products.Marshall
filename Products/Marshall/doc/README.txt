@@ -5,8 +5,8 @@ Marshall
 Installation
 ------------
 
-Installing is as simple as clicking a button, thanks to
-QuickInstaller. However, by default only the ``marshaller_tool`` is
+Installing is as simple as clicking a button.
+However, by default only the ``marshaller_tool`` is
 installed. After that, you need to add some ``marshaller predicates``
 by yourself. You can do that through the ZMI. The interface should be
 verbose enough to tell you all that you need to know to be able to

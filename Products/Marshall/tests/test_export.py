@@ -34,6 +34,7 @@ ZopeTestCase.installProduct('Archetypes')
 ZopeTestCase.installProduct('ATContentTypes')
 
 from Products.CMFCore.utils import getToolByName
+from Products.Marshall import registry
 from Products.Marshall.registry import Registry, getRegisteredComponents
 from Products.Marshall.registry import getComponent
 from Products.Marshall.tests import PACKAGE_HOME
@@ -98,8 +99,7 @@ class ExportTest(BaseTest):
     def afterSetUp(self):
         super(ExportTest, self).afterSetUp()
         self.loginPortalOwner()
-        self.qi = self.portal.portal_quickinstaller
-        self.qi.installProduct('Marshall')
+        registry.manage_addRegistry(self.portal)
         self.tool = getToolByName(self.portal, tool_id)
 
     def test_export(self):

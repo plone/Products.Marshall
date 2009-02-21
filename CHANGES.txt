@@ -4,6 +4,9 @@ Changelog
 2.0 - unreleased
 ----------------
 
+- Avoid a test dependency on quick installer.
+  [hannosch]
+
 - Updated package metadata and cleaned up a bit.
   [hannosch]
 

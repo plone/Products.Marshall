@@ -27,7 +27,7 @@ try:
 except ImportError:
     hasLibxml2 = False
     logger = logging.getLogger('Marshall')
-    logger.log(logging.INFO, \
+    logger.log(logging.DEBUG, \
         'libxml2-python not available.' \
         ' Unable to register libxml2 based marshallers.')
 else:

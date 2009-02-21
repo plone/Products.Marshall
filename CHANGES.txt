@@ -4,6 +4,9 @@ Changelog
 2.0 - unreleased
 ----------------
 
+- Downgrade warning about missing `libxml2-python` to debug level.
+  [hannosch]
+
 - Avoid a test dependency on quick installer.
   [hannosch]
 

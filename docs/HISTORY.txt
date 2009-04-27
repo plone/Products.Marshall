@@ -4,6 +4,9 @@ Changelog
 1.2.1 - unreleased
 ------------------
 
+- Register atxml even if libxml2 isn't present, but test for elementtree.
+  [csenger]
+
 1.2.0 - 2008-09-30
 ------------------
 

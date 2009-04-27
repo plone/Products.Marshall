@@ -34,9 +34,11 @@ registerComponent('rfc822', 'RFC822 Marshaller',
 if config.hasLibxml2:    
     # Now register our own xml marshallers
     from Products.Marshall.handlers.simple import SimpleXMLMarshaller
-    from Products.Marshall.handlers.atxml import ATXMLMarshaller
 
     registerComponent('simple_xml', 'Simple XML Marshaller',
                       SimpleXMLMarshaller)
+
+if config.hasElementtree:
+    from Products.Marshall.handlers.atxml import ATXMLMarshaller
     registerComponent('atxml', 'ATXML Marshaller',
                       ATXMLMarshaller)

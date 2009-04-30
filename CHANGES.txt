@@ -27,6 +27,13 @@ Changelog
 - Purged old Zope 2 Interface interfaces for Zope 2.12 compatibility.
   [elro]
 
+1.2.1 - Unreleased
+------------------
+
+- Register atxml and namespaces even if libxml2 isn't present, but test for 
+  elementtree. 
+  [csenger] 
+
 1.2.0 - 2008-09-30
 ------------------
 

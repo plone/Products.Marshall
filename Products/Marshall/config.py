@@ -22,17 +22,36 @@ import os
 import logging
 from App.Common import package_home
 
+logger = logging.getLogger('Marshall')
+
 try:
     import libxml2
 except ImportError:
     hasLibxml2 = False
-    logger = logging.getLogger('Marshall')
     logger.log(logging.DEBUG, \
         'libxml2-python not available.' \
         ' Unable to register libxml2 based marshallers.')
 else:
     hasLibxml2 = True
 
+
+try:
+    import elementtree
+except ImportError:
+    hasElementtree = False
+else:
+    hasElementtree = True
+
+if hasElementtree == False:
+    try:
+        import cElementTree
+    except ImportError:
+        logger.log(logging.INFO, \
+            'ElementTree not available.' \
+            ' Unable to register elementtree based marshallers, at least ATXMLMarshaller (atxml).')
+    else:
+        hasElementTree = True
+        
 PACKAGE_HOME = package_home(globals())
 HANDLE_REFS = False
 

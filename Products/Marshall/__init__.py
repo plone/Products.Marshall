@@ -29,7 +29,7 @@ del Install
 # Kick off handler registration
 from Products.Marshall import handlers
 
-if config.hasLibxml2:
+if config.hasElementtree:
     # Kick off namespace registration
     from Products.Marshall import namespaces
 

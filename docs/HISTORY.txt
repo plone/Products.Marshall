@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.2.1 - unreleased
+1.2.1 - 2009-05-29
 ------------------
 
 - Register atxml and namespaces even if libxml2 isn't present, but test for 

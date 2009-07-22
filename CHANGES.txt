@@ -4,6 +4,10 @@ Changelog
 2.0 - unreleased
 ----------------
 
+- Get tests to work with `xml.etree` and Plone trunk. We have to use the ATCT
+  test cases as a base to get the expected content types.
+  [hannosch]
+
 - Downgrade warning about missing `libxml2-python` to debug level.
   [hannosch]
 

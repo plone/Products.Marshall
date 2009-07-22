@@ -177,7 +177,7 @@ class XmlNamespace(object):
         attribute = self.getAttributeByName( tag )
         if attribute is None:
             return False
-        node.attribute = attribute
+        node.set('attribute', attribute)
         return attribute.processXml( context, node)
 
     def processXmlEnd(self, name, context):
@@ -386,7 +386,7 @@ class ATXMLMarshaller(Marshaller):
                 
             if namespace.processXml(context, node):
                 context.node=node
-                context.node.attribute.processXmlValue(context, node.text)
+                context.node.get('attribute').processXmlValue(context, node.text)
             else:
                 ## XXX: raise a warning that the attribute isnt defined in the schema
                 pass

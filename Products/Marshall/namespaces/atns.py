@@ -79,14 +79,14 @@ class ATAttribute(SchemaAttribute):
             name_attr = dom.createAttribute("name")
             name_attr.value = self.name
             node.setAttributeNode( name_attr )
-            
+
             if is_ref:
                 if config.HANDLE_REFS:
                     ref_node = dom.createElementNS( self.namespace.xmlns,
                                                     'reference' )
                     uid_node = dom.createElementNS( self.namespace.xmlns,
                                                     'uid' )
-                    value = response.createTextNode( str( value ) )
+                    value = dom.createTextNode( str( value ) )
                     uid_node.append( value )
                     ref_node.append( uid_node )
                     node.append( ref_node )
@@ -343,10 +343,6 @@ class Archetypes(XmlNamespace):
             if schema_name is None:
                 log("'id' attribute for at:field is deprecated, use 'name' instead")
                 schema_name = data_node.attrib.get('id')
-##            while context.reader.MoveToNextAttribute():
-##                if context.reader.LocalName() == 'id':
-##                    schema_name = context.reader.Value()
-##                    break
             assert schema_name, "No field name specified in at:field element"
             #print "field", schema_name
             self.last_schema_id = schema_name
@@ -354,7 +350,7 @@ class Archetypes(XmlNamespace):
             if attribute is None:
                 #print "na", schema_name
                 return False
-            data_node.attribute = attribute
+            data_node.set('attribute', attribute)
             return True
         
         elif self.in_reference_mode:
@@ -375,7 +371,7 @@ class Archetypes(XmlNamespace):
                 ref = srefs[-1]
                 
             attribute = ReferenceAttribute( data_node.name, ref )
-            data_node.attribute = attribute
+            data_node.set('attribute', attribute)
             return True
 
         elif tagname in self.at_fields:
@@ -383,7 +379,7 @@ class Archetypes(XmlNamespace):
             attribute = self.getAttributeByName( tagname )
             if attribute is None:
                 return False
-            data_node.attribute = attribute
+            data_node.set('attribute', attribute)
             return True
 
         return False

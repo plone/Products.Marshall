@@ -24,7 +24,7 @@ import difflib
 
 # Load fixture
 from Testing import ZopeTestCase
-from Products.Archetypes.tests.atsitetestcase import ATSiteTestCase
+from Products.ATContentTypes.tests.atcttestcase import ATCTSiteTestCase
 
 from AccessControl.SecurityManagement import newSecurityManager
 
@@ -42,7 +42,7 @@ def normalize_space(s):
     s =  re.sub(r"[\r\n]+", r'\r\n', s)
     return s
 
-class BaseTest(ATSiteTestCase):
+class BaseTest(ATCTSiteTestCase):
     """Base Test"""
 
     def loginPortalOwner(self):

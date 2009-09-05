@@ -4,6 +4,9 @@ Changelog
 2.0 - unreleased
 ----------------
 
+- Changed the config.py check for ElementTree to accept xml.etree.
+  [hannosch]
+
 - Get tests to work with `xml.etree` and Plone trunk. We have to use the ATCT
   test cases as a base to get the expected content types.
   [hannosch]

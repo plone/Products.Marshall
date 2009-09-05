@@ -35,23 +35,21 @@ else:
     hasLibxml2 = True
 
 
+hasElementtree = True
 try:
-    import elementtree
+    from xml.etree import cElementTree
 except ImportError:
-    hasElementtree = False
-else:
-    hasElementtree = True
-
-if hasElementtree == False:
     try:
         import cElementTree
     except ImportError:
-        logger.log(logging.INFO, \
-            'ElementTree not available.' \
-            ' Unable to register elementtree based marshallers, at least ATXMLMarshaller (atxml).')
-    else:
-        hasElementTree = True
-        
+        try:
+            from elementtree import ElementTree
+        except ImportError:
+            hasElementtree = False
+            logger.log(logging.INFO, \
+                'ElementTree not available.' \
+                ' Unable to register elementtree based marshallers, at least ATXMLMarshaller (atxml).')
+
 PACKAGE_HOME = package_home(globals())
 HANDLE_REFS = False
 

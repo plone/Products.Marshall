@@ -4,6 +4,9 @@ Changelog
 2.0 - unreleased
 ----------------
 
+- Replaced a simple logging call with the standard logging module.
+  [hannosch]
+
 - Changed the config.py check for ElementTree to accept xml.etree.
   [hannosch]
 

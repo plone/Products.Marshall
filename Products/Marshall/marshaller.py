@@ -19,10 +19,12 @@
 $Id$
 """
 
+import logging
+
 from Products.CMFCore.utils import getToolByName
-from Products.Archetypes.debug import log
 from Products.Archetypes.Marshall import Marshaller
 from Products.Archetypes.utils import mapply
+from Products.Marshall.config import logger
 from Products.Marshall.config import TOOL_ID
 from Products.Marshall.registry import getComponent
 from Products.Marshall.exceptions import MarshallingException
@@ -64,7 +66,7 @@ class ControlledMarshaller(Marshaller):
         else:
             # Couldn't find a context to get
             # hold of the tool or the tool is not installed.
-            log('Could not find the marshaller tool. '
+            logger.log(logging.DEBUG, 'Could not find the marshaller tool. '
                 'It might not be installed or you might not '
                 'be providing enough context to find it.')
         # We just use the first component, if one is returned.

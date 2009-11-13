@@ -1,24 +1,6 @@
-import os
-import sys
 from setuptools import setup, find_packages
 
-version = '2.0'
-
-install_requires=[
-    'setuptools',
-    'zope.contenttype',
-    'zope.interface',
-    'Products.Archetypes',
-    'Products.CMFCore',
-    'Products.GenericSetup',
-    'Acquisition',
-    'DateTime',
-    'ExtensionClass',
-    'Zope2',
-]
-
-if sys.version_info[:3] < (2,5,0):
-    install_requires.append('elementtree')
+version = '2.0a1'
 
 
 setup(name='Products.Marshall',
@@ -50,5 +32,16 @@ setup(name='Products.Marshall',
             'Products.ATContentTypes',
         ]
       ),
-      install_requires=install_requires,
+      install_requires=[
+          'setuptools',
+          'zope.contenttype',
+          'zope.interface',
+          'Products.Archetypes',
+          'Products.CMFCore',
+          'Products.GenericSetup',
+          'Acquisition',
+          'DateTime',
+          'ExtensionClass',
+          'Zope2',
+      ],
       )

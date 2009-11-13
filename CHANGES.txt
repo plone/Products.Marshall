@@ -1,8 +1,8 @@
 Changelog
 =========
 
-2.0 - unreleased
-----------------
+2.0a1 - 2009-11-13
+------------------
 
 - Replaced a simple logging call with the standard logging module.
   [hannosch]

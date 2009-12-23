@@ -4,6 +4,8 @@ Changelog
 2.0b1 - Unreleased
 ------------------
 
+- Removed BBB code for guess_content_type and fixed package dependencies.
+  [hannosch]
 
 2.0a1 - 2009-11-13
 ------------------

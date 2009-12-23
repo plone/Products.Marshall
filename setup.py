@@ -29,12 +29,12 @@ setup(name='Products.Marshall',
       zip_safe=False,
       extras_require=dict(
         test=[
-            'zope.schema',
             'Products.ATContentTypes',
         ]
       ),
       install_requires=[
           'setuptools',
+          'transaction',
           'zope.contenttype',
           'zope.interface',
           'Products.Archetypes',

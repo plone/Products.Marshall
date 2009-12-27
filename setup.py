@@ -2,7 +2,6 @@ from setuptools import setup, find_packages
 
 version = '2.0b1'
 
-
 setup(name='Products.Marshall',
       version=version,
       description="Configurable Marshallers for Archetypes",

@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.0b1 - Unreleased
+2.0b1 - 2009-12-27
 ------------------
 
 - Removed BBB code for guess_content_type and fixed package dependencies.

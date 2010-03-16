@@ -140,8 +140,13 @@ stuff into the 'blurb' field using CDATA.
   >>> article.CreationDate()
   '2004-01-01T01:02:04+01:00'
 
+ExpirationDate and EffectiveDate are not being set during import:
+
   >>> article.ExpirationDate()
-  '2004-09-09 09:09:08'
+  'None'
+
+  >>> article.EffectiveDate()
+  'None'
 
 
 Upload a text file (in this case, 'text/x-rst') and make sure the body

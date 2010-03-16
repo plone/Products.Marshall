@@ -329,7 +329,7 @@ def marshall_value( value ):
     elif isinstance(value, float):
         return str(value), 'float'
     elif isinstance(value, DateTime):
-        return value.ISO(), 'date'
+        return value.ISO8601(), 'date'
     elif isinstance(value, type(None)):
         return 'None', 'None'
     else:

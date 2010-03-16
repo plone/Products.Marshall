@@ -4,6 +4,8 @@ Changelog
 2.0b2 - unreleased
 ------------------
 
+- Deprecationfix: Use DateTime.ISO8601() instead of DateTime.ISO
+  [tomster]
 
 2.0b1 - 2009-12-27
 ------------------

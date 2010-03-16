@@ -138,7 +138,7 @@ stuff into the 'blurb' field using CDATA.
   '<p>Here is some Text</p>'
 
   >>> article.CreationDate()
-  '2004-01-01 00:02:04'
+  '2004-01-01T01:02:04+01:00'
 
   >>> article.ExpirationDate()
   '2004-09-09 09:09:08'

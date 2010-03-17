@@ -32,14 +32,14 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.permissions import ManagePortal
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
+
 class Export(Base):
 
     security = ClassSecurityInfo()
 
     security.declareProtected(ManagePortal, 'atxml_template')
-    atxml_template = PageTemplateFile(
-        'www/atxml', globals(),
-        __name__ = 'atxml_template')
+    atxml_template = PageTemplateFile('www/atxml', globals(),
+                                      __name__='atxml_template')
 
     security.declareProtected(ManagePortal, 'marshall_data')
     def marshall_data(self, obj):
@@ -65,12 +65,13 @@ class Export(Base):
 
         content_type, length, data = ddata
 
-        if type(data) is type(''): return StringIO(data)
+        if type(data) is type(''):
+            return StringIO(data)
 
         s = StringIO()
         while data is not None:
             s.write(data.data)
-            data=data.next
+            data = data.next
         s.seek(0)
         return s
 
@@ -115,7 +116,7 @@ class Export(Base):
 
             metadata = d.copy()
             for name in ('data', 'path'):
-                if metadata.has_key(name):
+                if name in metadata:
                     del metadata[name]
             # Write metadata
             metadata_path = os.path.join(dir_path, '.metadata')

@@ -41,6 +41,7 @@ from Products.Archetypes.utils import mapply
 
 from base import Marshaller
 
+
 class PrimaryFieldMarshaller(Marshaller):
 
     security = ClassSecurityInfo()
@@ -60,14 +61,14 @@ class PrimaryFieldMarshaller(Marshaller):
     def marshall(self, instance, **kwargs):
         p = instance.getPrimaryField()
         if not p:
-            raise TypeError, 'Primary Field could not be found.'
+            raise TypeError('Primary Field could not be found.')
         data = p and instance[p.getName()] or ''
         content_type = length = None
         # Gather/Guess content type
         if IBaseUnit.providedBy(data):
             content_type = data.getContentType()
             length = data.get_size()
-            data   = data.getRaw()
+            data = data.getRaw()
         elif isinstance(data, File):
             content_type = data.content_type
             length = data.get_size()

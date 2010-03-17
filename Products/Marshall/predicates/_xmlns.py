@@ -27,10 +27,12 @@ from _base import Predicate
 from Products.Marshall.registry import registerPredicate
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
+
 def attrMethod(attr, default=''):
     def boundAttrMethod(self):
         return getattr(self, attr, default)
     return boundAttrMethod
+
 
 class XMLNS(Predicate):
     """ Predicate matching xml files on a xmlns:attribute pair.
@@ -49,11 +51,11 @@ class XMLNS(Predicate):
 
     manage_options = (
         Predicate.manage_options[0],
-        {'label':'Settings', 'action':'manage_changeSettingsForm'},
+        {'label': 'Settings', 'action': 'manage_changeSettingsForm'},
         ) + Predicate.manage_options[1:]
 
     security.declareProtected('View management screens',
-      'manage_changeSettingsForm')
+                              'manage_changeSettingsForm')
 
     manage_changeSettingsForm = PageTemplateFile(
         '../www/xmlnsSettings', globals(),
@@ -69,7 +71,7 @@ class XMLNS(Predicate):
 
         for n in (element_ns, element_name, attr_ns, attr_name):
             if not isinstance(n, basestring):
-                raise TypeError, 'string required, got %r.' % n
+                raise TypeError('string required, got %r.' % n)
         self._value = value
         self._element_ns = element_ns
         self._element_name = element_name
@@ -111,7 +113,8 @@ class XMLNS(Predicate):
             return ()
         match = True
         elm = elm[0]
-        attr_args = filter(None, (self.getAttributeNS(), self.getAttributeName()))
+        attr_args = filter(None, (self.getAttributeNS(),
+                                  self.getAttributeName()))
         if not attr_args:
             get_attr = lambda elm=elm: elm.firstChild.nodeValue.strip()
         else:

@@ -30,11 +30,13 @@ from Products.Marshall.registry import getComponent
 from Products.Marshall.exceptions import MarshallingException
 from Acquisition import ImplicitAcquisitionWrapper
 
+
 def getContext(obj, REQUEST=None):
     context = getattr(obj, 'aq_parent', None)
     if context is not None or REQUEST is None:
         return obj
     return REQUEST['PARENTS'][0]
+
 
 class ControlledMarshaller(Marshaller):
 
@@ -93,7 +95,7 @@ class ControlledMarshaller(Marshaller):
         return self.delegate('marshall', obj, **kw)
 
     def demarshall(self, obj, data, **kw):
-        if kw.has_key('file'):
+        if 'file' in kw:
             if not data:
                 # XXX Yuck! Shouldn't read the whole file, never.
                 # OTOH, if you care about large files, you should be

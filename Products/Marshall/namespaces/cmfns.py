@@ -45,6 +45,7 @@ TypeRNGSchemaFragment = '''
   </define>
 '''
 
+
 class TypeAttribute(SchemaAttribute):
 
     def getAttributeNames(self):
@@ -55,16 +56,16 @@ class TypeAttribute(SchemaAttribute):
 
     def deserialize(self, instance, ns_data):
         value = ns_data.get(self.name)
-        instance._setPortalTypeName( value )
+        instance._setPortalTypeName(value)
 
     def serialize(self, dom, parent_node, instance):
         value = self.get(instance)
-        elname = "%s:%s"%(self.namespace.prefix, self.name)
-        node = dom.createElementNS( CMF.xmlns, elname )
-        value_node = dom.createTextNode( str( value ) )
-        node.appendChild( value_node )
+        elname = "%s:%s" % (self.namespace.prefix, self.name)
+        node = dom.createElementNS(CMF.xmlns, elname)
+        value_node = dom.createTextNode(str(value))
+        node.appendChild(value_node)
         node.normalize()
-        parent_node.appendChild( node )
+        parent_node.appendChild(node)
 
 
 SecurityRNGSchemaFragment = '''
@@ -85,8 +86,8 @@ SecurityRNGSchemaFragment = '''
   </define>
 '''
 
+
 class LocalRolesAttribute(SchemaAttribute):
-    
     """
     serializes local roles into the form of
 
@@ -103,16 +104,16 @@ class LocalRolesAttribute(SchemaAttribute):
 
     def getAttributeNames(self):
         return (self.name,)
-    
+
     def get(self, instance):
-        return getattr( instance, '__ac_local_roles__', {})
+        return getattr(instance, '__ac_local_roles__', {})
 
     def deserialize(self, instance, ns_data):
         values = ns_data.get(self.name)
         if not values:
             return
         for user_id, role in values:
-            instance.manage_addLocalRoles( user_id, [role])
+            instance.manage_addLocalRoles(user_id, [role])
 
     def serialize(self, dom, parent_node, instance):
         values = self.get(instance)
@@ -120,23 +121,23 @@ class LocalRolesAttribute(SchemaAttribute):
         if not values:
             return
 
-        elname = "%s:%s"%(self.namespace.prefix, "security")
-        node = dom.createElementNS( CMF.xmlns,  elname )
+        elname = "%s:%s" % (self.namespace.prefix, "security")
+        node = dom.createElementNS(CMF.xmlns, elname)
 
         for user_id, roles in values.items():
             for role in roles:
-                elname = "%s:%s"%(self.namespace.prefix, self.name )
-                lr_node = dom.createElementNS( CMF.xmlns, elname )
+                elname = "%s:%s" % (self.namespace.prefix, self.name)
+                lr_node = dom.createElementNS(CMF.xmlns, elname)
                 user_attr = dom.createAttribute("user_id")
                 user_attr.value = user_id
-                lr_node.setAttributeNode( user_attr )
-                
-                role_attr = dom.createAttribute( "role")
+                lr_node.setAttributeNode(user_attr)
+
+                role_attr = dom.createAttribute("role")
                 role_attr.value = role
-                lr_node.setAttributeNode( role_attr )
-                node.appendChild( lr_node )
-        
-        parent_node.appendChild( node )
+                lr_node.setAttributeNode(role_attr)
+                node.appendChild(lr_node)
+
+        parent_node.appendChild(node)
 
     def processXml(self, context, ctx_node):
         value = context.reader.Value()
@@ -146,19 +147,19 @@ class LocalRolesAttribute(SchemaAttribute):
         if not value:
             return
 
-        data = context.getDataFor( self.namespace.xmlns )
+        data = context.getDataFor(self.namespace.xmlns)
         values = data.setdefault(self.name, [])
         user_id = role = None
-        
-        while context.reader.MoveToNextAttribute():            
+
+        while context.reader.MoveToNextAttribute():
             if context.reader.LocalName() == 'user_id':
                 user_id = reader.Value()
             elif context.reader.LocalName() == 'role':
                 role = context.reader.Value()
 
         assert user_id, role
-        values.append( (user_id, role ) )
-            
+        values.append((user_id, role))
+
 
 WorkflowRNGSchemaFragment = '''
   <define name="WorkflowHistory"
@@ -186,6 +187,7 @@ WorkflowRNGSchemaFragment = '''
   </define>
 '''
 
+
 class WorkflowAttribute(SchemaAttribute):
     """
     serializes workflow state into the form below
@@ -206,7 +208,7 @@ class WorkflowAttribute(SchemaAttribute):
 
     def getAttributeNames(self):
         return ("workflow", "var", "history", 'workflow_history')
-        
+
     def get(self, instance):
         return getattr(instance, 'workflow_history', None)
 
@@ -215,55 +217,54 @@ class WorkflowAttribute(SchemaAttribute):
         wf_tool = getToolByName(instance, 'portal_workflow')
 
         for wf_id in wf_records:
-            #history = list( instance.workflow_history.setdefault( wf_id, () ) )
-            history=[]
-            for record in wf_records[ wf_id ]:
-                history.append( record )
-            instance.workflow_history[ wf_id ] = tuple( history )
+            #history = list(instance.workflow_history.setdefault(wf_id, ()))
+            history = []
+            for record in wf_records[wf_id]:
+                history.append(record)
+            instance.workflow_history[wf_id] = tuple(history)
 
     def serialize(self, dom, parent_node, instance):
-        history = self.get( instance )
+        history = self.get(instance)
 
         if history is None:
             return
-        
-        elname = "%s:workflow_history"%(self.namespace.prefix)
-        node = dom.createElementNS( self.namespace.xmlns, elname )
+
+        elname = "%s:workflow_history" % (self.namespace.prefix)
+        node = dom.createElementNS(self.namespace.xmlns, elname)
         keys = history.keys()
         for wf_id in keys:
-            wf_node = self.serializeWorkflow( dom, wf_id, history )
-            node.appendChild( wf_node )
-        parent_node.appendChild( node )
-        
+            wf_node = self.serializeWorkflow(dom, wf_id, history)
+            node.appendChild(wf_node)
+        parent_node.appendChild(node)
 
     def serializeWorkflow(self, dom, wf_id, wf_hist):
 
         prefix = self.namespace.prefix
-        xmlns  = self.namespace.xmlns
-        
-        elname = "%s:workflow"%prefix
+        xmlns = self.namespace.xmlns
+
+        elname = "%s:workflow" % prefix
         node = dom.createElementNS(xmlns, elname)
 
-        wfid_attr = dom.createAttribute( "id" )
+        wfid_attr = dom.createAttribute("id")
         wfid_attr.value = wf_id
-        
-        node.setAttributeNode( wfid_attr )
-        
+
+        node.setAttributeNode(wfid_attr)
+
         for history in wf_hist[wf_id]:
-            elname = "%s:%s"%(prefix, "history")
+            elname = "%s:%s" % (prefix, "history")
             history_node = dom.createElementNS(xmlns, elname)
             items = history.items()
-            items.sort(lambda a,b: cmp(a[0],b[0]))
-            
-            for k,v in items:
-                elname = "%s:%s"%(prefix, "var" )
+            items.sort(lambda a, b: cmp(a[0], b[0]))
+
+            for k, v in items:
+                elname = "%s:%s" % (prefix, "var")
                 var_node = dom.createElementNS(xmlns, elname)
                 # Attributes normally do not have a namespace
                 value_attr = dom.createAttribute("value")
                 type_attr = dom.createAttribute("type")
                 id_attr = dom.createAttribute("id")
 
-                value, vtype = marshall_value( v )
+                value, vtype = marshall_value(v)
 
                 id_attr.value = str(k)
                 type_attr.value = vtype
@@ -272,55 +273,59 @@ class WorkflowAttribute(SchemaAttribute):
                 var_node.setAttributeNode(id_attr)
                 var_node.setAttributeNode(type_attr)
                 var_node.setAttributeNode(value_attr)
-                
-                history_node.appendChild( var_node )
-                
-            node.appendChild( history_node )
+
+                history_node.appendChild(var_node)
+
+            node.appendChild(history_node)
 
         return node
-                
+
     def processXml(self, context, node):
 
-        tag,namespace=utils.fixtag(node.tag,context.ns_map)
+        tag, namespace = utils.fixtag(node.tag, context.ns_map)
         data = context.getDataFor(self.namespace.xmlns)
-        nsprefix=node.tag[:node.tag.find('}')+1]
+        nsprefix = node.tag[:node.tag.find('}') + 1]
 
         #iworkflow
-        wf_node=node.find(nsprefix+'workflow')
-        wf_id = wf_node.attrib.get(nsprefix+'id') or wf_node.attrib.get('id') #be tolerant with namespace sloppyness;)
+        wf_node = node.find(nsprefix + 'workflow')
+        wf_id = (wf_node.attrib.get(nsprefix + 'id') or
+                 wf_node.attrib.get('id'))
+                 #be tolerant with namespace sloppyness;)
         assert wf_id
-            
-            
+
         wf_data = data.setdefault(self.name, {})
-        wf_data.setdefault( wf_id, [] )
+        wf_data.setdefault(wf_id, [])
         wf_pstate = data.setdefault('_wf_pstate', wf_id)
-            
+
         #history
-        hist_nodes=wf_node.findall(nsprefix+'history')
+        hist_nodes = wf_node.findall(nsprefix + 'history')
         wf_pstate = data['_wf_pstate']
         for hist_node in hist_nodes:
             record = {}
-            data[self.name][wf_pstate].append( record )
-    
+            data[self.name][wf_pstate].append(record)
+
             #var
-            var_nodes=hist_node.findall(nsprefix+'var')
+            var_nodes = hist_node.findall(nsprefix + 'var')
             vid = vtype = value = None
-            
+
             for var_node in var_nodes:
-                vid=var_node.attrib.get(nsprefix+'id') or var_node.attrib.get('id')
-                vtype=var_node.attrib.get(nsprefix+'type',None) or var_node.attrib.get('type')
-                value=var_node.attrib.get(nsprefix+'value',None) or var_node.attrib.get('value') or ''
-                
+                vid = (var_node.attrib.get(nsprefix + 'id') or
+                       var_node.attrib.get('id'))
+                vtype = (var_node.attrib.get(nsprefix + 'type', None) or
+                         var_node.attrib.get('type'))
+                value = (var_node.attrib.get(nsprefix + 'value', None) or
+                         var_node.attrib.get('value') or '')
+
                 assert vid and vtype and not value is None
-    
-                value = demarshall_value( value, vtype )
-                wf_pstate = data['_wf_pstate']            
-                data[self.name][wf_pstate][-1][vid]=value
+
+                value = demarshall_value(value, vtype)
+                wf_pstate = data['_wf_pstate']
+                data[self.name][wf_pstate][-1][vid] = value
 
         return True
-    
 
-def marshall_value( value ):
+
+def marshall_value(value):
 
     if isinstance(value, str):
         return value, 'str'
@@ -333,9 +338,10 @@ def marshall_value( value ):
     elif isinstance(value, type(None)):
         return 'None', 'None'
     else:
-        raise SyntaxError("Unknown value type %r"%value)
-    
-def demarshall_value( value, type ):
+        raise SyntaxError("Unknown value type %r" % value)
+
+
+def demarshall_value(value, type):
 
     if type == 'str':
         return value
@@ -344,38 +350,37 @@ def demarshall_value( value, type ):
     elif type == 'float':
         return float(value)
     elif type == 'date':
-        if value.strip()=='':
+        if value.strip() == '':
             return None
         else:
             return DateTime(value)
     elif type == 'None':
         return None
     else:
-        raise SyntaxError("Unknown Type %r"%type)
-    
+        raise SyntaxError("Unknown Type %r" % type)
+
+
 class CMF(XmlNamespace):
-    
+
     xmlns = config.CMF_NS
     prefix = 'cmf'
     attributes = (
         TypeAttribute('type'),
         WorkflowAttribute('workflow_history '),
-        LocalRolesAttribute('local_role')
-        )
+        LocalRolesAttribute('local_role'))
 
     def getAttributeByName(self, name):
 
         for attr in self.attributes:
             if name in attr.getAttributeNames():
                 return attr
-            
-    def processXml(self, context, node):
-        return XmlNamespace.processXml(self,context,node)
 
-    def getSchemaInfo( self ):
+    def processXml(self, context, node):
+        return XmlNamespace.processXml(self, context, node)
+
+    def getSchemaInfo(self):
 
         return [
-            ( "TypeInfo", "optional", TypeRNGSchemaFragment ),
-            ( "SecurityInfo", "optional", SecurityRNGSchemaFragment ),
-            ( "WorkflowInfo", "optional", WorkflowRNGSchemaFragment )
-              ]
+            ("TypeInfo", "optional", TypeRNGSchemaFragment),
+            ("SecurityInfo", "optional", SecurityRNGSchemaFragment),
+            ("WorkflowInfo", "optional", WorkflowRNGSchemaFragment)]

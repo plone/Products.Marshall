@@ -42,29 +42,30 @@ RNGSchemaFragment = '''
   </define>
 '''
 
+
 class XMPDate(SchemaAttribute):
 
     def get(self, instance):
         return getattr(instance, self.field_id)
 
     def deserialize(self, instance, ns_data):
-        value = ns_data.get( self.name )
+        value = ns_data.get(self.name)
         if not value:
             return
-        value = DateTime( value )
-        setattr(instance, self.field_id, value )        
+        value = DateTime(value)
+        setattr(instance, self.field_id, value)        
 
     def serialize(self, dom, parent_node, instance):
-        value = self.get( instance )
-        if isinstance( value, DateTime):
+        value = self.get(instance)
+        if isinstance(value, DateTime):
             value = value.HTML4()
-        elname = "%s:%s"%(self.namespace.prefix, self.name)
-        node = dom.createElementNS( self.namespace.xmlns,
-                                    elname )
-        value_node = dom.createTextNode( value )
-        node.appendChild( value_node )
+        elname = "%s:%s" % (self.namespace.prefix, self.name)
+        node = dom.createElementNS(self.namespace.xmlns,
+                                   elname)
+        value_node = dom.createTextNode(value)
+        node.appendChild(value_node)
         node.normalize()
-        parent_node.appendChild( node )
+        parent_node.appendChild(node)
     
 
 class AdobeXMP(XmlNamespace):
@@ -76,15 +77,10 @@ class AdobeXMP(XmlNamespace):
     
     attributes = (
         XMPDate('CreateDate', 'creation_date'),
-        XMPDate('ModifyDate', 'modification_date'),
-        )
+        XMPDate('ModifyDate', 'modification_date'),)
 
     def getATFields(self):
         return ('creation_date', 'modification_date')
 
     def getSchemaInfo(self):
-        return (
-            ("DateInfo", "zeroOrMore", RNGSchemaFragment),
-            )
-        
-
+        return (("DateInfo", "zeroOrMore", RNGSchemaFragment),)

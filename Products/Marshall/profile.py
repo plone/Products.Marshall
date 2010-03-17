@@ -41,13 +41,15 @@ from Products.Marshall.registry import createPredicate
 
 _FILENAME = 'marshall-registry.xml'
 
+
 def _getRegistry(site):
     registry = site._getOb(TOOL_ID, None)
 
     if registry is None:
-        raise ValueError, 'Marshall Registry Not Found'
+        raise ValueError('Marshall Registry Not Found')
 
     return registry
+
 
 def exportMarshallRegistry(context):
     """ Export marshall registry as an XML file.
@@ -59,6 +61,7 @@ def exportMarshallRegistry(context):
     xml = exporter.generateXML()
     context.writeDataFile(_FILENAME, xml, 'text/xml')
     return 'Marshall Registry exported.'
+
 
 def _updateMarshallRegistry(registry, xml, should_purge, encoding=None):
 
@@ -72,14 +75,15 @@ def _updateMarshallRegistry(registry, xml, should_purge, encoding=None):
     for info in reg_info['predicates']:
         if registry.hasObject(info['id']):
             registry.manage_delObjects(ids=[info['id']])
-        obj = createPredicate(info['predicate_name'], 
-                              info['id'], info['title'], 
-                              info['expression'], 
+        obj = createPredicate(info['predicate_name'],
+                              info['id'], info['title'],
+                              info['expression'],
                               info['component'])
-        if (info['predicate_name'] in ('xmlns_attr',) and 
+        if (info['predicate_name'] in ('xmlns_attr',) and
             info.get('xml_settings', ())):
             obj.edit(**info['xml_settings'][0])
         registry._setObject(info['id'], obj)
+
 
 def importMarshallRegistry(context):
     """ Import marshall registry from an XML file.
@@ -95,6 +99,7 @@ def importMarshallRegistry(context):
 
     _updateMarshallRegistry(registry, xml, context.shouldPurge(), encoding)
     return 'Marshall Registry imported.'
+
 
 class MarshallRegistryExporter(ExportConfiguratorBase):
 
@@ -121,6 +126,7 @@ class MarshallRegistryExporter(ExportConfiguratorBase):
                 settings['attr_ns'] = predicate.getAttributeNS()
                 settings['value'] = predicate.getValue()
             yield info
+
 
 class MarshallRegistryImporter(ImportConfiguratorBase):
 
@@ -150,6 +156,7 @@ class MarshallRegistryImporter(ImportConfiguratorBase):
                'value':          {KEY: 'value'}
                },
          }
+
 
 class MarshallRegistryFileExportImportAdapter(object):
     """ Designed for use when exporting / importing within a container.

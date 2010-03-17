@@ -36,6 +36,7 @@ from Products.Marshall.exceptions import MarshallingException
 import libxml2
 libxml2.initParser()
 
+
 class SimpleXMLMarshaller(Marshaller):
 
     __name__ = 'Simple XML Marshaller'
@@ -49,7 +50,8 @@ class SimpleXMLMarshaller(Marshaller):
                       if f.getName() != pname]
             for f in fields:
                 items = doc.xpathEval('/*/%s' % f.getName())
-                if not len(items): continue
+                if not len(items):
+                    continue
                 # Note that we ignore all but the first element if
                 # we get more than one
                 value = items[0].children

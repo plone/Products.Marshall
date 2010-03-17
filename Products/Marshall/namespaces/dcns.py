@@ -57,6 +57,7 @@ RNGSchemaFragment = '''
   </define>
 '''
 
+
 class DCAttribute(SchemaAttribute):
 
     def __init__(self,
@@ -74,67 +75,68 @@ class DCAttribute(SchemaAttribute):
         self.process = process
 
     def get(self, instance):
-        accessor = getattr( instance, self.accessor)
+        accessor = getattr(instance, self.accessor)
         value = accessor()
 
         if not value:
             return None
-        elif not isinstance( value, (list, tuple) ):
+        elif not isinstance(value, (list, tuple)):
             values = [value]
         elif self.many:
             values = value
         else:
             raise AssertionError("Many values on single value attr")
-        
+
         return filter(None, values)
 
     def deserialize(self, instance, ns_data):
-        
-        value = ns_data.get( self.name )
+
+        value = ns_data.get(self.name)
 
         if not self.mutator or not value:
             return
-        
+
         if self.process:
             for p in self.process:
-                value = p( value )
+                value = p(value)
 
-        mutator = getattr( instance, self.mutator )
-        mutator( value )
+        mutator = getattr(instance, self.mutator)
+        mutator(value)
 
     def serialize(self, dom, parent_node, instance):
-        values = self.get( instance )
+        values = self.get(instance)
         if not values:
             return False
-            
+
         for value in values:
-            elname = "%s:%s"%(self.namespace.prefix, self.name)
-            node = dom.createElementNS( DublinCore.xmlns, elname)
-            value_node = dom.createTextNode( str( value ) )
-            node.appendChild( value_node )
+            elname = "%s:%s" % (self.namespace.prefix, self.name)
+            node = dom.createElementNS(DublinCore.xmlns, elname)
+            value_node = dom.createTextNode(str(value))
+            node.appendChild(value_node)
             node.normalize()
-            parent_node.appendChild( node )
+            parent_node.appendChild(node)
         return True
 
     def processXmlValue(self, context, value):
         value = value and value.strip()
         if not value:
             return
-        data = context.getDataFor( self.namespace.xmlns )
-        
+        data = context.getDataFor(self.namespace.xmlns)
+
         if self.many:
-            data.setdefault(self.name, []).append( value )
+            data.setdefault(self.name, []).append(value)
         else:
-            data[self.name]=value
-            
+            data[self.name] = value
+
+
 class normalizer(object):
     """ utility function ns """
 
-    def space( text ):
+    def space(text):
         return '\n'.join([s.strip() for s in text.splitlines()])
     space = staticmethod(space)
 
-    def newline( text ):
+    def newline(text):
         return ' '.join([s.strip() for s in text.splitlines()])
     newline = staticmethod(newline)
 
@@ -145,23 +147,21 @@ class DublinCore(XmlNamespace):
     prefix = 'dc'
 
     uses_at_fields = True
-    
+
     attributes = (
         DCAttribute('title', 'Title', 'setTitle',
                     process=(normalizer.space, normalizer.newline)),
-        
+
         DCAttribute('description', 'Description', 'setDescription',
                     process=(normalizer.space,)),
 
-        DCAttribute('subject', 'Subject', 'setSubject', many=True),                
+        DCAttribute('subject', 'Subject', 'setSubject', many=True),
         DCAttribute('contributor', 'Contributors', 'setContributors',
                     many=True),
         # this attr diverges from cmfdefault.dublincore
         DCAttribute('creator', 'Creators', 'setCreators', many=True),
         DCAttribute('rights', 'Rights', 'setRights'),
-        DCAttribute('language', 'Language', 'setLanguage')
-        )
-    
+        DCAttribute('language', 'Language', 'setLanguage'))
 
     def getATFields(self):
         return ('title',
@@ -173,4 +173,4 @@ class DublinCore(XmlNamespace):
                 'language')
 
     def getSchemaInfo(self):
-        return [ ("DublinCore", "zeroOrMore", RNGSchemaFragment) ]
+        return [("DublinCore", "zeroOrMore", RNGSchemaFragment)]

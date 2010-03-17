@@ -23,6 +23,7 @@ $Id$
 
 from zope.interface import Interface
 
+
 class IPredicate(Interface):
     """ A Predicate """
 

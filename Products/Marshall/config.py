@@ -47,8 +47,9 @@ except ImportError:
         except ImportError:
             hasElementtree = False
             logger.log(logging.INFO, \
-                'ElementTree not available.' \
-                ' Unable to register elementtree based marshallers, at least ATXMLMarshaller (atxml).')
+                       'ElementTree not available. '
+                       'Unable to register elementtree based marshallers, '
+                       'at least ATXMLMarshaller (atxml).')
 
 PACKAGE_HOME = package_home(globals())
 HANDLE_REFS = False

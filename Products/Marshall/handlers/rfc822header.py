@@ -50,6 +50,7 @@ mixedCase: a MiXeD case keyword
 This is the body.
 """
 
+
 class NonLoweringMessage(Message):
     """A RFC 822 Message class that doesn't lower header names
     
@@ -65,7 +66,7 @@ class NonLoweringMessage(Message):
             return line[:i]
             #return line[:i].lower()
         else:
-            return None        
+            return None
 
     def getheader(self, name, default=None):
         """Get the header value for a name.
@@ -75,27 +76,26 @@ class NonLoweringMessage(Message):
             # return self.dict[name.lower()]
         except KeyError:
             return default
-    get = getheader  
+    get = getheader
 
 
-
-def formatRFC822Headers( headers ):
-
+def formatRFC822Headers(headers):
     """ Convert the key-value pairs in 'headers' to valid RFC822-style
         headers, including adding leading whitespace to elements which
         contain newlines in order to preserve continuation-line semantics.
 
-        code based on old cmf1.4 impl 
+        code based on old cmf1.4 impl
     """
     munged = []
-    linesplit = re.compile( r'[\n\r]+?' )
+    linesplit = re.compile(r'[\n\r]+?')
 
     for key, value in headers:
 
-        vallines = linesplit.split( value )
-        munged.append( '%s: %s' % ( key, '\r\n  '.join( vallines ) ) )
+        vallines = linesplit.split(value)
+        munged.append('%s: %s' % (key, '\r\n  '.join(vallines)))
 
-    return '\r\n'.join( munged )
+    return '\r\n'.join(munged)
+
 
 def parseRFC822(body):
     """Parse a RFC 822 (email) style string
@@ -125,7 +125,8 @@ def parseRFC822(body):
     for key in message.keys():
         headers[key] = '\n'.join(message.getheaders(key))
 
-    return headers, buffer.read() 
+    return headers, buffer.read()
+
 
 class RFC822Marshaller(Marshaller):
 
@@ -137,7 +138,7 @@ class RFC822Marshaller(Marshaller):
 
     def demarshall(self, instance, data, **kwargs):
         # We don't want to pass file forward.
-        if kwargs.has_key('file'):
+        if 'file' in kwargs:
             if not data:
                 # XXX Yuck! Shouldn't read the whole file, never.
                 # OTOH, if you care about large files, you should be
@@ -171,12 +172,13 @@ class RFC822Marshaller(Marshaller):
         # Gather/Guess content type
         if IBaseUnit.providedBy(body):
             content_type = str(body.getContentType())
-            body   = body.getRaw()
+            body = body.getRaw()
         else:
             if p and hasattr(p, 'getContentType'):
                 content_type = p.getContentType(instance) or 'text/plain'
             else:
-                content_type = body and guess_content_type(body) or 'text/plain'
+                content_type = (body and guess_content_type(body) or
+                                'text/plain')
 
         headers = []
         fields = [f for f in instance.Schema().fields()
@@ -187,7 +189,7 @@ class RFC822Marshaller(Marshaller):
             accessor = field.getEditAccessor(instance)
             if not accessor:
                 continue
-            kw = {'raw':1, 'field': field.__name__}
+            kw = {'raw': 1, 'field': field.__name__}
             value = mapply(accessor, **kw)
             if type(value) in [ListType, TupleType]:
                 value = '\n'.join([str(v) for v in value])

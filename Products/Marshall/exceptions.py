@@ -19,4 +19,6 @@
 $Id$
 """
 
-class MarshallingException(Exception): pass
+
+class MarshallingException(Exception):
+    pass

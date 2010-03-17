@@ -35,6 +35,7 @@ from Products.Archetypes.interfaces.marshall import IMarshall
 from Products.Archetypes.interfaces.layer import ILayer
 from zope.interface import implements
 
+
 class Marshaller:
     implements(IMarshall, ILayer)
 

@@ -67,8 +67,10 @@ XMLREADER_START_ELEMENT_NODE_TYPE = 1
 XMLREADER_END_ELEMENT_NODE_TYPE = 15
 XMLREADER_TEXT_ELEMENT_NODE_TYPE = 3
 
+
 class SchemaAttributeDemarshallException(Exception):
     """Exception mus be raised when demershall of SchemaAtribute fails."""
+
 
 class ErrorCallback:
 
@@ -86,7 +88,8 @@ class ErrorCallback:
     def get(self, clear=False):
         tid = thread.get_ident()
         msgs = self.msgs.setdefault(tid, [])
-        if clear: self.clear()
+        if clear:
+            self.clear()
         return ''.join(msgs)
 
     def clear(self):
@@ -95,7 +98,6 @@ class ErrorCallback:
 
 
 class XmlNamespace(object):
-
 
     #################################
     # the framework does a bit of introspection on
@@ -115,7 +117,7 @@ class XmlNamespace(object):
 
     def __init__(self):
         for attribute in self.attributes:
-            attribute.setNamespace( self )
+            attribute.setNamespace(self)
 
     def getAttributeByName(self, name):
         """ given an xml name return the schema attribute
@@ -143,7 +145,7 @@ class XmlNamespace(object):
         based on attributes in this namespace
         """
         for attribute in self.attributes:
-            attribute.serialize( dom_node, parent_node, instance)
+            attribute.serialize(dom_node, parent_node, instance)
 
     def deserialize(self, instance, ns_data, options):
         """ given the instance and the namespace data for
@@ -151,20 +153,19 @@ class XmlNamespace(object):
         on the instance.
         """
         if not ns_data:
-            return 
+            return
         for attribute in self.attributes:
             try:
-                attribute.deserialize( instance, ns_data )
-            except Exception, e:                
+                attribute.deserialize(instance, ns_data)
+            except Exception, e:
                 ec, e, tb = sys.exc_info()
                 ftb = traceback.format_tb(tb,)
                 msg = "failure while demarshalling schema attribute %s\n" % \
-                      attribute.name 
+                      attribute.name
                 msg += "data: %s\n" % ns_data.get(attribute.name, None)
                 msg += "original exception: %s\n" % str(ec)
                 msg += "original traceback:\n%s" % '\n'.join(ftb)
-                raise SchemaAttributeDemarshallException, msg
-                
+                raise SchemaAttributeDemarshallException(msg)
 
     def processXml(self, context, node):
         """ handle the start of a xml tag with this namespace
@@ -172,40 +173,38 @@ class XmlNamespace(object):
 
         if this method return false then the node is assumed to
         be junk and it is discarded.
-        """ 
-        tag, ns = utils.fixtag(node.tag,context.ns_map)
-        attribute = self.getAttributeByName( tag )
+        """
+        tag, ns = utils.fixtag(node.tag, context.ns_map)
+        attribute = self.getAttributeByName(tag)
         if attribute is None:
             return False
         node.set('attribute', attribute)
-        return attribute.processXml( context, node)
+        return attribute.processXml(context, node)
 
     def processXmlEnd(self, name, context):
         """ callback invoked when the parser reaches the
         end of an xml node in this namespace.
         """
 
-    def getSchemaInfo( self ):
+    def getSchemaInfo(self):
         """ return information on this namespace's rng schema
 
-        should be an iterable of sets of ( 'defined_name', 'occurence', 'schema')
-        where defined name is the name of any top level defined entities in
-        the schema, occurence defines the rng occurence value for that entity
-        in the object's xml representation, and schema is the rng schema
-        definition for the defined entities
+        should be an iterable of sets of
+        ('defined_name', 'occurence', 'schema')
+        where defined name is the name of any top level defined
+        entities in the schema, occurence defines the rng occurence
+        value for that entity in the object's xml representation,
+        and schema is the rng schema definition for the defined entities
         """
         return ()
-    
-    
-        
-    
+
 
 class SchemaAttribute(object):
 
     def __init__(self, name, field_name=None):
         self.name, self.field_id = name, field_name or name
         self.namespace = None
-        
+
     def set(self, instance, data):
         """ set the attribute's value on the instance
         """
@@ -225,7 +224,7 @@ class SchemaAttribute(object):
         """ give the instance and the namespace data for
         instance, reconstitute this attribute on the instance
         """ 
-        self.set( instance, ns_data )
+        self.set(instance, ns_data)
 
     def processXml(self, context, ctx_node):
         """ callback invoked with a node from the xml stream
@@ -240,13 +239,14 @@ class SchemaAttribute(object):
         value = value and value.strip()
         if not value:
             return
-        data = context.getDataFor( self.namespace.xmlns )
+        data = context.getDataFor(self.namespace.xmlns)
         data[self.name] = value
 
     def setNamespace(self, namespace):
         """ sets which namespace the attribute belongs to
         """
         self.namespace = namespace
+
 
 class DataNode(object):
     """ a data bag holding a namespace uri and a node name
@@ -262,6 +262,7 @@ class DataNode(object):
         self.name = name
         self.attribute = None
 
+
 class ParseContext(object):
     """ a bag for holding data values from and for parsing
     """
@@ -272,21 +273,24 @@ class ParseContext(object):
         self.data = {} # ns_uri -> ns_data
         self.node = None # current node if any
         self.ns_delegate = None
-        
+
     def getDataFor(self, ns_uri):
         return self.data.setdefault(ns_uri, {})
 
     def getNamespaceFor(self, ns_uri):
         if self.ns_delegate is not None:
             return self.ns_delegate
-        return self.ns_map.get( ns_uri )
+        return self.ns_map.get(ns_uri)
 
-    def setNamespaceDelegate( self, namespace):
+    def setNamespaceDelegate(self, namespace):
         self.ns_delegate = namespace
 
-class ATXMLMarker: pass
+
+class ATXMLMarker:
+    pass
 
 _marker = ATXMLMarker()
+
 
 class ATXMLMarshaller(Marshaller):
 
@@ -297,8 +301,8 @@ class ATXMLMarshaller(Marshaller):
     use_validation = False
 
     __name__ = 'ATXML Marshaller'
-    
-    def __init__(self, demarshall_hook=None, marshall_hook=None, 
+
+    def __init__(self, demarshall_hook=None, marshall_hook=None,
                  root_tag='metadata', namespace=_marker):
         Marshaller.__init__(self, demarshall_hook, marshall_hook)
         self.root_tag = root_tag
@@ -310,11 +314,12 @@ class ATXMLMarshaller(Marshaller):
         namespaces = self.getNamespaceURIMap()
         # Flatten ns into (ns, attr) tuples
         flat_ns = []
-        [flat_ns.extend(zip((n,)*len(n.attrs), n.attrs)) for n in self.namespaces]
+        [flat_ns.extend(zip((n,) * len(n.attrs), n.attrs)) for
+         n in self.namespaces]
         # Dict mapping an AT fieldname to a (prefix, element name) tuple
         field_map = dict([(a.field, (n.prefix, a.name)) for n, a in flat_ns])
         return field_map
-    
+
     def getNamespaceURIMap(self):
         """ Mapping of xmlns URI to ns object
         """
@@ -339,42 +344,41 @@ class ATXMLMarshaller(Marshaller):
                 yield n
 
     def demarshall(self, instance, data, **kwargs):
-        context = self.parseContext( instance, data)
-        self.processContext( instance, context, kwargs )
+        context = self.parseContext(instance, data)
+        self.processContext(instance, context, kwargs)
 
     def marshall(self, instance, use_namespaces=None, **kwargs):
         doc = minidom.Document()
-        node = doc.createElementNS( self.namespace, self.root_tag)         
-        doc.appendChild( node )
+        node = doc.createElementNS(self.namespace, self.root_tag)         
+        doc.appendChild(node)
 
         # setup default namespace
         attr = doc.createAttribute('xmlns')
         attr.value = self.namespace
         node.setAttributeNode(attr)
     
-        for ns in self.getNamespaces( use_namespaces ):
-            ns.serialize( doc, node, instance, kwargs )
+        for ns in self.getNamespaces(use_namespaces):
+            ns.serialize(doc, node, instance, kwargs)
             if not ns.prefix:
                 continue
             attrname = 'xmlns:%s' % ns.prefix
             attr = doc.createAttribute(attrname)
             attr.value = ns.xmlns
-            node.setAttributeNode(attr)                
+            node.setAttributeNode(attr)
 
         content_type = 'text/xml'
         data = doc.toprettyxml()#.encode('utf-8')
         length = len(data)
         return (content_type, length, data)
 
-    def parseContext(self, instance, data):  
-        #parser = XmlParser( instance, data, use_validation=self.use_validation)
+    def parseContext(self, instance, data):
+        #parser = XmlParser(instance, data, use_validation=self.use_validation)
         root = ElementTree.fromstring(data)
         ns_map = self.getNamespaceURIMap()
         context = ParseContext(instance, root, ns_map)
         context.xmlsource = data
-        self.parseXml( root, context, ns_map )
+        self.parseXml(root, context, ns_map)
         return context
-
 
     def parseXml(self, root, context, ns_map):
         """
@@ -383,12 +387,13 @@ class ATXMLMarshaller(Marshaller):
         read_result = 1
         for node in root:
             tag, namespace = utils.fixtag(node.tag, context.ns_map)
-                
             if namespace.processXml(context, node):
-                context.node=node
-                context.node.get('attribute').processXmlValue(context, node.text)
+                context.node = node
+                context.node.get('attribute').processXmlValue(context,
+                                                              node.text)
             else:
-                ## XXX: raise a warning that the attribute isnt defined in the schema
+                ## XXX: raise a warning that the attribute isnt defined
+                ## XXX: in the schema
                 pass
 
         return read_result
@@ -397,26 +402,27 @@ class ATXMLMarshaller(Marshaller):
         """ instantiate instance with data from context
         """
         for ns in getRegisteredNamespaces():
-            ns_data = context.getDataFor( ns.xmlns )
-            ns.deserialize( instance, ns_data, options )
+            ns_data = context.getDataFor(ns.xmlns)
+            ns.deserialize(instance, ns_data, options)
 
 
-class _NamespaceCatalog( object ):
+class _NamespaceCatalog(object):
 
-    def __init__( self ):
+    def __init__(self):
         self._namespaces = {}
         self._order = []
 
-    def registerNamespace( self, namespace, override=False, position=-1):
+    def registerNamespace(self, namespace, override=False, position=-1):
         if namespace.xmlns in self._namespaces and not override:
-            raise RuntimeError("Duplicate Namespace Registration %s"%namespace.xmlns )
-        self._namespaces[ namespace.xmlns ] = namespace
+            raise RuntimeError("Duplicate Namespace Registration %s" %
+                               namespace.xmlns)
+        self._namespaces[namespace.xmlns] = namespace
         if position == -1:
-            position = len( self._order )
-        self._order.append( position, namespace.xmlns )
+            position = len(self._order)
+        self._order.append(position, namespace.xmlns)
 
-    def getRegisteredNamespaces( self ):
-        return [ self._namespaces[ xmlns ] for xmlns in self._order ]
+    def getRegisteredNamespaces(self):
+        return [self._namespaces[xmlns] for xmlns in self._order]
 
 
 NamespaceCatalog = _NamespaceCatalog()
@@ -424,12 +430,12 @@ NamespaceCatalog = _NamespaceCatalog()
 registerNamespace = NamespaceCatalog.registerNamespace
 getRegisteredNamespaces = NamespaceCatalog.getRegisteredNamespaces
 
-def registerNamespace( namespace ):
-    if not isinstance( namespace, XmlNamespace):
+
+def registerNamespace(namespace):
+    if not isinstance(namespace, XmlNamespace):
         namespace = namespace()
-    ATXMLMarshaller.namespaces.append( namespace )
+    ATXMLMarshaller.namespaces.append(namespace)
+
 
 def getRegisteredNamespaces():
-    return tuple( ATXMLMarshaller.namespaces )
-
-
+    return tuple(ATXMLMarshaller.namespaces)

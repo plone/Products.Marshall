@@ -32,6 +32,7 @@ from Products.Marshall.registry import getRegisteredPredicates
 from Products.Marshall.registry import getRegisteredComponents
 from Products.Marshall.interfaces import IPredicate
 
+
 class Predicate(SimpleItem):
     """ A Predicate for selecting marshallers.
 
@@ -49,7 +50,7 @@ class Predicate(SimpleItem):
     security = ClassSecurityInfo()
 
     manage_options = (
-        {'label':'Edit', 'action':'manage_changePredicateForm'},
+        {'label': 'Edit', 'action': 'manage_changePredicateForm'},
         ) + SimpleItem.manage_options
 
     security.declareProtected('View management screens',
@@ -101,8 +102,8 @@ class Predicate(SimpleItem):
         """ Change the component name """
         valid_components = [i['name'] for i in getRegisteredComponents()]
         if component_name not in valid_components:
-            raise ValueError, ('Not a valid registered '
-                               'component: %s' % component_name)
+            raise ValueError('Not a valid registered '
+                             'component: %s' % component_name)
         self._component_name = component_name
 
     security.declareProtected(manage_properties, 'setExpression')
@@ -148,6 +149,7 @@ class Predicate(SimpleItem):
 InitializeClass(Predicate)
 registerPredicate('default', 'Default Predicate', Predicate)
 
+
 def manage_addPredicate(self, id, title, predicate, expression,
                         component_name, REQUEST=None):
     """ Factory method that creates a Property Set Predicate"""
@@ -162,8 +164,10 @@ def manage_addPredicate(self, id, title, predicate, expression,
 
     return self._getOb(id)
 
+
 def manage_availablePredicates(self):
     return getRegisteredPredicates()
+
 
 def manage_availableComponents(self):
     return getRegisteredComponents()

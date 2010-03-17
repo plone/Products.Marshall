@@ -32,6 +32,7 @@ from Products.Marshall.interfaces import IMarshallRegistry
 from Products.Marshall.config import TOOL_ID
 from Products.Marshall.export import Export
 
+
 class RegistryItem:
 
     def __init__(self, name, title, factory):
@@ -42,11 +43,12 @@ class RegistryItem:
         self.factory = factory
 
     def info(self):
-        return {'name':self.name,
-                'title':self.title}
+        return {'name': self.name,
+                'title': self.title}
 
     def create(self, id, title, expression, component_name):
-        return self.factory(id, title or self.title, expression, component_name)
+        return self.factory(id, title or self.title, expression,
+                            component_name)
 
 comp_registry = {}
 def registerComponent(name, title, component):
@@ -69,6 +71,7 @@ def getRegisteredPredicates():
 
 def createPredicate(name, id, title, expression, component_name):
     return registry[name].create(id, title, expression, component_name)
+
 
 class Registry(OrderedFolder, Export):
     """ A registry that holds predicates and applies them to
@@ -101,12 +104,13 @@ class Registry(OrderedFolder, Export):
 
 InitializeClass(Registry)
 
+
 def manage_addRegistry(self, REQUEST=None, **ignored):
     """ Factory method that creates a Registry"""
     obj = Registry()
     self._setObject(obj.id, obj)
 
     if REQUEST is not None:
-        REQUEST['RESPONSE'].redirect(self.absolute_url()+'/manage_main')
+        REQUEST['RESPONSE'].redirect(self.absolute_url() + '/manage_main')
     else:
         return self._getOb(obj.id)

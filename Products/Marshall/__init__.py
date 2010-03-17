@@ -35,6 +35,7 @@ if config.hasElementtree:
 
 from Products.Marshall.marshaller import ControlledMarshaller
 
+
 def initialize(context):
     from Products.Marshall import registry
     from Products.Marshall import predicates

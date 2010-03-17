@@ -30,6 +30,7 @@ from AccessControl import getSecurityManager, ClassSecurityInfo
 from Products.PageTemplates.Expressions import getEngine
 from Products.PageTemplates.Expressions import SecureModuleImporter
 
+
 class Expression(Persistent):
     """A Persistent TALES Expression"""
 
@@ -53,6 +54,7 @@ class Expression(Persistent):
 
 InitializeClass(Expression)
 
+
 def createExprContext(obj, **kw):
     """ Provides names for TALES expressions.
     """
@@ -71,7 +73,7 @@ def createExprContext(obj, **kw):
         'modules':      SecureModuleImporter,
         'user':         user,
         }
-    if kw.has_key('mimetype') and not kw.has_key('content_type'):
+    if 'mimetype' in kw and not 'content_type' in kw:
         # Alias content_type to mimetype
         kw['content_type'] = kw['mimetype']
     data.update(kw)

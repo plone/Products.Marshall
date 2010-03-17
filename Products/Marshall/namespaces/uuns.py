@@ -35,7 +35,6 @@ import uu
 DEBUG = False
 
 
-
 class UUAttribute(SchemaAttribute):
 
 #    def get(self, instance):
@@ -49,125 +48,119 @@ class UUAttribute(SchemaAttribute):
 #        
 #        
 #        
-#        if not isinstance( values, ( list, tuple ) ):
+#        if not isinstance(values, (list, tuple)):
 #            values = [values]
 #        return filter(None, values)
-
 
 #    def get(self, instance):
 #        values = atapi.BaseObject.__getitem__(instance, self.name)
-#        if not isinstance( values, ( list, tuple ) ):
+#        if not isinstance(values, (list, tuple)):
 #            values = [values]
 #        return filter(None, values)
-        
-        
-    def base64encode(self, string) :
+
+    def base64encode(self, string):
         return base64.encodestring(string)
-        
-    def base64decode(self, string) :
+
+    def base64decode(self, string):
         return base64.decodestring(string)
-        
-    def uuencode(self, string) :
+
+    def uuencode(self, string):
         # uu encode a srting
         stringio = StringIO()
         uu.encode(StringIO(string), stringio)
         return stringio.getvalue()
-        
-    def uudecode(self, string) :
+
+    def uudecode(self, string):
         # uu decode a srting
         stringio = StringIO()
         uu.decode(StringIO(string), stringio)
         return stringio.getvalue()
-        
-    def char_encode(self, string) :
+
+    def char_encode(self, string):
         return self.uuencode(string)
 
-    def char_decode(self, string) :
+    def char_decode(self, string):
         return self.uudecode(string)
-    
 
     def deserialize(self, instance, ns_data):
-        values = ns_data.get( self.name )
+        values = ns_data.get(self.name)
         if not values:
             return
-        
+
         field = instance.Schema().getField(self.name)
         baseunit = field.getBaseUnit(instance)
-        isBinary = baseunit.isBinary() 
-        if isBinary :
-            values = self.char_decode( values )
-        
+        isBinary = baseunit.isBinary()
+        if isBinary:
+            values = self.char_decode(values)
+
         mutator = instance.Schema()[self.name].getMutator(instance)
         if not mutator:
             #raise AttributeError("No Mutator for %s"%self.name)
             return
-        
+
         mutator(values)
 
-
     def serialize(self, dom, parent_node, instance):
-        
-        if DEBUG :
+
+        if DEBUG:
             print "uuns/UUattribute", instance, self.name
-        
+
         field = instance.Schema().getField(self.name)
         baseunit = field.getBaseUnit(instance)
         value = baseunit.getRaw(encoding=baseunit.original_encoding)
 
-        isBinary = baseunit.isBinary() 
-        if isBinary :
+        isBinary = baseunit.isBinary()
+        if isBinary:
             value = self.char_encode(value)
-        
-        elname = "%s:%s"%(self.namespace.prefix, self.name)
-        node = dom.createElementNS( self.namespace.xmlns,
-                                    elname )
-        value_node = dom.createTextNode( value )
-        node.appendChild( value_node )
+
+        elname = "%s:%s" % (self.namespace.prefix, self.name)
+        node = dom.createElementNS(self.namespace.xmlns,
+                                   elname)
+        value_node = dom.createTextNode(value)
+        node.appendChild(value_node)
         node.normalize()
-        
-        if  isBinary :
-            id_attr = dom.createAttributeNS( self.namespace.xmlns, "binary")
+
+        if  isBinary:
+            id_attr = dom.createAttributeNS(self.namespace.xmlns, "binary")
             id_attr.value = "uuencoded"
-            node.setAttributeNode( id_attr )
-        
-        parent_node.appendChild( node )
-        
-                                  
+            node.setAttributeNode(id_attr)
+
+        parent_node.appendChild(node)
+
+
 class UUNS(XmlNamespace):
-    
+
     xmlns = 'uuns:ns:data'
     prefix = 'at_data'
     attributes = []
-    
+
     #uses_at_fields = True
-    
-    
+
     def getAttributeByName(self, schema_name, context=None):
         if context is not None and schema_name not in self.at_fields:
-            assert context.instance.Schema().has_key( schema_name )
-        
+            assert schema_name in context.instance.Schema()
+
         #if schema_name in self.at_fields:
         #    return self.at_fields[ schema_name ]
-            
-        attribute = UUAttribute( schema_name )
-        attribute.setNamespace( self )
-        
+
+        attribute = UUAttribute(schema_name)
+        attribute.setNamespace(self)
+
         return attribute
-        
-        
+
     def getAttributes(self, instance):
-        
+
         field_keys = instance.Schema().keys()
-        if DEBUG :
+        if DEBUG:
             print "UUNS/getAttributes", field_keys
         #import pdb; pdb.set_trace() # @@@
         #return fields
-        
+
         # remove fields delegated to other namespaces
         #fields = []
         #for ns in getRegisteredNamespaces():
         #    if ns.uses_at_fields:
-        #        fields.extend( ns.getATFields() )
+        #        fields.extend(ns.getATFields())
         #mset = Set(fields)
         #assert len(mset) == len(fields), "Multiple NS multiplexing field"
         #
@@ -177,43 +170,40 @@ class UUNS(XmlNamespace):
         #p = instance.getPrimaryField()
         #pk = p and p.getName() or None
         #if pk:
-        #    field_keys.remove( pk )
+        #    field_keys.remove(pk)
         #
 
-
 #        import pdb; pdb.set_trace() # @@@
-        
+
         for fk in field_keys:
             field = instance.Schema().getField(fk)
-            
-            if hasattr(field, 'getBaseUnit') :
+
+            if hasattr(field, 'getBaseUnit'):
                 baseunit = field.getBaseUnit(instance)
-            else :
+            else:
                 #print ">>>>>>>> field==", field, "no getBaseUnit!"
                 continue
-                
+
             isBinary = baseunit.isBinary()
-            
+
             if isBinary or instance.getPrimaryField() == field:
-                yield self.getAttributeByName( fk )
-            
-            if DEBUG :        
+                yield self.getAttributeByName(fk)
+
+            if DEBUG:
                 print fk, isBinary
-            
+
         #
         ## yield additional intrinsic at framework attrs
         #for attribute in self.at_fields.values():
         #    yield attribute
 
-
     def serialize(self, dom, parent_node, instance):
-
-        for attribute in self.getAttributes( instance ):
-            attribute.serialize( dom, parent_node, instance )
+        for attribute in self.getAttributes(instance):
+            attribute.serialize(dom, parent_node, instance)
 
     def deserialize(self, instance, ns_data):
         if not ns_data:
             return
 
-        for attribute in self.getAttributes( instance ):
-            attribute.deserialize( instance, ns_data )
+        for attribute in self.getAttributes(instance):
+            attribute.deserialize(instance, ns_data)

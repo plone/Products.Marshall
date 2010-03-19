@@ -27,12 +27,14 @@ Authors: Kapil Thangavelu <k_vertigo@objectrealms.net>
 
 $Id: $
 """
+import re
 from sets import Set
 
 from Products.CMFCore.utils import getToolByName
 from Products.Archetypes import config as atcfg
 from Products.Archetypes.debug import log
-from Products.Archetypes.interfaces.field import IObjectField
+from Products.Archetypes.interfaces import IBaseUnit
+from Products.Archetypes.interfaces import IObjectField
 from Products.Archetypes import public as atapi
 from Products.Marshall import config
 from Products.Marshall.handlers.atxml import XmlNamespace
@@ -44,6 +46,22 @@ from Products.Marshall import utils
 import transaction
 
 _marker = object()
+
+
+# Find control characters (0-31, 127) excluding:
+#   9 (\t, tab)
+#   10 (\n, new line character)
+#   13 (\r, carriage return)
+#   127 (\x1f, delete)
+# which are handled properly by python xml libraries such
+# as xml.dom.minidom and elementtree
+CTRLCHARS_RE = re.compile(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f]')
+
+
+def has_ctrlchars(value):
+    if CTRLCHARS_RE.search(value):
+        return True
+    return False
 
 
 class BoundReference(object):
@@ -68,32 +86,57 @@ class ATAttribute(SchemaAttribute):
         return filter(None, values)
 
     def serialize(self, dom, parent_node, instance, options={}):
-        
+
+        encode_ctrlchars = options.get('encode_ctrlchars', True)
+
         values = self.get(instance)
         if not values:
             return
-
-        is_ref = self.isReference(instance)
         
         for value in values:
             node = dom.createElementNS(self.namespace.xmlns, "field")
             name_attr = dom.createAttribute("name")
             name_attr.value = self.name
             node.setAttributeNode(name_attr)
+            
+            # try to get 'utf-8' encoded string
+            if isinstance(value, unicode):
+                value = value.encode('utf-8')
+            elif IBaseUnit.providedBy(value):
+                value = value.getRaw(encoding='utf-8')
+            else:
+                value = str(value)
 
-            if is_ref:
+            if self.isReference(instance):
                 if config.HANDLE_REFS:
                     ref_node = dom.createElementNS(self.namespace.xmlns,
-                                                   'reference')
+                                                    'reference')
                     uid_node = dom.createElementNS(self.namespace.xmlns,
-                                                   'uid')
-                    value = dom.createTextNode(str(value))
+                                                    'uid')
+                    value = dom.createTextNode(value)
                     uid_node.append(value)
                     ref_node.append(uid_node)
                     node.append(ref_node)
-            else:
-                value_node = dom.createTextNode(str(value))
+            elif (encode_ctrlchars and
+                  isinstance(value, str) and
+                  has_ctrlchars(value)):
+                value = value.encode('base64')
+                attr = dom.createAttributeNS(self.namespace.xmlns,
+                                             'transfer_encoding')
+                attr.value = 'base64'
+                node.setAttributeNode(attr)
+                value_node = dom.createCDATASection(value)
                 node.appendChild(value_node)
+            else:
+                value_node = dom.createTextNode(value)
+                node.appendChild(value_node)
+
+            # set the mimetype if it is available
+            field = instance.schema._fields[self.name]
+            if IObjectField.providedBy(field):
+                mime_attr = dom.createAttribute('mimetype')
+                mime_attr.value = field.getContentType(instance)
+                node.setAttributeNode(mime_attr)
         
             node.normalize()
             parent_node.appendChild(node)
@@ -101,41 +144,67 @@ class ATAttribute(SchemaAttribute):
         return True
 
     def processXmlValue(self, context, value):
+        if value is None:
+            return
+
         value = value.strip()
         if not value:
             return
-        data = context.getDataFor(self.namespace.xmlns)
-        if self.name in data:
-            svalues = data[self.name]
+
+        # decode node value if needed
+        te = context.node.get('transfer_encoding', None)
+        if te is not None:
+            value = value.decode(te)
+
+        context_data = context.getDataFor(self.namespace.xmlns)
+        data = context_data.setdefault(self.name, {'mimetype': None})
+        mimetype = context.node.get('mimetype', None)
+        if mimetype is not None:
+            data['mimetype'] = mimetype
+        
+        if data.has_key('value'):
+            svalues = data[value]
             if not isinstance(svalues, list):
-                data[self.name] = svalues = [svalues]
+                data['value'] = svalues = [svalues]
             svalues.append(value)
             return
         else:
-            data[self.name] = value
-        
+            data['value'] = value
+
     def deserialize(self, instance, ns_data, options={}):
-        values = ns_data.get(self.name)
+        if not ns_data:
+            return
+        data = ns_data.get( self.name )
+        if data is None:
+            return
+        values = data.get('value', None)
         if not values:
             return
 
-        # check if we are a schema attribute
-        if self.isReference(instance):
-            values = self.resolveReferences(instance, values)
-            if not config.HANDLE_REFS:
+	# check if we are a schema attribute
+        if self.isReference( instance ):
+            values = self.resolveReferences( instance, values)
+            if not config.HANDLE_REFS :
                 return
 
-        mutator = instance.Schema()[self.name].getMutator(instance)
+        field = instance.Schema()[self.name]
+        mutator = field.getMutator(instance)
         if not mutator:
             # read only field no mutator, but try to set value still
             # since it might reflect object state (like ATCriteria)
-            field = instance.getField(self.name).set(instance, values)
+            field = instance.getField( self.name ).set( instance, values )
             #raise AttributeError("No Mutator for %s"%self.name)
             return
         
         if self.name == "id":
             transaction.savepoint()
+            
         mutator(values)
+
+        # set mimetype if possible
+        mimetype = data.get('mimetype', None)
+        if (mimetype is not None and IObjectField.providedBy(field)):
+            field.setContentType(instance, mimetype)
 
     def resolveReferences(self, instance, values):
         ref_values = []

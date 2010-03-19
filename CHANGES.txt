@@ -3,6 +3,14 @@ Changelog
 
 2.0b2 - unreleased
 ------------------
+- atmxl: Export / import mimetype of Archetypes IObjectFields so the right 
+  content type will be set in Plone 4. Ported from quintagroup.transmogrifier.
+  [csenger]
+
+- atxml: Encode/decode strings with control characters that breaks common xml 
+  parsers in base64. This can be turned off by calling the marshaller with
+  'encode_with_ctrlchars=False'
+  [csenger]
 
 - Deprecationfix: Use DateTime.ISO8601() instead of DateTime.ISO
   [tomster]

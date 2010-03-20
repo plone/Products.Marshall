@@ -42,7 +42,7 @@ from Products.Marshall.handlers.atxml import SchemaAttribute
 from Products.Marshall.handlers.atxml import getRegisteredNamespaces
 from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall import utils
-
+from DateTime import DateTime
 import transaction
 
 _marker = object()
@@ -195,11 +195,15 @@ class ATAttribute(SchemaAttribute):
             field = instance.getField( self.name ).set( instance, values )
             #raise AttributeError("No Mutator for %s"%self.name)
             return
-        
         if self.name == "id":
             transaction.savepoint()
-            
-        mutator(values)
+
+        if instance.getField(self.name).type == 'datetime':
+            # make sure DateTime fields are constructed properly
+            # by explicitly constructing a DateTime instance
+            mutator(DateTime(values))
+        else:
+            mutator(values)
 
         # set mimetype if possible
         mimetype = data.get('mimetype', None)

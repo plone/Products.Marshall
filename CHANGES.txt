@@ -12,6 +12,11 @@ Changelog
   'encode_with_ctrlchars=False'
   [csenger]
 
+- make sure DateTime fields are constructed properly in atns.py
+  by explicitly constructing a DateTime instance for input values
+  that would result in a DateTime value of `None` otherwise
+  [tomster]
+
 - Deprecationfix: Use DateTime.ISO8601() instead of DateTime.ISO
   [tomster]
 

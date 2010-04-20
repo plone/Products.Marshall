@@ -97,7 +97,7 @@ Registry to decide what Marshaller to use at runtime.
     >>> article.getText()
     ''
 
-    
+
 Upload a very simple ATXML file and make sure it used the ATXML
 Marshaller by checking that the Title got changed and the body is
 still empty. Note we also support CDATA sections, so we'll stick some
@@ -130,7 +130,7 @@ stuff into the 'blurb' field using CDATA.
   ... %s""" %  xml_input, handle_errors=False)
   HTTP/1.1 204 No Content...
 
-  
+
   >>> article.Title()
   'Some Title'
 

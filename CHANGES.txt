@@ -3,18 +3,19 @@ Changelog
 
 2.0b2 - unreleased
 ------------------
-- atmxl: Export / import mimetype of Archetypes IObjectFields so the right 
+
+- atmxl: Export / import mimetype of Archetypes IObjectFields so the right
   content type will be set in Plone 4. Ported from quintagroup.transmogrifier.
   [csenger]
 
-- atxml: Encode/decode strings with control characters that breaks common xml 
+- atxml: Encode/decode strings with control characters that breaks common xml
   parsers in base64. This can be turned off by calling the marshaller with
-  'encode_with_ctrlchars=False'
+  'encode_with_ctrlchars=False'.
   [csenger]
 
-- make sure DateTime fields are constructed properly in atns.py
+- Make sure DateTime fields are constructed properly in atns.py
   by explicitly constructing a DateTime instance for input values
-  that would result in a DateTime value of `None` otherwise
+  that would result in a DateTime value of `None` otherwise.
   [tomster]
 
 - Deprecationfix: Use DateTime.ISO8601() instead of DateTime.ISO

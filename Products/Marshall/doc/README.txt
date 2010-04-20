@@ -137,13 +137,11 @@ stuff into the 'blurb' field using CDATA.
   >>> article.getText()
   '<p>Here is some Text</p>'
 
-  >>> article.CreationDate()
-  '2004-01-01T01:02:04+01:00'
+  >>> article.created().ISO8601()
+  '2004-01-01T00:02:04+00:00'
 
-ExpirationDate and EffectiveDate are not being set during import:
-
-  >>> article.ExpirationDate()
-  'None'
+  >>> article.expires().ISO8601()
+  '2004-09-09T09:09:08+00:00'
 
   >>> article.EffectiveDate()
   'None'

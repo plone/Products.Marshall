@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.0b2 - unreleased
+2.0b2 - 2010-04-20
 ------------------
 
 - atmxl: Export / import mimetype of Archetypes IObjectFields so the right

@@ -1,9 +1,11 @@
 Changelog
 =========
 
-2.0.1 - unreleased
-------------------
+2.1 - unreleased
+----------------
 
+- Use plone.uuid to look up content UUIDs.
+  [toutpt, davisagli]
 
 2.0 - 2010-07-18
 ----------------

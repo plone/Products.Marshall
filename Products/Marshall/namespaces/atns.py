@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##################################################################
+from plone.uuid.interfaces import IUUID
 
 """
 Serialize AT Schema Attributes
@@ -246,7 +247,7 @@ class ReferenceAttribute(SchemaAttribute):
 class ArchetypeUID(SchemaAttribute):
 
     def serialize(self, dom, parent_node, instance, options={}):
-        value = getattr(instance, atcfg.UUID_ATTR, "")
+        value = IUUID(instance, '')
         node = dom.createElementNS(Archetypes.xmlns, "uid")
         nvalue = dom.createTextNode(value)
         node.appendChild(nvalue)
@@ -261,7 +262,8 @@ class ArchetypeUID(SchemaAttribute):
     def resolveUID(self, instance, values):
         assert not isinstance(values, (list, tuple))
         at_uid = values
-        existing = getattr(instance, atcfg.UUID_ATTR, _marker)
+        #existing = getattr(instance, atcfg.UUID_ATTR, _marker)
+        existing = IUUID(instance, _marker)
         if existing is _marker or existing != at_uid:
             ref = Reference(uid=at_uid)
             target = ref.resolve(instance)

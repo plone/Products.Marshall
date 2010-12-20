@@ -34,6 +34,7 @@ setup(name='Products.Marshall',
       install_requires=[
           'setuptools',
           'transaction',
+          'plone.uuid',
           'zope.contenttype',
           'zope.interface',
           'Products.Archetypes',

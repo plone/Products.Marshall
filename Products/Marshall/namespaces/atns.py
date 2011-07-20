@@ -164,7 +164,7 @@ class ATAttribute(SchemaAttribute):
             data['mimetype'] = mimetype
         
         if data.has_key('value'):
-            svalues = data[value]
+            svalues = data['value']
             if not isinstance(svalues, list):
                 data['value'] = svalues = [svalues]
             svalues.append(value)

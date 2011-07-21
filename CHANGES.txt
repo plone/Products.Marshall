@@ -1,8 +1,11 @@
 Changelog
 =========
 
-2.1.1 - Unreleased
+2.1.1 - 2011-07-20
 ------------------
+
+- Fixed typo which prevents the deserializing of multiValued fields.
+  [matth]
 
 2.1 - 2011-01-03
 ----------------

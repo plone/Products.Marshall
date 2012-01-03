@@ -40,7 +40,7 @@ libxml2.initParser()
 class SimpleXMLMarshaller(Marshaller):
 
     __name__ = 'Simple XML Marshaller'
-    
+
     def demarshall(self, instance, data, **kwargs):
         doc = libxml2.parseDoc(data)
         p = instance.getPrimaryField()

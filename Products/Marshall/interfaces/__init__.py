@@ -22,7 +22,7 @@ from zope.interface import Interface
 from Products.Marshall.interfaces.predicate import IPredicate
 
 class IMarshallRegistry(Interface):
-    
+
     def getMarshallersFor(obj, **kw):
         """Get Marshallers for some object
         """

@@ -39,15 +39,15 @@ class UUAttribute(SchemaAttribute):
 
 #    def get(self, instance):
 #        values = atapi.BaseObject.__getitem__(instance, self.name)
-#        
+#
 #        import pdb; pdb.set_trace() # @@@
-#        
+#
 #        field = instance.Schema().getField(self.name)
 #        values = field.getRaw(instance)
-#        
-#        
-#        
-#        
+#
+#
+#
+#
 #        if not isinstance(values, (list, tuple)):
 #            values = [values]
 #        return filter(None, values)

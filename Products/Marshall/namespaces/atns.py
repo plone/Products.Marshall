@@ -68,18 +68,18 @@ def has_ctrlchars(value):
 class BoundReference(object):
 
     __slots__ = ('ns_data', 'attribute', 'instance')
-    
+
     def __init__(self, ns_data, attribute, instance):
         self.ns_data = ns_data
         self.attribute = attribute
         self.instance = instance
-    
+
     def resolve(self, context):
         self.attribute.deserialize(self.instance, self.ns_data)
 
 
 class ATAttribute(SchemaAttribute):
-    
+
     def get(self, instance):
         values = atapi.BaseObject.__getitem__(instance, self.name)
         if not isinstance(values, (list, tuple)):
@@ -93,13 +93,13 @@ class ATAttribute(SchemaAttribute):
         values = self.get(instance)
         if not values:
             return
-        
+
         for value in values:
             node = dom.createElementNS(self.namespace.xmlns, "field")
             name_attr = dom.createAttribute("name")
             name_attr.value = self.name
             node.setAttributeNode(name_attr)
-            
+
             # try to get 'utf-8' encoded string
             if isinstance(value, unicode):
                 value = value.encode('utf-8')
@@ -138,7 +138,7 @@ class ATAttribute(SchemaAttribute):
                 mime_attr = dom.createAttribute('mimetype')
                 mime_attr.value = field.getContentType(instance)
                 node.setAttributeNode(mime_attr)
-        
+
             node.normalize()
             parent_node.appendChild(node)
 
@@ -162,7 +162,7 @@ class ATAttribute(SchemaAttribute):
         mimetype = context.node.get('mimetype', None)
         if mimetype is not None:
             data['mimetype'] = mimetype
-        
+
         if data.has_key('value'):
             svalues = data['value']
             if not isinstance(svalues, list):
@@ -223,7 +223,7 @@ class ATAttribute(SchemaAttribute):
                     "Could not resolve reference %r" % value)
             ref_values.append(ref)
         return ref_values
-        
+
     def isReference(self, instance):
         return not not isinstance(instance.Schema()[self.name],
                                   atapi.ReferenceField)
@@ -236,7 +236,7 @@ class ReferenceAttribute(SchemaAttribute):
     def __init__(self, name, reference):
         super(ReferenceAttribute, self).__init__(name)
         self.reference = reference
-        
+
     def processXml(self, context, node):
         return True
 
@@ -321,7 +321,7 @@ class Archetypes(XmlNamespace):
     xmlns = config.AT_NS
     prefix = None
     attributes = []
-        
+
     def __init__(self):
         super(Archetypes, self).__init__()
         self.last_schema_id = None
@@ -330,7 +330,7 @@ class Archetypes(XmlNamespace):
 
         uid_attribute = ArchetypeUID('uid')
         uid_attribute.setNamespace(self)
-        
+
         self.at_fields = {'uid': uid_attribute}
 
     def getAttributeByName(self, schema_name, context=None):
@@ -338,13 +338,13 @@ class Archetypes(XmlNamespace):
             if not schema_name in context.instance.Schema():
                 return
                 raise AssertionError("invalid attribute %s" % (schema_name))
-        
+
         if schema_name in self.at_fields:
             return self.at_fields[schema_name]
 
         attribute = ATAttribute(schema_name)
         attribute.setNamespace(self)
-        
+
         return attribute
 
     def getAttributes(self, instance, exclude_attrs=()):

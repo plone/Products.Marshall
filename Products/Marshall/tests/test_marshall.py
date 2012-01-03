@@ -65,7 +65,7 @@ class MarshallerTest(BaseTest):
         marshaller.demarshall(self.obj, content)
         ctype, length, got = marshaller.marshall(self.obj, filename=self.input)
         normalize = self.input.endswith('xml')
-        
+
         self.assertEqualsDiff(content, got, normalize=normalize)
 
 class ATXMLReferenceMarshallTest(BaseTest):

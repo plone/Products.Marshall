@@ -8,7 +8,7 @@ from cmfns import CMF
 registerNamespace(DublinCore)
 registerNamespace(AdobeXMP)
 registerNamespace(Archetypes)
-registerNamespace(CMF) 
+registerNamespace(CMF)
 
 # we do cmf last because workflow might other get reset
 # by a set id (manage_afterAdd hook) value change

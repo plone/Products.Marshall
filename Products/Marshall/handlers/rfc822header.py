@@ -1,21 +1,21 @@
-# Copyright (c) 2002-2006, Benjamin Saller <bcsaller@ideasuite.com>, and 
+# Copyright (c) 2002-2006, Benjamin Saller <bcsaller@ideasuite.com>, and
 #	                the respective authors.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.	
 #     * Redistributions in binary form must reproduce the above
 #       copyright notice, this list of conditions and the following disclaimer
 #       in the documentation and/or other materials provided with the
-#       distribution. 
+#       distribution.
 #     * Neither the name of Archetypes nor the names of its contributors
 #       may be used to endorse or promote products derived from this software
-#       without specific prior written permission. 
-# 
+#       without specific prior written permission.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -53,7 +53,7 @@ This is the body.
 
 class NonLoweringMessage(Message):
     """A RFC 822 Message class that doesn't lower header names
-    
+
     IMPORTANT: Only a small subset of the available methods aren't lowering the
                header names!
     """
@@ -99,21 +99,21 @@ def formatRFC822Headers(headers):
 
 def parseRFC822(body):
     """Parse a RFC 822 (email) style string
-    
+
     The code is mostly based on CMFDefault.utils.parseHeadersBody. It doesn't
     capitalize the headers as the CMF function.
-    
+
     >>> headers, body = parseRFC822(sample_data)
     >>> keys = headers.keys(); keys.sort()
     >>> for key in keys:
     ...     key, headers[key]
-    
-    
+
+
     ('content-type', 'text/plain')
     ('keywords', 'foo')
     ('mixedCase', 'a MiXeD case keyword')
     ('title', 'a title')
-    
+
     >>> print body
     This is the body.
     <BLANKLINE>

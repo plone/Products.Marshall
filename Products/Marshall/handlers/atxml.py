@@ -29,7 +29,7 @@ generic xml marshaller
 
  see the Marshall.namespaces package for some sample and
  default namespaces.
- 
+
 caveats
 
  - if you want to use multiple namespaces on the same
@@ -39,7 +39,7 @@ caveats
 
 Authors: kapil thangavelu <k_vertigo@objectrealms.net> (current impl)
          sidnei da silva <sidnei@awkly.org>
-         
+
 """
 
 #################################
@@ -223,7 +223,7 @@ class SchemaAttribute(object):
     def deserialize(self, instance, ns_data):
         """ give the instance and the namespace data for
         instance, reconstitute this attribute on the instance
-        """ 
+        """
         self.set(instance, ns_data)
 
     def processXml(self, context, ctx_node):
@@ -349,14 +349,14 @@ class ATXMLMarshaller(Marshaller):
 
     def marshall(self, instance, use_namespaces=None, **kwargs):
         doc = minidom.Document()
-        node = doc.createElementNS(self.namespace, self.root_tag)         
+        node = doc.createElementNS(self.namespace, self.root_tag)
         doc.appendChild(node)
 
         # setup default namespace
         attr = doc.createAttribute('xmlns')
         attr.value = self.namespace
         node.setAttributeNode(attr)
-    
+
         for ns in self.getNamespaces(use_namespaces):
             ns.serialize(doc, node, instance, kwargs)
             if not ns.prefix:

@@ -53,7 +53,7 @@ class XMPDate(SchemaAttribute):
         if not value:
             return
         value = DateTime(value)
-        setattr(instance, self.field_id, value)        
+        setattr(instance, self.field_id, value)
 
     def serialize(self, dom, parent_node, instance):
         value = self.get(instance)
@@ -66,15 +66,15 @@ class XMPDate(SchemaAttribute):
         node.appendChild(value_node)
         node.normalize()
         parent_node.appendChild(node)
-    
+
 
 class AdobeXMP(XmlNamespace):
-    
+
     xmlns = 'adobe:ns:meta'
     prefix = 'xmp'
-    
+
     uses_at_fields = True
-    
+
     attributes = (
         XMPDate('CreateDate', 'creation_date'),
         XMPDate('ModifyDate', 'modification_date'),)

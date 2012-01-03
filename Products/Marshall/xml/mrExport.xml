@@ -18,7 +18,7 @@
                     element-ns pt/xml_settings/element_ns;
                     attr-name pt/xml_settings/attr_name;
                     attr-ns pt/xml_settings/attr_ns;
-                    value pt/xml_settings/value" 
+                    value pt/xml_settings/value"
     />
  </predicate>
 </marshall-registry>

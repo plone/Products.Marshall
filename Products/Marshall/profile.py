@@ -103,7 +103,7 @@ def importMarshallRegistry(context):
 
 class MarshallRegistryExporter(ExportConfiguratorBase):
 
-    def __init__(self, context, encoding=None):
+    def __init__(self, context, encoding='utf-8'):
         ExportConfiguratorBase.__init__(self, None, encoding)
         self.context = context
 

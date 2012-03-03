@@ -4,6 +4,9 @@ Changelog
 2.1.2 - Unreleased
 ------------------
 
+- Unicode export text is not supported since GS 1.7.0.
+  [rossp]
+
 2.1.1 - 2011-07-20
 ------------------
 

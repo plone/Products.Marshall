@@ -54,7 +54,7 @@ except ImportError:
         import cElementTree as ElementTree
     except ImportError:
         from elementtree import ElementTree
-from Products.Marshall.handlers.base import Marshaller
+from Products.Archetypes.Marshall import Marshaller
 from Products.Marshall import config
 from Products.Marshall import utils
 

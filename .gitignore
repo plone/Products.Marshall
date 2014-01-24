@@ -1,0 +1,5 @@
+*.py[co]
+*.mo
+*.tar.gz
+*.egg-info
+dist

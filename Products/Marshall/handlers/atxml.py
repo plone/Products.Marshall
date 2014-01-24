@@ -47,13 +47,7 @@ import sys
 import thread
 import traceback
 from xml.dom import minidom
-try:
-    from xml.etree import cElementTree as ElementTree
-except ImportError:
-    try:
-        import cElementTree as ElementTree
-    except ImportError:
-        from elementtree import ElementTree
+from xml.etree import cElementTree as ElementTree
 from Products.Archetypes.Marshall import Marshaller
 from Products.Marshall import config
 from Products.Marshall import utils

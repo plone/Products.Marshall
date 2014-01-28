@@ -16,15 +16,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id$
 """
 
 from Products.Marshall.config import hasLibxml2
 from Products.Marshall.registry import registerComponent
 
 # Register default Archetypes marshallers
-from primaryfield import PrimaryFieldMarshaller
-from rfc822header import RFC822Marshaller
+from Products.Archetypes.Marshall import PrimaryFieldMarshaller
+from Products.Archetypes.Marshall import RFC822Marshaller
 
 registerComponent('primary_field', 'Primary Field Marshaller',
                   PrimaryFieldMarshaller)

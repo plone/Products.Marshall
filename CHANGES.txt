@@ -5,6 +5,7 @@ Changelog
 ------------------
 
 - Remove duplicate code which is already available from Products.Archetypes
+  and add deprecation warnings about it.
   [tomgross]
 
 

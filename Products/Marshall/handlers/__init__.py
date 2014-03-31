@@ -16,29 +16,26 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id$
 """
 
-from Products.Marshall import config
+from Products.Marshall.config import hasLibxml2
 from Products.Marshall.registry import registerComponent
 
 # Register default Archetypes marshallers
-from primaryfield import PrimaryFieldMarshaller
-from rfc822header import RFC822Marshaller
+from Products.Archetypes.Marshall import PrimaryFieldMarshaller
+from Products.Archetypes.Marshall import RFC822Marshaller
 
 registerComponent('primary_field', 'Primary Field Marshaller',
                   PrimaryFieldMarshaller)
 registerComponent('rfc822', 'RFC822 Marshaller',
                   RFC822Marshaller)
 
-if config.hasLibxml2:
+if hasLibxml2:
     # Now register our own xml marshallers
     from Products.Marshall.handlers.simple import SimpleXMLMarshaller
 
     registerComponent('simple_xml', 'Simple XML Marshaller',
                       SimpleXMLMarshaller)
 
-if config.hasElementtree:
-    from Products.Marshall.handlers.atxml import ATXMLMarshaller
-    registerComponent('atxml', 'ATXML Marshaller',
-                      ATXMLMarshaller)
+from Products.Marshall.handlers.atxml import ATXMLMarshaller
+registerComponent('atxml', 'ATXML Marshaller', ATXMLMarshaller)

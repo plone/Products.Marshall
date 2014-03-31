@@ -20,7 +20,6 @@ $Id$
 """
 
 import pkg_resources
-from Products.Marshall import config
 
 # Kick off Extensions.Install import
 from Products.Marshall.Extensions import Install
@@ -29,9 +28,8 @@ del Install
 # Kick off handler registration
 from Products.Marshall import handlers
 
-if config.hasElementtree:
-    # Kick off namespace registration
-    from Products.Marshall import namespaces
+# Kick off namespace registration
+from Products.Marshall import namespaces
 
 from Products.Marshall.marshaller import ControlledMarshaller
 

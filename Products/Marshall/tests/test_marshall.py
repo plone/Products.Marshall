@@ -1,26 +1,6 @@
-# Marshall: A framework for pluggable marshalling policies
-# Copyright (C) 2004-2006 Enfold Systems, LLC
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-"""
-$Id$
-"""
-
-import os, sys
 import glob
+import os
+import sys
 
 # Load fixture
 from Testing import ZopeTestCase
@@ -41,8 +21,10 @@ from Products.Marshall.tests.examples import person
 from Products.Marshall.tests.examples import blob
 tool_id = Registry.id
 
+
 def get_data(fname):
     return open(os.path.join(PACKAGE_HOME, 'data', fname), 'rb').read()
+
 
 class MarshallerTest(BaseTest):
 
@@ -67,6 +49,7 @@ class MarshallerTest(BaseTest):
         normalize = self.input.endswith('xml')
 
         self.assertEqualsDiff(content, got, normalize=normalize)
+
 
 class ATXMLReferenceMarshallTest(BaseTest):
 
@@ -471,31 +454,6 @@ class BlobMarshallTest(BaseTest):
         data = get_data('file.html')
         self._test_blob_roundtrip('atext', data, 'text/html', 'file.html')
 
-from zExceptions.ExceptionFormatter import format_exception
-from ZPublisher.HTTPResponse import HTTPResponse
-
-orig_exception = HTTPResponse.exception
-def exception(self, **kw):
-    def tag_search(*args):
-        return False
-    kw['tag_search'] = tag_search
-    return orig_exception(self, **kw)
-
-orig_setBody = HTTPResponse.setBody
-def setBody(self, *args, **kw):
-    kw['is_error'] = 0
-    if len(args[0]) == 2:
-        title, body = args[0]
-        args = (body,) + args[1:]
-    return orig_setBody(self, *args, **kw)
-
-def _traceback(self, t, v, tb, as_html=1):
-    return ''.join(format_exception(t, v, tb, as_html=as_html))
-
-HTTPResponse._error_format = 'text/plain'
-HTTPResponse._traceback = _traceback
-HTTPResponse.exception = exception
-HTTPResponse.setBody = setBody
 
 class DocumentationTest(ZopeTestCase.Functional, BaseTest):
 
@@ -503,6 +461,7 @@ class DocumentationTest(ZopeTestCase.Functional, BaseTest):
         super(DocumentationTest, self).afterSetUp()
         self.loginPortalOwner()
         registry.manage_addRegistry(self.portal)
+
 
 def test_suite():
     import unittest
@@ -542,4 +501,3 @@ def test_suite():
                          k_dict)
             suite.addTest(unittest.makeSuite(klass))
     return suite
-

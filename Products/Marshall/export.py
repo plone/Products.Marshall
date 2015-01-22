@@ -16,19 +16,15 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id$
 """
 
 import os
-import tempfile
 import zipfile
-import shutil
 from cStringIO import StringIO
 from App.class_init import InitializeClass
 from ExtensionClass import Base
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base
-from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.permissions import ManagePortal
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 

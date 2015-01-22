@@ -29,14 +29,10 @@ Doesn't currently iterate over directories.
 If you want to use this for content without ATXML files,
 set the ATXML extension as the content
 
-$Id: __init__.py 2886 2004-08-25 03:51:04Z dreamcatcher $
 """
 
 import os, sys, time
-import httplib, urllib
-import string
 from optparse import OptionParser
-from base64 import encodestring
 from WebDAV import davlib     # not the standard davlib
 from xml.dom import minidom
 

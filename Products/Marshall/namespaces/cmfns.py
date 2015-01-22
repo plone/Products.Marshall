@@ -23,11 +23,9 @@ Local Roles.
 
 Created: 10/11/2004
 Author: Kapil Thangavelu <k_vertigo@objectrealms.net>
-$Id: $
 """
 
 from DateTime import DateTime
-from Products.CMFCore.utils import getToolByName
 from Products.Marshall import config
 from Products.Marshall.handlers.atxml import XmlNamespace
 from Products.Marshall.handlers.atxml import SchemaAttribute
@@ -153,7 +151,7 @@ class LocalRolesAttribute(SchemaAttribute):
 
         while context.reader.MoveToNextAttribute():
             if context.reader.LocalName() == 'user_id':
-                user_id = reader.Value()
+                user_id = context.reader.Value()
             elif context.reader.LocalName() == 'role':
                 role = context.reader.Value()
 
@@ -214,10 +212,7 @@ class WorkflowAttribute(SchemaAttribute):
 
     def deserialize(self, instance, ns_data):
         wf_records = ns_data.get(self.name, {})
-        wf_tool = getToolByName(instance, 'portal_workflow')
-
         for wf_id in wf_records:
-            #history = list(instance.workflow_history.setdefault(wf_id, ()))
             history = []
             for record in wf_records[wf_id]:
                 history.append(record)

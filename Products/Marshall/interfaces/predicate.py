@@ -17,8 +17,6 @@
 #
 """
 Interfaces for Predicate
-
-$Id$
 """
 
 from zope.interface import Interface

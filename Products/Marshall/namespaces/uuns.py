@@ -19,14 +19,12 @@
 ##################################################################
 
 """
-$Id: $
 """
 
 # Georg Gogo. BERNHARD: UUencoded pluggable namespace for all at fields
 
 #from DateTime import DateTime
 from Products.Marshall.public import XmlNamespace, SchemaAttribute
-from Products.Archetypes import public as atapi
 from cStringIO import StringIO
 
 import base64

@@ -16,22 +16,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: _xml.py 2994 2004-09-09 12:22:37Z dreamcatcher $
 """
 
-import os
-import thread
 from types import ListType, TupleType
 from xml.dom import minidom
-from cStringIO import StringIO
-from DateTime import DateTime
-from Products.CMFCore.utils import getToolByName
 from Products.Archetypes.Marshall import Marshaller
-from Products.Archetypes.Field import ReferenceField
-from Products.Archetypes.config import REFERENCE_CATALOG, UUID_ATTR
-from Products.Archetypes.debug import log
-from Products.Marshall.config import AT_NS, CMF_NS, ATXML_SCHEMA
-from Products.Marshall.exceptions import MarshallingException
 
 import libxml2
 libxml2.initParser()

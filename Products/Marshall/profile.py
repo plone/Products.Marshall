@@ -16,22 +16,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id: config.py 7851 2007-03-31 13:01:43Z seletz $
 """
-
-from StringIO import StringIO
 
 from zope.interface import implements
 
 from Products.GenericSetup.interfaces import IFilesystemExporter
 from Products.GenericSetup.interfaces import IFilesystemImporter
-from Products.GenericSetup.content import FauxDAVRequest
-from Products.GenericSetup.content import FauxDAVResponse
 from Products.GenericSetup.utils import ExportConfiguratorBase
 from Products.GenericSetup.utils import ImportConfiguratorBase
-from Products.GenericSetup.utils import _getDottedName
-from Products.GenericSetup.utils import _resolveDottedName
-from Products.GenericSetup.utils import CONVERTER
 from Products.GenericSetup.utils import DEFAULT
 from Products.GenericSetup.utils import KEY
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
@@ -191,10 +183,4 @@ class MarshallRegistryFileExportImportAdapter(object):
             import_context.note('SGAIFA',
                                 'no %s in %s' % (_FILENAME, subdir))
         else:
-            request = FauxDAVRequest(BODY=data, BODYFILE=StringIO(data))
-            response = FauxDAVResponse()
-            _updatePluginRegistry(self.context,
-                                  data,
-                                  import_context.shouldPurge(),
-                                  import_context.getEncoding(),
-                                 )
+            pass

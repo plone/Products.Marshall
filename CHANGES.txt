@@ -7,6 +7,8 @@ Changelog
 - Ported tests to plone.app.testing
   [tomgross]
 
+- Removed libxml2 based marshalling
+  [tomgross]
 
 2.1.3 (2014-04-16)
 ------------------

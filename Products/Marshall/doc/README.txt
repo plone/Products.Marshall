@@ -32,12 +32,18 @@ used to check for the existence of a certain attribute or element in a
 XML file. If the predicate matches, we will map it to the ``atxml``
 marshaller (component_name).
 
+    >>> portal = layer['portal']
+    >>> from plone.testing import z2
+    >>> from plone.app.testing import SITE_OWNER_NAME
+    >>> z2.login(layer['app']['acl_users'], SITE_OWNER_NAME)
+    >>> from Products.Marshall import registry
+    >>> _ = registry.manage_addRegistry(portal)
     >>> from Products.Marshall.predicates import add_predicate
     >>> from Products.Marshall.config import TOOL_ID as marshall_tool_id
     >>> from Products.Marshall.config import AT_NS, CMF_NS
     >>> from Products.CMFCore.utils import getToolByName
 
-    >>> tool = getToolByName(self.portal, marshall_tool_id)
+    >>> tool = getToolByName(portal, marshall_tool_id)
     >>> p = add_predicate(tool, id='atxml',
     ...                   title='ATXML Predicate',
     ...                   predicate='xmlns_attr',
@@ -80,7 +86,7 @@ At this point, our Article should be able to use the Marshaller
 Registry to decide what Marshaller to use at runtime.
 
     >>> from Products.Archetypes.tests.utils import makeContent
-    >>> article = makeContent(self.portal, 'Document', 'article')
+    >>> article = makeContent(portal, 'Document', 'article')
     >>> article.getId()
     'article'
 
@@ -123,11 +129,15 @@ stuff into the 'blurb' field using CDATA.
   ...   </field>
   ... </metadata>"""
 
+  >>> from Testing.ZopeTestCase.zopedoctest.functional import http
+  >>> from Testing.ZopeTestCase.sandbox import AppZapper
+  >>> from plone.app.testing import SITE_OWNER_NAME, SITE_OWNER_PASSWORD
+  >>> AppZapper().set(layer['app'])
   >>> print http(r"""
   ... PUT /plone/article HTTP/1.1
   ... Content-Type: text/xml
-  ... Authorization: Basic portal_owner:secret
-  ... %s""" %  xml_input, handle_errors=False)
+  ... Authorization: Basic %s:%s
+  ... %s""" %  (SITE_OWNER_NAME, SITE_OWNER_PASSWORD, xml_input), handle_errors=False)
   HTTP/1.1 204 No Content...
 
 
@@ -160,8 +170,8 @@ field was updated with the uploaded file contents.
   >>> print http(r"""
   ... PUT /plone/article HTTP/1.1
   ... Content-Type: text/x-rst
-  ... Authorization: Basic portal_owner:secret
-  ... %s""" % rst_input, handle_errors=False)
+  ... Authorization: Basic %s:%s
+  ... %s""" %  (SITE_OWNER_NAME, SITE_OWNER_PASSWORD, xml_input), handle_errors=False)
   HTTP/1.1 204 No Content...
 
   >>> article.Title()

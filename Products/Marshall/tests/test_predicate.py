@@ -17,7 +17,7 @@ class PredicateTest(BaseTest):
 
     def afterSetUp(self):
         super(PredicateTest, self).afterSetUp()
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         registry.manage_addRegistry(self.portal)
         self.tool = getToolByName(self.portal, tool_id)
 

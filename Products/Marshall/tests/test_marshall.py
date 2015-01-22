@@ -1,19 +1,11 @@
-import glob
 import os
-import sys
 
 # Load fixture
-from Testing import ZopeTestCase
 from Products.Marshall.tests.base import BaseTest
-
-# Install our product
-ZopeTestCase.installProduct('Marshall')
-ZopeTestCase.installProduct('Archetypes')
-ZopeTestCase.installProduct('ATContentTypes')
 
 from Products.CMFCore.utils import getToolByName
 from Products.Marshall import registry
-from Products.Marshall.registry import Registry, getRegisteredComponents
+from Products.Marshall.registry import Registry
 from Products.Marshall.registry import getComponent
 from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall.tests import PACKAGE_HOME
@@ -30,7 +22,7 @@ class MarshallerTest(BaseTest):
 
     def afterSetUp(self):
         super(MarshallerTest, self).afterSetUp()
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         registry.manage_addRegistry(self.portal)
         self.tool = getToolByName(self.portal, tool_id)
         self.infile = open(self.input, 'rb+')
@@ -55,7 +47,7 @@ class ATXMLReferenceMarshallTest(BaseTest):
 
     def afterSetUp(self):
         super(ATXMLReferenceMarshallTest, self).afterSetUp()
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         registry.manage_addRegistry(self.portal)
         self.tool = getToolByName(self.portal, tool_id)
         self.marshaller = getComponent('atxml')
@@ -394,11 +386,12 @@ class ATXMLReferenceMarshallTest(BaseTest):
         comp = [s for s in expected if s in got]
         self.assertEquals(comp, expected)
 
+
 class BlobMarshallTest(BaseTest):
 
     def afterSetUp(self):
         super(BlobMarshallTest, self).afterSetUp()
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         registry.manage_addRegistry(self.portal)
         self.tool = getToolByName(self.portal, tool_id)
         self.marshaller = getComponent('atxml')
@@ -455,49 +448,14 @@ class BlobMarshallTest(BaseTest):
         self._test_blob_roundtrip('atext', data, 'text/html', 'file.html')
 
 
-class DocumentationTest(ZopeTestCase.Functional, BaseTest):
-
-    def afterSetUp(self):
-        super(DocumentationTest, self).afterSetUp()
-        self.loginPortalOwner()
-        registry.manage_addRegistry(self.portal)
-
-
 def test_suite():
     import unittest
-    from Testing.ZopeTestCase import FunctionalDocFileSuite
+    from doctest import DocFileSuite
+    from plone.app.testing.bbb import PTC_FUNCTIONAL_TESTING
+    from plone.testing import layered
     suite = unittest.TestSuite()
 
-    suite.addTest(FunctionalDocFileSuite('doc/README.txt',
-                                         package='Products.Marshall',
-                                         test_class=DocumentationTest))
-
-    # These tests depend on libxml2 being installed
-    from Products.Marshall import config
-    if not config.hasLibxml2:
-        return suite
-
-
-    ## XXX: reenable Blob and Image tests
-    #suite.addTest(unittest.makeSuite(ATXMLReferenceMarshallTest))
-    #suite.addTest(unittest.makeSuite(BlobMarshallTest))
-    dirs = glob.glob(os.path.join(PACKAGE_HOME, 'input', '*'))
-    comps = [i['name'] for i in getRegisteredComponents()]
-    for d in dirs:
-        prefix = os.path.basename(d)
-        if prefix not in comps:
-            continue
-        files = glob.glob(os.path.join(d, '*'))
-        for f in files:
-            if os.path.isdir(f):
-                continue
-            f_name = os.path.basename(f)
-            type_name = os.path.splitext(f_name)[0]
-            k_dict = {'prefix':prefix,
-                      'type_name':type_name,
-                      'input':f}
-            klass = type('%s%sTest' % (prefix, type_name),
-                         (MarshallerTest,),
-                         k_dict)
-            suite.addTest(unittest.makeSuite(klass))
+    suite.addTest(layered(DocFileSuite(
+        'doc/README.txt', package='Products.Marshall'),
+        layer=PTC_FUNCTIONAL_TESTING))
     return suite

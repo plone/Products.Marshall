@@ -23,18 +23,7 @@ import logging
 from App.Common import package_home
 
 logger = logging.getLogger('Marshall')
-
-try:
-    import libxml2
-except ImportError:
-    hasLibxml2 = False
-    logger.log(logging.DEBUG, \
-        'libxml2-python not available.' \
-        ' Unable to register libxml2 based marshallers.')
-else:
-    hasLibxml2 = True
-
-
+hasLibxml2 = False
 hasElementtree = True
 
 PACKAGE_HOME = package_home(globals())

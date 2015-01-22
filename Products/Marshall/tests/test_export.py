@@ -77,7 +77,7 @@ class ExportTest(BaseTest):
 
     def afterSetUp(self):
         super(ExportTest, self).afterSetUp()
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         registry.manage_addRegistry(self.portal)
         self.tool = getToolByName(self.portal, tool_id)
 

@@ -171,7 +171,7 @@ field was updated with the uploaded file contents.
   ... PUT /plone/article HTTP/1.1
   ... Content-Type: text/x-rst
   ... Authorization: Basic %s:%s
-  ... %s""" %  (SITE_OWNER_NAME, SITE_OWNER_PASSWORD, xml_input), handle_errors=False)
+  ... %s""" %  (SITE_OWNER_NAME, SITE_OWNER_PASSWORD, rst_input), handle_errors=False)
   HTTP/1.1 204 No Content...
 
   >>> article.Title()

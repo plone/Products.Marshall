@@ -19,10 +19,7 @@
 ##################################################################
 
 """
-$Id: $
 """
-
-from Products.CMFCore.utils import getToolByName
 from Products.Marshall.handlers.atxml import XmlNamespace
 from Products.Marshall.handlers.atxml import SchemaAttribute
 

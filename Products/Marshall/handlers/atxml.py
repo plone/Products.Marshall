@@ -88,7 +88,7 @@ class ErrorCallback:
 
     def clear(self):
         tid = thread.get_ident()
-        msgs = self.msgs[tid] = []
+        self.msgs[tid] = []
 
 
 class XmlNamespace(object):
@@ -305,7 +305,6 @@ class ATXMLMarshaller(Marshaller):
             self.namespace = config.AT_NS
 
     def getFieldNamespace(self, field):
-        namespaces = self.getNamespaceURIMap()
         # Flatten ns into (ns, attr) tuples
         flat_ns = []
         [flat_ns.extend(zip((n,) * len(n.attrs), n.attrs)) for
@@ -323,7 +322,7 @@ class ATXMLMarshaller(Marshaller):
     def getNamespacePrefixMap(self):
         """ Mapping of prefix -> xmlns URI
         """
-        prefix_map = dict([(ns.prefix, ns.xmlns) for ns in self.namespaces])
+        return dict([(ns.prefix, ns.xmlns) for ns in self.namespaces])
 
     def getNamespaces(self, namespaces=None):
         if namespaces is None:

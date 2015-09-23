@@ -18,13 +18,10 @@
 """
 Persistent TALES Expression. Highly inspired (read copied)
 from CMFCore's Expression.
-
-$Id$
 """
 
 from Persistence import Persistent
 from App.class_init import InitializeClass
-from Acquisition import aq_inner, aq_parent
 from AccessControl import getSecurityManager, ClassSecurityInfo
 
 from Products.PageTemplates.Expressions import getEngine

@@ -8,10 +8,13 @@ from Products.CMFCore.utils import getToolByName
 from Products.Marshall import registry
 from Products.Marshall.registry import Registry
 from Products.Marshall.registry import getComponent
-from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall.tests import PACKAGE_HOME
-from Products.Marshall.tests.examples import person
 from Products.Marshall.tests.examples import blob
+
+from plone.app.testing.bbb import PTC_FUNCTIONAL_TESTING
+from plone.testing import layered
+
+
 tool_id = Registry.id
 
 
@@ -88,9 +91,6 @@ OPTIONFLAGS = (doctest.ELLIPSIS |
 
 def test_suite():
     import unittest
-    from doctest import DocFileSuite
-    from plone.app.testing.bbb import PTC_FUNCTIONAL_TESTING
-    from plone.testing import layered
     suite = unittest.TestSuite()
 
     suite.addTest(layered(doctest.DocFileSuite(

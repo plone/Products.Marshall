@@ -164,22 +164,6 @@ class XMLNSPredicateTest(PredicateTest):
         self.assertEquals(self.get(None, data=bad_data), ())
         self.assertEquals(self.get(None, data=''), ())
 
-    def test_xmlns_element(self):
-        p = add_predicate(
-            self.tool,
-            id='xmlns_attr',
-            title='xmlns',
-            predicate='xmlns_attr',
-            expression='',
-            component_name='primary_field')
-        p.edit(element_name='test', value=None)
-        data = """<?xml version="1.0" encoding="UTF-8"?>
-        <test>
-           Doesn't Matter
-        </test>
-        """
-        self.assertEquals(self.get(None, data=data), ('primary_field',))
-
     def test_xmlns_element_ns(self):
         p = add_predicate(
             self.tool,

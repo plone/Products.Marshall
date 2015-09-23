@@ -16,16 +16,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 """
-$Id$
 """
 
 from zope.interface import implements
 
 from OFS.OrderedFolder import OrderedFolder
-from Persistence import PersistentMapping
 from App.class_init import InitializeClass
 from AccessControl import ClassSecurityInfo
-from AccessControl.Permissions import view, manage_properties
+from AccessControl.Permissions import view
 
 from Products.Marshall.interfaces import IPredicate
 from Products.Marshall.interfaces import IMarshallRegistry

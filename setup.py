@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '2.1.5.dev0'
+version = '2.2.0.dev0'
 
 setup(name='Products.Marshall',
       version=version,
@@ -12,6 +12,7 @@ setup(name='Products.Marshall',
         "Environment :: Web Environment",
         "Framework :: Zope2",
         "Framework :: Plone",
+        "Framework :: Plone :: 4.3",
         "Framework :: Plone :: 5.0",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",

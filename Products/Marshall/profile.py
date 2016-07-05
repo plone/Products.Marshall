@@ -18,7 +18,7 @@
 """
 """
 
-from zope.interface import implements
+from zope.interface import implementer
 
 from Products.GenericSetup.interfaces import IFilesystemExporter
 from Products.GenericSetup.interfaces import IFilesystemImporter
@@ -150,10 +150,10 @@ class MarshallRegistryImporter(ImportConfiguratorBase):
          }
 
 
+@implementer(IFilesystemExporter, IFilesystemImporter)
 class MarshallRegistryFileExportImportAdapter(object):
     """ Designed for use when exporting / importing within a container.
     """
-    implements(IFilesystemExporter, IFilesystemImporter)
 
     def __init__(self, context):
         self.context = context

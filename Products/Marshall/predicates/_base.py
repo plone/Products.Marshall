@@ -19,7 +19,7 @@
 $Id$
 """
 
-from zope.interface import implements
+from zope.interface import implementer
 
 from OFS.SimpleItem import SimpleItem
 from App.class_init import InitializeClass
@@ -33,6 +33,7 @@ from Products.Marshall.registry import getRegisteredComponents
 from Products.Marshall.interfaces import IPredicate
 
 
+@implementer(IPredicate)
 class Predicate(SimpleItem):
     """ A Predicate for selecting marshallers.
 
@@ -41,8 +42,6 @@ class Predicate(SimpleItem):
     decide if the Predicate applies, and returns
     a component name to be used for that object.
     """
-
-    implements(IPredicate)
 
     meta_type = "Marshaller Predicate"
     predicate_type = None

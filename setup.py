@@ -6,8 +6,8 @@ setup(
     name='Products.Marshall',
     version=version,
     description="Configurable Marshallers for Archetypes",
-    long_description=(open("README.txt").read() + "\n" +
-                      open("CHANGES.txt").read()),
+    long_description=(open("README.rst").read() + "\n" +
+                      open("CHANGES.rst").read()),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",

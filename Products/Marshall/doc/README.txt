@@ -189,5 +189,6 @@ Get the ``raw`` body value. Using getBody() would return the rendered HTML.
 Now, just restore the previous marshaller, as to leave everything in
 the same state it was found:
 
+    >>> AppZapper().clear()
     >>> ATDocument.schema.registerLayer('marshall',
     ...                                  old_marshall)

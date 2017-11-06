@@ -14,7 +14,8 @@ New features:
 
 Bug fixes:
 
-- *add item here*
+- Fix test isolation issue due to incomplete teardown.
+  [pbauer]
 
 
 2.2.1 (2016-08-18)

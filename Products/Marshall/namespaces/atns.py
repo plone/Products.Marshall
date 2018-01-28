@@ -17,7 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##################################################################
-from plone.uuid.interfaces import IUUID
 
 """
 Serialize AT Schema Attributes
@@ -28,22 +27,24 @@ Authors: Kapil Thangavelu <k_vertigo@objectrealms.net>
 
 $Id: $
 """
-import re
-from sets import Set
-
-from Products.CMFCore.utils import getToolByName
+from DateTime import DateTime
+from plone.uuid.interfaces import IUUID
 from Products.Archetypes import config as atcfg
+from Products.Archetypes import public as atapi
 from Products.Archetypes.debug import log
 from Products.Archetypes.interfaces import IBaseUnit
 from Products.Archetypes.interfaces import IObjectField
-from Products.Archetypes import public as atapi
+from Products.CMFCore.utils import getToolByName
 from Products.Marshall import config
-from Products.Marshall.handlers.atxml import XmlNamespace
-from Products.Marshall.handlers.atxml import SchemaAttribute
-from Products.Marshall.handlers.atxml import getRegisteredNamespaces
-from Products.Marshall.exceptions import MarshallingException
 from Products.Marshall import utils
-from DateTime import DateTime
+from Products.Marshall.exceptions import MarshallingException
+from Products.Marshall.handlers.atxml import getRegisteredNamespaces
+from Products.Marshall.handlers.atxml import SchemaAttribute
+from Products.Marshall.handlers.atxml import XmlNamespace
+from sets import Set
+
+import re
+import six
 import transaction
 
 _marker = object()
@@ -101,7 +102,7 @@ class ATAttribute(SchemaAttribute):
             node.setAttributeNode(name_attr)
 
             # try to get 'utf-8' encoded string
-            if isinstance(value, unicode):
+            if isinstance(value, six.text_type):
                 value = value.encode('utf-8')
             elif IBaseUnit.providedBy(value):
                 value = value.getRaw(encoding='utf-8')
@@ -111,9 +112,9 @@ class ATAttribute(SchemaAttribute):
             if self.isReference(instance):
                 if config.HANDLE_REFS:
                     ref_node = dom.createElementNS(self.namespace.xmlns,
-                                                    'reference')
+                                                   'reference')
                     uid_node = dom.createElementNS(self.namespace.xmlns,
-                                                    'uid')
+                                                   'uid')
                     value = dom.createTextNode(value)
                     uid_node.append(value)
                     ref_node.append(uid_node)
@@ -163,7 +164,7 @@ class ATAttribute(SchemaAttribute):
         if mimetype is not None:
             data['mimetype'] = mimetype
 
-        if data.has_key('value'):
+        if 'value' in data:
             svalues = data['value']
             if not isinstance(svalues, list):
                 data['value'] = svalues = [svalues]
@@ -175,17 +176,17 @@ class ATAttribute(SchemaAttribute):
     def deserialize(self, instance, ns_data, options={}):
         if not ns_data:
             return
-        data = ns_data.get( self.name )
+        data = ns_data.get(self.name)
         if data is None:
             return
         values = data.get('value', None)
         if not values:
             return
 
-	# check if we are a schema attribute
-        if self.isReference( instance ):
-            values = self.resolveReferences( instance, values)
-            if not config.HANDLE_REFS :
+    # check if we are a schema attribute
+        if self.isReference(instance):
+            values = self.resolveReferences(instance, values)
+            if not config.HANDLE_REFS:
                 return
 
         field = instance.Schema()[self.name]
@@ -193,8 +194,8 @@ class ATAttribute(SchemaAttribute):
         if not mutator:
             # read only field no mutator, but try to set value still
             # since it might reflect object state (like ATCriteria)
-            field = instance.getField( self.name ).set( instance, values )
-            #raise AttributeError("No Mutator for %s"%self.name)
+            field = instance.getField(self.name).set(instance, values)
+            # raise AttributeError("No Mutator for %s"%self.name)
             return
         if self.name == "id":
             transaction.savepoint()
@@ -218,7 +219,7 @@ class ATAttribute(SchemaAttribute):
                 ref_values.append(value)
                 continue
             ref = value.resolve(instance)
-            if ref is None: #just for dup behavior
+            if ref is None:  #just for dup behavior
                 raise MarshallingException(
                     "Could not resolve reference %r" % value)
             ref_values.append(ref)
@@ -262,7 +263,7 @@ class ArchetypeUID(SchemaAttribute):
     def resolveUID(self, instance, values):
         assert not isinstance(values, (list, tuple))
         at_uid = values
-        #existing = getattr(instance, atcfg.UUID_ATTR, _marker)
+        # existing = getattr(instance, atcfg.UUID_ATTR, _marker)
         existing = IUUID(instance, _marker)
         if existing is _marker or existing != at_uid:
             ref = Reference(uid=at_uid)
@@ -272,7 +273,7 @@ class ArchetypeUID(SchemaAttribute):
                         "Trying to set uid of "
                         "%s to an already existing uid "
                         "clashed with %s" % (
-                        instance.absolute_url(), target.absolute_url()))
+                            instance.absolute_url(), target.absolute_url()))
             instance._setUID(at_uid)
 
 
@@ -335,9 +336,8 @@ class Archetypes(XmlNamespace):
 
     def getAttributeByName(self, schema_name, context=None):
         if context is not None and schema_name not in self.at_fields:
-            if not schema_name in context.instance.Schema():
+            if schema_name not in context.instance.Schema():
                 return
-                raise AssertionError("invalid attribute %s" % (schema_name))
 
         if schema_name in self.at_fields:
             return self.at_fields[schema_name]
@@ -359,7 +359,7 @@ class Archetypes(XmlNamespace):
 
         field_keys = [k for k in instance.Schema().keys()
                       if k not in exclude_attrs and k not in fields]
-        #Set(instance.Schema().keys())-mset
+        # Set(instance.Schema().keys())-mset
 
         # remove primary field if still present
         # XXX: we dont want to remove the PF, but want to be backward
@@ -382,7 +382,7 @@ class Archetypes(XmlNamespace):
 
         for attribute in self.getAttributes(instance, exclude_attrs):
             if (hasattr(attribute, 'isReference') and
-                attribute.isReference(instance)):
+                    attribute.isReference(instance)):
                 continue
             attribute.serialize(dom, parent_node, instance, options)
 
@@ -392,8 +392,8 @@ class Archetypes(XmlNamespace):
 
         for attribute in self.getAttributes(instance):
             if (not config.HANDLE_REFS and
-                hasattr(attribute, 'isReference') and
-                attribute.isReference(instance)):
+                    hasattr(attribute, 'isReference') and
+                    attribute.isReference(instance)):
                 # simply skip it then... Gogo
                 continue
             attribute.deserialize(instance, ns_data)
@@ -426,11 +426,11 @@ class Archetypes(XmlNamespace):
                     "use 'name' instead")
                 schema_name = data_node.attrib.get('id')
             assert schema_name, "No field name specified in at:field element"
-            #print "field", schema_name
+            # print "field", schema_name
             self.last_schema_id = schema_name
             attribute = self.getAttributeByName(schema_name, context)
             if attribute is None:
-                #print "na", schema_name
+                # print "na", schema_name
                 return False
             data_node.set('attribute', attribute)
             return True
@@ -470,7 +470,7 @@ class Archetypes(XmlNamespace):
         if name == 'reference':
             context.setNamespaceDelegate(None)
             self.in_reference_mode = False
-            self.last_schema_id = None # guard against bad xml
+            self.last_schema_id = None  # guard against bad xml
 
     def getSchemaInfo(self):
         return [("ArchetypesFields", "zeroOrMore", RNGSchemaFragment)]
@@ -497,7 +497,7 @@ class Reference(dict):
         if path is not None:
             return context.restrictedTraverse(path, None)
         catalog = getToolByName(context, 'portal_catalog')
-        params = [(k, v) for k, v in self.items() \
+        params = [(k, v) for k, v in self.items()
                   if k not in ('uid', 'path')]
         kw = [(self.index_map.get(k), v) for k, v in params]
         kw = dict(filter(lambda x: x[0] is not None and x, kw))

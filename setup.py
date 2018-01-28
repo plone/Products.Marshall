@@ -38,6 +38,7 @@ setup(
     ),
     install_requires=[
         'setuptools',
+        'six',
         'transaction',
         'plone.uuid',
         'zope.contenttype',

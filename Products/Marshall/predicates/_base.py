@@ -68,15 +68,15 @@ class Predicate(SimpleItem):
         self.setExpression(expression)
         self.setComponentName(component_name)
 
-    security.declareProtected(view, 'getPredicateType')
+    @security.protected(view)
     def getPredicateType(self):
         return self.predicate_type
 
-    security.declareProtected(view, 'getPredicateName')
+    @security.protected(view)
     def getPredicateName(self):
         return self.predicate_name
 
-    security.declareProtected(view, 'apply')
+    @security.protected(view)
     def apply(self, obj, **kw):
         """ Evaluate expression using the object as
         context and return a component name if applicable.
@@ -89,14 +89,14 @@ class Predicate(SimpleItem):
             return (self.getComponentName(),)
         return ()
 
-    security.declareProtected(view, 'getComponentName')
+    @security.protected(view)
     def getComponentName(self):
         """ Return the component name configured for
         this predicate.
         """
         return self._component_name
 
-    security.declareProtected(manage_properties, 'setComponentName')
+    @security.protected(manage_properties)
     def setComponentName(self, component_name):
         """ Change the component name """
         valid_components = [i['name'] for i in getRegisteredComponents()]
@@ -105,18 +105,18 @@ class Predicate(SimpleItem):
                              'component: %s' % component_name)
         self._component_name = component_name
 
-    security.declareProtected(manage_properties, 'setExpression')
+    @security.protected(manage_properties)
     def setExpression(self, expression):
         """ Change the expression """
         self._expression_text = expression
         self._expression = Expression(expression)
 
-    security.declareProtected(view, 'expression')
+    @security.protected(view)
     def expression(self, context):
         """ Evaluate the expression using context """
         return self._expression(context)
 
-    security.declareProtected(view, 'getExpression')
+    @security.protected(view)
     def getExpression(self):
         """ Get the expression as text """
         return self._expression_text
@@ -124,7 +124,7 @@ class Predicate(SimpleItem):
     def manage_availableComponents(self):
         return getRegisteredComponents()
 
-    security.declareProtected(manage_properties, 'manage_changePredicate')
+    @security.protected(manage_properties)
     def manage_changePredicate(self, title=None,
                                expression=None,
                                component_name=None,
@@ -144,6 +144,7 @@ class Predicate(SimpleItem):
                 manage_tabs_message=message,
                 management_view='Edit')
         return self
+
 
 InitializeClass(Predicate)
 registerPredicate('default', 'Default Predicate', Predicate)
@@ -170,6 +171,7 @@ def manage_availablePredicates(self):
 
 def manage_availableComponents(self):
     return getRegisteredComponents()
+
 
 manage_addPredicateForm = PageTemplateFile(
     '../www/predicateAdd', globals(),

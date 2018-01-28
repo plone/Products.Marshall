@@ -27,6 +27,8 @@ from _base import Predicate
 from Products.Marshall.registry import registerPredicate
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
 
+import six
+
 
 def attrMethod(attr, default=''):
     def boundAttrMethod(self):
@@ -63,14 +65,14 @@ class XMLNS(Predicate):
 
     manage_changeSettingsForm._owner = None
 
-    security.declareProtected(ManagePortal, 'edit')
+    @security.protected(ManagePortal)
     def edit(self, element_ns='', element_name='',
              attr_ns='', attr_name='', value='', REQUEST=None):
         """Change settings germane to this predicate
         """
 
         for n in (element_ns, element_name, attr_ns, attr_name):
-            if not isinstance(n, basestring):
+            if not isinstance(n, six.string_types):
                 raise TypeError('string required, got %r.' % n)
         self._value = value
         self._element_ns = element_ns
@@ -84,7 +86,7 @@ class XMLNS(Predicate):
                 manage_tabs_message=message,
                 management_view='Settings')
 
-    security.declareProtected(ManagePortal, 'apply')
+    @security.protected(ManagePortal)
     def apply(self, obj, **kw):
         """ Return component name if the rule matches, else an empty tuple.
         """
@@ -125,6 +127,7 @@ class XMLNS(Predicate):
             got = get_attr(*attr_args)
             match = got == expected
         return match and retval or ()
+
 
 InitializeClass(XMLNS)
 registerPredicate('xmlns_attr', 'XMLNS Element/Attribute', XMLNS)

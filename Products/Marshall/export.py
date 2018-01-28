@@ -18,15 +18,17 @@
 """
 """
 
-import os
-import zipfile
-from cStringIO import StringIO
 from App.class_init import InitializeClass
 from ExtensionClass import Base
 from AccessControl import ClassSecurityInfo
 from Acquisition import aq_base
 from Products.CMFCore.permissions import ManagePortal
 from Products.PageTemplates.PageTemplateFile import PageTemplateFile
+from six.moves import cStringIO as StringIO
+
+import os
+import six
+import zipfile
 
 
 class Export(Base):
@@ -37,19 +39,19 @@ class Export(Base):
     atxml_template = PageTemplateFile('www/atxml', globals(),
                                       __name__='atxml_template')
 
-    security.declareProtected(ManagePortal, 'marshall_data')
+    @security.protected(ManagePortal)
     def marshall_data(self, obj):
         from Products.Marshall.registry import getComponent
         marshaller = getComponent('primary_field')
         return self.marshall(obj, marshaller)
 
-    security.declareProtected(ManagePortal, 'marshall_metadata')
+    @security.protected(ManagePortal)
     def marshall_metadata(self, obj):
         from Products.Marshall.registry import getComponent
         marshaller = getComponent('atxml')
         return self.marshall(obj, marshaller)
 
-    security.declareProtected(ManagePortal, 'marshall')
+    @security.protected(ManagePortal)
     def marshall(self, obj, marshaller):
         REQUEST = obj.REQUEST
         RESPONSE = REQUEST.RESPONSE
@@ -61,7 +63,7 @@ class Export(Base):
 
         content_type, length, data = ddata
 
-        if type(data) is type(''):
+        if isinstance(data, six.string_types):
             return StringIO(data)
 
         s = StringIO()
@@ -71,7 +73,7 @@ class Export(Base):
         s.seek(0)
         return s
 
-    security.declareProtected(ManagePortal, 'export')
+    @security.protected(ManagePortal)
     def export(self, context, paths):
         data = StringIO()
         out = zipfile.ZipFile(data, 'w')
@@ -95,7 +97,7 @@ class Export(Base):
         data.seek(0)
         return data
 
-    security.declareProtected(ManagePortal, 'export_info')
+    @security.protected(ManagePortal)
     def export_info(self, context, info):
         data = StringIO()
         out = zipfile.ZipFile(data, 'w')
@@ -123,5 +125,6 @@ class Export(Base):
         out.close()
         data.seek(0)
         return data
+
 
 InitializeClass(Export)

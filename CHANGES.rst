@@ -14,6 +14,9 @@ New features:
 
 Bug fixes:
 
+- Prepare for Python 2 / 3 compatibility
+  [pbauer]
+
 - Fix test isolation issue due to incomplete teardown.
   [pbauer]
 

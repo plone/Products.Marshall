@@ -281,25 +281,25 @@ class WorkflowAttribute(SchemaAttribute):
         data = context.getDataFor(self.namespace.xmlns)
         nsprefix = node.tag[:node.tag.find('}') + 1]
 
-        #iworkflow
+        # iworkflow
         wf_node = node.find(nsprefix + 'workflow')
         wf_id = (wf_node.attrib.get(nsprefix + 'id') or
                  wf_node.attrib.get('id'))
-                 #be tolerant with namespace sloppyness;)
+                 # be tolerant with namespace sloppyness;)
         assert wf_id
 
         wf_data = data.setdefault(self.name, {})
         wf_data.setdefault(wf_id, [])
         wf_pstate = data.setdefault('_wf_pstate', wf_id)
 
-        #history
+        # history
         hist_nodes = wf_node.findall(nsprefix + 'history')
         wf_pstate = data['_wf_pstate']
         for hist_node in hist_nodes:
             record = {}
             data[self.name][wf_pstate].append(record)
 
-            #var
+            # var
             var_nodes = hist_node.findall(nsprefix + 'var')
             vid = vtype = value = None
 

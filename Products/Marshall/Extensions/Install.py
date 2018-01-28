@@ -1,13 +1,11 @@
-"""
-$Id$
-"""
-
-from cStringIO import StringIO
+# -*- coding: utf-8 -*-
 from Products.CMFCore.utils import getToolByName
 from Products.Marshall import registry
 from Products.Marshall.config import TOOL_ID as tool_id
+from six.moves import cStringIO as StringIO
 
 add_registry = registry.manage_addRegistry
+
 
 def install_tool(self, out):
     tool = getToolByName(self, tool_id, None)
@@ -16,6 +14,7 @@ def install_tool(self, out):
         return
     add_registry(self)
     out.write('Registry installed sucessfully.\n')
+
 
 def install(self, out=None):
     if out is None:

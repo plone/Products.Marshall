@@ -151,7 +151,7 @@ class XmlNamespace(object):
         for attribute in self.attributes:
             try:
                 attribute.deserialize(instance, ns_data)
-            except Exception, e:
+            except Exception as e:
                 ec, e, tb = sys.exc_info()
                 ftb = traceback.format_tb(tb,)
                 msg = "failure while demarshalling schema attribute %s\n" % \

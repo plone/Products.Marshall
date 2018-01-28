@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from Products.CMFCore.utils import getToolByName
+
 
 def export(self):
     ct = getToolByName(self, 'portal_catalog')

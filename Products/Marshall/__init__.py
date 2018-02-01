@@ -21,10 +21,6 @@ $Id$
 
 import pkg_resources
 
-# Kick off Extensions.Install import
-from Products.Marshall.Extensions import Install
-del Install
-
 # Kick off handler registration
 from Products.Marshall import handlers
 

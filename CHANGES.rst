@@ -10,7 +10,7 @@ Breaking changes:
 
 New features:
 
-- *add item here*
+- Replaced Extensions/Install.py with GenericSetup profile.  [maurits]
 
 Bug fixes:
 

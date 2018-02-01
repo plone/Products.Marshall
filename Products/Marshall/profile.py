@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Marshall: A framework for pluggable marshalling policies
 # Copyright (C) 2004-2006 Enfold Systems, LLC
 #
@@ -15,22 +16,24 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-"""
-"""
 
-from zope.interface import implementer
-
+from Products.CMFCore.utils import getToolByName
 from Products.GenericSetup.interfaces import IFilesystemExporter
 from Products.GenericSetup.interfaces import IFilesystemImporter
+from Products.GenericSetup.utils import DEFAULT
 from Products.GenericSetup.utils import ExportConfiguratorBase
 from Products.GenericSetup.utils import ImportConfiguratorBase
-from Products.GenericSetup.utils import DEFAULT
 from Products.GenericSetup.utils import KEY
-from Products.PageTemplates.PageTemplateFile import PageTemplateFile
-
+from Products.Marshall import registry
 from Products.Marshall.config import TOOL_ID
 from Products.Marshall.registry import createPredicate
+from Products.PageTemplates.PageTemplateFile import PageTemplateFile
+from zope.interface import implementer
 
+import logging
+
+
+logger = logging.getLogger('Products.Marshall')
 _FILENAME = 'marshall-registry.xml'
 
 
@@ -184,3 +187,23 @@ class MarshallRegistryFileExportImportAdapter(object):
                                 'no %s in %s' % (_FILENAME, subdir))
         else:
             pass
+
+
+def install_tool(context):
+    tool = getToolByName(context, TOOL_ID, None)
+    if tool is not None:
+        logger.info('Registry was already installed.')
+        return
+    portal = getToolByName(context, 'portal_url').getPortalObject()
+    registry.manage_addRegistry(portal)
+    logger.info('Registry installed sucessfully.')
+
+
+def uninstall_tool(context):
+    tool = getToolByName(context, TOOL_ID, None)
+    if tool is None:
+        logger.info('Registry was already uninstalled.')
+        return
+    portal = getToolByName(context, 'portal_url').getPortalObject()
+    portal.manage_delObjects([TOOL_ID])
+    logger.info('Registry uninstalled sucessfully.')

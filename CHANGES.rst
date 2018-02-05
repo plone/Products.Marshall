@@ -4,10 +4,6 @@ Changelog
 2.2.2 (unreleased)
 ------------------
 
-Breaking changes:
-
-- *add item here*
-
 New features:
 
 - Replaced Extensions/Install.py with GenericSetup profile.  [maurits]

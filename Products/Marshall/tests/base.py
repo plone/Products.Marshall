@@ -22,7 +22,7 @@ import re
 import difflib
 
 # Load fixture
-from plone.app.testing.bbb import PloneTestCase
+from plone.app.testing.bbb_at import PloneTestCase
 
 
 def normalize_tabs(s):

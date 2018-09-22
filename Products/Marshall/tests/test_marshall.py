@@ -11,7 +11,7 @@ from Products.Marshall.registry import getComponent
 from Products.Marshall.tests import PACKAGE_HOME
 from Products.Marshall.tests.examples import blob
 
-from plone.app.testing.bbb import PTC_FUNCTIONAL_TESTING
+from plone.app.testing.bbb_at import PTC_FUNCTIONAL_TESTING
 from plone.testing import layered
 
 

@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.3.1 (unreleased)
+2.4.0 (unreleased)
 ------------------
 
 Breaking changes:
@@ -14,7 +14,8 @@ New features:
 
 Bug fixes:
 
-- *add item here*
+- Switch to new TestCase using AT after PloneTestcase is now DX.
+  [pbauer]
 
 
 2.3 (2018-02-05)

@@ -25,7 +25,7 @@ setup(
     license="GPL",
     author='Sidnei da Silve and others',
     author_email='plone-developers@lists.sourceforge.net',
-    url='https://pypi.python.org/pypi/Products.Marshall',
+    url='https://pypi.org/project/Products.Marshall',
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages=['Products'],
     include_package_data=True,

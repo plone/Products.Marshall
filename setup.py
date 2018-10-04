@@ -5,14 +5,14 @@ version = '2.1.5.dev0'
 setup(name='Products.Marshall',
       version=version,
       description="Configurable Marshallers for Archetypes",
-      long_description=open("README.txt").read() + "\n" + \
-              open("CHANGES.txt").read(),
+      long_description=open("README.rst").read() + "\n" + \
+              open("CHANGES.rst").read(),
       classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Zope2",
         "Framework :: Plone",
-        "Framework :: Plone :: 5.0",
+        "Framework :: Plone :: 4.3",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
         "Programming Language :: Python",

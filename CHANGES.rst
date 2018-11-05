@@ -8,6 +8,14 @@ Changelog
 
 .. towncrier release notes start
 
+2.4.0 (2018-11-05)
+------------------
+
+New features:
+
+
+- Switch to new TestCase using AT after PloneTestcase is now DX. [pbauer] (#7)
+
 
 2.3 (2018-02-05)
 ----------------

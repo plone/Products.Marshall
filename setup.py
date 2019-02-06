@@ -12,6 +12,7 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Framework :: Zope2",
+        "Framework :: Zope :: 4",
         "Framework :: Plone",
         "Framework :: Plone :: 5.2",
         "License :: OSI Approved :: GNU General Public License (GPL)",
